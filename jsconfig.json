@@ -1,0 +1,33 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"sourceMap": true,
+		"checkJs": false,
+		"baseUrl": ".",
+		"typeRoots": ["types"],
+		"types": ["jquery", "lodash", "vue", "dayjs", "joi", "lottie"]
+	},
+	"include": [],
+	"exclude": [
+		"**/*/global.js",
+		"**/*/prototype.js",
+		"**/*/pulltorefresh_club.js",
+
+		".cache",
+		".git",
+		".idea",
+		".output",
+		".vscode",
+		"build",
+		"cron",
+		"deploy",
+		"dist",
+		"docs",
+		"local_history",
+		"logs",
+		"node_modules",
+		"test"
+	]
+}

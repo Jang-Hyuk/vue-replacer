@@ -1,0 +1,192 @@
+{
+	"root": true,
+	"env": {
+		"browser": true,
+		"node": true
+	},
+	"extends": ["airbnb-base", "plugin:vue/recommended", "plugin:prettier/recommended"],
+	"parserOptions": {
+		"requireConfigFile": false,
+		"ecmaVersion": 12,
+		"sourceType": "module"
+	},
+	"ignorePatterns": ["_", "**/*/*.min.js"],
+	"globals": {
+		"fn*": false,
+		"globalThis": false,
+		"*": false,
+		"$": false,
+		"_": false,
+		"Vue": false,
+		"VueAwesomeSwiper": false,
+		"vueBus": false,
+		"dayjs": false,
+		"lottie": false,
+		"cookie": false,
+		"bridge": false,
+		"bridgeRouter": false,
+		"app": false,
+		"device": false,
+		"history": false,
+		"location": false,
+		"document": false,
+		"window": false
+	},
+	// add your custom rules here
+	"rules": {
+		/**********************/
+		/* Global Code Rules */
+		/**********************/
+		"prettier/prettier": "error",
+
+		"consistent-return": "off",
+		"no-console": "off",
+		// "import/no-named-as-default": "off",
+		/**********************/
+		/* General Code Rules */
+		/**********************/
+		// Enforce import order
+		"import/order": "error",
+
+		"import/no-dynamic-require": "off",
+
+		// .vue ~ syntax
+		"import/extensions": "off",
+
+		// nuxt.js
+		"import/no-extraneous-dependencies": "off",
+
+		// Imports should come first
+		"import/first": "error",
+
+		// Other import rules
+		"import/no-mutable-exports": "error",
+
+		// Allow unresolved imports
+		"import/no-unresolved": "off",
+
+		/**********************/
+		/*     Vue Rules      */
+		/**********************/
+		// "vue/no-multi-spaces": [
+		//   "error",
+		//   {
+		//     ignoreProperties: false,
+		//   },
+		// ],
+		"vue/multi-word-component-names": "error",
+
+		"vue/singleline-html-element-content-newline": "off",
+
+		// Disable template errors regarding invalid end tags
+		"vue/no-parsing-error": [
+			"error",
+			{
+				"x-invalid-end-tag": false
+			}
+		],
+
+		// Maximum 5 attributes per line instead of one
+		"vue/max-attributes-per-line": "off",
+		// "vue/max-attributes-per-line": [
+		//   "error",
+		//   {
+		//     "singleline": 5
+		//   }
+		// ],
+
+		/***************************/
+		/* ESLint Vue Plugin Rules */
+		/***************************/
+		"vue/html-indent": [
+			"error",
+			"tab",
+			{
+				"attribute": 1,
+				"baseIndent": 1,
+				"closeBracket": 0,
+				"alignAttributesVertically": true,
+				"ignores": []
+			}
+		],
+
+		"vue/order-in-components": [
+			"error",
+			{
+				"order": [
+					"el",
+					"name",
+					"key",
+					"parent",
+					"functional",
+					["delimiters", "comments"],
+					["components", "directives", "filters"],
+					"extends",
+					"mixins",
+					["provide", "inject"],
+					"ROUTER_GUARDS",
+					"layout",
+					"middleware",
+					"validate",
+					"scrollToTop",
+					"transition",
+					"loading",
+					"inheritAttrs",
+					"model",
+					"props",
+					"emits",
+					"setup",
+					"asyncData",
+					"data",
+					"fetch",
+					"head",
+					"computed",
+					"watch",
+					"watchQuery",
+					"LIFECYCLE_HOOKS",
+					"methods",
+					["template", "render"],
+					"renderError"
+				]
+			}
+		],
+		"global-require": 0,
+		"vue/html-self-closing": ["off"],
+		"vue/component-name-in-template-casing": [
+			"error",
+			"kebab-case",
+			{
+				"ignores": ["nuxt", "nuxt-link"]
+			}
+		],
+
+		// https://eslint.vuejs.org/rules/attributes-order.html
+		"vue/attributes-order": [
+			"error",
+			{
+				"order": [
+					"DEFINITION",
+					"LIST_RENDERING",
+					"CONDITIONALS",
+					"RENDER_MODIFIERS",
+					"GLOBAL",
+					"UNIQUE",
+					"TWO_WAY_BINDING",
+					"OTHER_DIRECTIVES",
+					"OTHER_ATTR",
+					"EVENTS",
+					"CONTENT"
+				]
+			}
+		]
+	},
+	"overrides": [
+		{
+			"files": "**/*.vue",
+			"rules": {
+				"object-shorthand": "error",
+				"es5/no-shorthand-properties": "off"
+			}
+		}
+	]
+}

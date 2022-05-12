@@ -1,5 +1,5 @@
 import fs from 'fs';
-import path from 'path';
+import path, { sep } from 'path';
 
 import _ from 'lodash';
 import iconv from 'iconv-lite';
@@ -9,14 +9,12 @@ const TAB = '\t';
 class VueReplacer {
 	/**
 	 * @param {string} filePath file full path (d:/temp/conts/js/*.vue)
-	 * @param {boolean} [isEuckr=true]
+	 * @param {boolean} [isEuckr = true]
+	 * @param {string} [fileSep = sep]
 	 */
-	constructor(filePath, isEuckr = true) {
-		const sep = '/';
-		// console.log('filePath: ', filePath, sep);
+	constructor(filePath, isEuckr = true, fileSep = sep) {
 		// ↓↓↓ set constructor params
-		this.vueFileFolder = _(filePath).split(sep).initial().join(sep);
-		console.log('this.vueFileFolder: ', this.vueFileFolder);
+		this.vueFileFolder = _(filePath).split(fileSep).initial().join(fileSep);
 		this.vueFilePath = filePath;
 		this.isEuckr = isEuckr;
 
@@ -33,7 +31,6 @@ class VueReplacer {
 			indentDepth: 0,
 			positionId: ''
 		};
-		this.htmlFilePath = '';
 		/** vue script 영역을 변환하여 저장할 파일 */
 		this.jsFilePath = `${fileName}.js`;
 
@@ -70,7 +67,7 @@ class VueReplacer {
 	 */
 	static toDictionary(pairs, outerSep = ' ', innerSeq = '=') {
 		return _.chain(pairs)
-			.split('\n')
+			.split(NEW_LINE)
 			.map(str => str.replace(/\t|"/g, ''))
 			.join(' ')
 			.split(outerSep)
@@ -212,10 +209,11 @@ class VueReplacer {
 		// js파일에 덮어쓸 최초 시작 포인트 index를 읽어옴 => (new Vue({), Vue.component('any', {)) 이런식으로 { 가 시작점
 		const headerLastPositionIndex = jsFile.indexOf('{', sDelimiterIndex);
 		// Header + Vue Script + Footer 조합
+		const regExp = new RegExp(NEW_LINE, 'g');
 		const overwrittenJs = jsFile
 			.slice(0, headerLastPositionIndex)
 			.concat(
-				vueScript,
+				vueScript.replace(regExp, `${NEW_LINE}${TAB}`),
 				jsFile.slice(jsFile.slice(0, eDelimiterIndex).lastIndexOf('}') + 1)
 			);
 

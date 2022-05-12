@@ -17,7 +17,7 @@ watch(
 			return /\.vue$/.test(f);
 		}
 	},
-	function (event, filename) {
+	(event, filename) => {
 		console.log(`event is: ${event}`);
 		if (filename) {
 			console.log(`filename provided: ${filename}`);
@@ -29,4 +29,4 @@ watch(
 	}
 );
 
-console.log('start watch');
+console.info('start VueReplacer watcher !!!');

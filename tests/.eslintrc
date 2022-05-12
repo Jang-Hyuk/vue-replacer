@@ -1,0 +1,278 @@
+{
+	"root": true,
+	"env": {
+		"browser": true,
+		"node": true,
+		"es6": false
+	},
+	"extends": [
+		"airbnb-base",
+		"plugin:es5/no-es2015",
+		"plugin:vue/recommended",
+		"plugin:prettier/recommended"
+	],
+	"parserOptions": {
+		"ecmaVersion": 6,
+		"sourceType": "module"
+	},
+	"plugins": ["es5"],
+	"ignorePatterns": ["_", "**/*/*.min.js"],
+	"globals": {
+		"fn*": false,
+		"globalThis": false,
+		"*": false,
+		"$": false,
+		"_": false,
+		"Vue": false,
+		"VueAwesomeSwiper": false,
+		"vueBus": false,
+		"dayjs": false,
+		"lottie": false,
+		"cookie": false,
+		"bridge": false,
+		"bridgeRouter": false,
+		"app": false,
+		"device": false,
+		"history": false,
+		"location": false,
+		"document": false,
+		"window": false
+	},
+	// add your custom rules here
+	"rules": {
+		"block-scoped-var": "warn",
+		"camelcase": "off",
+		// Force curly braces for control flow,
+		"curly": "error",
+		"default-case-last": "off",
+		"default-case": "error",
+		"guard-for-in": "warn",
+		"new-cap": "warn",
+		"no-alert": "off",
+		"no-bitwise": ["error", { "allow": ["^"] }],
+		"no-console": "off",
+		"no-continue": "off",
+		"no-control-regex": "off",
+		"no-empty": "off",
+		"no-eval": "warn",
+		"no-inner-declarations": "off",
+		"no-lonely-if": "off",
+		"no-new": "off",
+		// Disallows reassignment of function parameters.
+		"no-param-reassign": "off",
+		"no-plusplus": "off",
+		"no-prototype-builtins": "error",
+		// Disallows variable redeclarations.
+		"no-redeclare": "error",
+		"no-restricted-globals": "off",
+		"no-restricted-properties": "off",
+		"no-restricted-syntax": "warn",
+		"no-script-url": "off",
+		// Disallows variable declarations from shadowing variables declared in the outer scope.
+		"no-shadow": "error",
+		"no-undef": "off",
+		"no-underscore-dangle": "off",
+		"no-unused-expressions": [
+			"error",
+			{ "allowShortCircuit": true, "allowTernary": true }
+		],
+		"no-unused-vars": [
+			"warn",
+			{
+				// "varsIgnorePattern": "fn*",
+				"args": "none",
+				"ignoreRestSiblings": true,
+				"caughtErrors": "none",
+				"caughtErrorsIgnorePattern": "^ignore"
+			}
+		],
+		"no-use-before-define": "off",
+		"no-useless-concat": "warn",
+		"no-useless-escape": "off",
+		"no-var": "off",
+		"prefer-regex-literals": "off",
+		"radix": "off",
+
+		"es5/no-modules": "off",
+
+		/**********************/
+		/* Global Code Rules */
+		/**********************/
+		"prettier/prettier": "error",
+
+		"no-irregular-whitespace": "off",
+
+		"prefer-arrow-callback": "off",
+		"prefer-const": "off",
+		"prefer-destructuring": "off",
+		"prefer-object-spread": "off",
+		"prefer-rest-params": "off",
+		"prefer-template": "off",
+
+		"class-methods-use-this": "off",
+		"consistent-return": "off",
+		"css-propertyvalueexpected": "off",
+		"func-names": "off",
+		"key-spacing": "off",
+		"linebreak-style": "off",
+		"max-len": "off",
+		"quotes": "error",
+		"vars-on-top": "off",
+
+		// ES5
+		"generator-star-spacing": "off",
+		// Force object shorthand where possible
+		"object-shorthand": "off",
+		// No async function without await
+		"require-await": "error",
+		// No useless destructuring/importing/exporting renames
+		"no-useless-rename": "error",
+		/**********************/
+		/* General Code Rules */
+		/**********************/
+		// Enforce import order
+		"import/order": "error",
+
+		"import/no-dynamic-require": "off",
+
+		// .vue ~ syntax
+		"import/extensions": "off",
+
+		// nuxt.js
+		"import/no-extraneous-dependencies": "off",
+
+		// Imports should come first
+		"import/first": "error",
+
+		// Other import rules
+		"import/no-mutable-exports": "error",
+
+		// Allow unresolved imports
+		"import/no-unresolved": "off",
+
+		/**********************/
+		/*     Vue Rules      */
+		/**********************/
+		// "vue/no-multi-spaces": [
+		//   "error",
+		//   {
+		//     ignoreProperties: false,
+		//   },
+		// ],
+		"vue/multi-word-component-names": "error",
+
+		"vue/singleline-html-element-content-newline": "off",
+
+		// Disable template errors regarding invalid end tags
+		"vue/no-parsing-error": [
+			"error",
+			{
+				"x-invalid-end-tag": false
+			}
+		],
+
+		// Maximum 5 attributes per line instead of one
+		"vue/max-attributes-per-line": "off",
+		// "vue/max-attributes-per-line": [
+		//   "error",
+		//   {
+		//     "singleline": 5
+		//   }
+		// ],
+
+		/***************************/
+		/* ESLint Vue Plugin Rules */
+		/***************************/
+		"vue/html-indent": [
+			"error",
+			"tab",
+			{
+				"attribute": 1,
+				"baseIndent": 1,
+				"closeBracket": 0,
+				"alignAttributesVertically": true,
+				"ignores": []
+			}
+		],
+
+		"vue/order-in-components": [
+			"error",
+			{
+				"order": [
+					"el",
+					"name",
+					"key",
+					"parent",
+					"functional",
+					["delimiters", "comments"],
+					["components", "directives", "filters"],
+					"extends",
+					"mixins",
+					["provide", "inject"],
+					"ROUTER_GUARDS",
+					"layout",
+					"middleware",
+					"validate",
+					"scrollToTop",
+					"transition",
+					"loading",
+					"inheritAttrs",
+					"model",
+					"props",
+					"emits",
+					"setup",
+					"asyncData",
+					"data",
+					"fetch",
+					"head",
+					"computed",
+					"watch",
+					"watchQuery",
+					"LIFECYCLE_HOOKS",
+					"methods",
+					["template", "render"],
+					"renderError"
+				]
+			}
+		],
+		"global-require": 0,
+		"vue/html-self-closing": ["off"],
+		"vue/component-name-in-template-casing": [
+			"error",
+			"kebab-case",
+			{
+				"ignores": ["nuxt", "nuxt-link"]
+			}
+		],
+
+		// https://eslint.vuejs.org/rules/attributes-order.html
+		"vue/attributes-order": [
+			"error",
+			{
+				"order": [
+					"DEFINITION",
+					"LIST_RENDERING",
+					"CONDITIONALS",
+					"RENDER_MODIFIERS",
+					"GLOBAL",
+					["UNIQUE", "SLOT"],
+					"TWO_WAY_BINDING",
+					"OTHER_DIRECTIVES",
+					"OTHER_ATTR",
+					"EVENTS",
+					"CONTENT"
+				],
+				"alphabetical": false
+			}
+		]
+	},
+	"overrides": [
+		{
+			"files": "**/*.vue",
+			"rules": {
+				"object-shorthand": "error",
+				"es5/no-shorthand-properties": "off"
+			}
+		}
+	]
+}
