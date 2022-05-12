@@ -32,97 +32,16 @@ $pmTodayInfo = $row[0][0];
 		position: relative;
 		z-index: 1110;
 	}
-
-	.qMeet_pop_evnt_bg {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, .64);
-		z-index: 1;
-	}
-
-	.qmeet_banner__wrap {
-		position: fixed;
-		bottom: 0;
-		left: 0;
-		width: 100%;
-		height: auto;
-		z-index: 2;
-	}
-
-	.qMeet_pop_cls {
-		position: absolute;
-		width: 50px;
-		height: 50px;
-		top: -50px;
-		right: 20px;
-		background: url("https://image.club5678.com/imgs/mobile/event/pop_btn_cls.png")no-repeat center;
-		background-size: 50px 28px;
-		cursor: pointer;
-		font-size: 0;
-		text-indent: -9999px;
-	}
-
-	.qmeet_layer {
-		width: 100%;
-		max-width: inherit;
-	}
-
-	.qmeet_layer img {
-		border-radius: 30px 30px 0 0;
-		width: 100%;
-	}
-
-	.qmeet_banner__pagination {
-		position: absolute;
-		bottom: 7px;
-		left: 50%;
-		transform: translateX(-50%);
-		z-index: 3;
-	}
-
-	.qmeet_banner__pagination .swiper-pagination-bullet {
-		width: 8px;
-		height: 8px;
-		margin: 0 2px;
-		display: inline-block;
-		border-radius: 100%;
-		background: #D0D0D0;
-		opacity: 1;
-	}
-
-	.qmeet_banner__pagination .swiper-pagination-bullet-active {
-		width: 8px;
-		height: 8px;
-		display: inline-block;
-		border-radius: 100%;
-		background: #FF378E;
-	}
 </style>
-<!-- ### Vue photoPopup -->
-<div class="qmeet_pop_wrap qMeet_pop_wrap" id="photoPopup" v-if="isShow" v-cloak>
+<!-- ### Vue photoPopup ### -->
+<div v-if="isShow" v-cloak id="photoPopup" class="qmeet_pop_wrap qMeet_pop_wrap">
 	<div class="qmeet_banner">
 		<!-- 배너영역 슬라이드-->
-		<div class="qMeet_pop_evnt_bg " onclick="history.back()"></div>
+		<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
 		<div class="qmeet_banner__wrap">
 			<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
-			<swiper class="qmeet_layer swiper-wrapper" ref="popupSwiper" :options="swiperOption">
-				<swiper-slide>
-					<img src="https://image.club5678.com/imgs/mobile/main_renewal/bnr/bnr_qmeet_evnt1.png" alt="팝업1">
-				</swiper-slide>
-				<swiper-slide>
-					<img src="https://image.club5678.com/imgs/mobile/main_renewal/bnr/bnr_qmeet_evnt2.png" alt="팝업2">
-				</swiper-slide>
-				<swiper-slide>
-					<img src="https://image.club5678.com/imgs/mobile/main_renewal/bnr/bnr_qmeet_evnt3.png" alt="팝업3">
-				</swiper-slide>
-				<swiper-slide>
-					<img src="https://image.club5678.com/imgs/mobile/main_renewal/bnr/bnr_qmeet_evnt4.png" alt="팝업4">
-				</swiper-slide>
-			</swiper>
-			<div class="qmeet_banner__pagination"></div> <!-- 페이지네이션영역 -->
+			<div class="qmeet_banner__pagination"></div>
+			<!-- 페이지네이션영역 -->
 		</div>
 	</div>
 </div>

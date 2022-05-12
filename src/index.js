@@ -1,5 +1,5 @@
 import watch from 'node-watch';
-import vueConverter from './vueConverter.js';
+import VueReplacer from './VueReplacer.js';
 
 const rootPath = '../';
 
@@ -21,7 +21,8 @@ watch(
 		console.log(`event is: ${event}`);
 		if (filename) {
 			console.log(`filename provided: ${filename}`);
-			vueConverter(filename);
+			const vueReplacer = new VueReplacer(filename);
+			vueReplacer.convertVueFile();
 		} else {
 			console.log('filename not provided');
 		}
