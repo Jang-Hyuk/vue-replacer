@@ -28,20 +28,52 @@ function getEuckrFile(filePath) {
 }
 
 /**
- * Vue Script 안의 내용을 인코딩 처리 후 가져옴
- * @alias Js Converter
+ * Vue Template 안의 내용을 인코딩 처리 후 가져옴
+ * @alias Template Converter
  * @param {string} fileFullPath
  * @returns {string}
  */
-async function getVueScript(fileFullPath = '') {
-	const filePath = `${fileFullPath.slice(0, fileFullPath.lastIndexOf('.'))}.vue`;
-	const file = await getEuckrFile(filePath);
-	// console.log('file: ', file);
+async function getVueTemplate(file) {
+	// template 시작 tag 닫는 위치부터 template 종료 tag 범위 짜름
+	return sliceString(file, '>', '</template>');
+	// _.chain(jsFile)
+	// .thru(str => str.slice(0, jsFileStartIndex + vueStartDelimiterWord.length))
+	// // .split('\r\n')
+	// // .initial()
+	// // .join('')
+	// .value()
+	return _.chain(file)
+		.thru(str => str.slice(file.indexOf('\n'), file.lastIndexOf('</template>')))
+		.replace('export default', '')
+		.trim()
+		.thru(str => str.slice(0, str.length - 1))
+		.value();
+}
 
-	if (!file.length) {
+/**
+ * 스트링 범위로 짜르기
+ * @param {string} source
+ * @param {string} sDelimiter
+ * @param {string} eDelimiter
+ * @returns {any}
+ */
+function sliceString(source, sDelimiter, eDelimiter) {
+	const strStartIndex = source.indexOf(sDelimiter);
+	const strEndIndex = source.lastIndexOf(eDelimiter);
+	if (strStartIndex === -1 || strEndIndex === -1) {
 		return '';
 	}
 
+	return source.slice(strStartIndex + sDelimiter.length, strEndIndex);
+}
+
+/**
+ * Vue Script 안의 내용을 인코딩 처리 후 가져옴
+ * @alias Js Converter
+ * @param {string} file
+ * @returns {string}
+ */
+async function getVueScript(file) {
 	return _.chain(file)
 		.thru(str => str.slice(file.indexOf('export default'), file.lastIndexOf('</script>')))
 		.replace('export default', '')
@@ -143,12 +175,31 @@ function fileCreator(fileFullPath = '') {
 	// console.log('fileContents: ', fileContents.toString());
 }
 
+/**
+ * Vue 파일 변경될 경우 변환 작업 처리
+ * @param {string} path fileFullPath
+ */
 async function convertVueFile(path) {
+	const fileContents = await getEuckrFile(path);
+
+	if (!fileContents.length) {
+		return '';
+	}
+	const vueTemplate = await getVueTemplate(fileContents);
+	// 1. 개행 단위로 split
+	const refineVueTemplate = vueTemplate.replace(/\n\t/g, '\n');
+	console.log('refineVueTemplate: ', refineVueTemplate);
+	// console.log('vueTemplate: ', vueTemplate);
+
+	fs.writeFileSync('./src/test.html', iconv.encode(refineVueTemplate, 'euc-kr'), {
+		encoding: 'binary'
+	});
+
 	// console.log('convertVueFile: ', path);
-	const vueScript = await getVueScript(path);
+	// const vueScript = await getVueScript(fileContents);
 	// console.log('vueScript: ', vueScript);
 	// console.log('vueScript: ', vueScript);
-	replaceVueScript(vueScript, path);
+	// replaceVueScript(vueScript, path);
 }
 
 export default convertVueFile;
