@@ -1,0 +1,15 @@
+{
+  "restartable": "rs",
+  "ignore": [
+    ".git",
+    "node_modules",
+    "dist",
+    "coverage",
+    "cTest.js"
+  ],
+  "watch": [
+    "."
+  ],
+  "env": {},
+  "ext": "js, vue, json, txt"
+}

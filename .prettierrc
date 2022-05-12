@@ -1,0 +1,12 @@
+{
+  "phpVersion": "5.3",
+  "trailingCommaPHP": true,
+  "singleQuote": true,
+  "semi": true,
+  "tabWidth": 2,
+  "useTabs": true,
+  "trailingComma": "none",
+  "printWidth": 90,
+  "arrowParens": "avoid",
+  "endOfLine": "auto"
+}

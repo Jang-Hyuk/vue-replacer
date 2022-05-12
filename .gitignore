@@ -1,0 +1,23 @@
+# ignore IDE/hidden/OS cache files
+nbproject
+nb-configuration.xml
+Session.vim
+*.tmproj
+*.tmproject
+tmtags
+Thumbs.db
+Desktop.ini
+.idea
+.vscode
+AG315
+_global
+dexTemp
+
+# cron directory ignore
+/cron
+
+node_modules
+.eslintrc
+package*.json
+jsconfig.json
+*.vue
