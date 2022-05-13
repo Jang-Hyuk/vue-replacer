@@ -20,13 +20,21 @@ watch(
 	(event, filename) => {
 		console.log(`event is: ${event}`);
 		if (filename) {
-			console.log(`filename provided: ${filename}`);
+			console.log(`🐟 filename provided: ${filename}`);
 			const vueReplacer = new VueReplacer(filename);
 			vueReplacer.convertVueFile();
 		} else {
-			console.log('filename not provided');
+			console.log('🐟 filename not provided');
 		}
 	}
 );
 
-console.info('start VueReplacer watcher !!!');
+console.info('✅ start VueReplacer watcher !!!');
+
+process.on('uncaughtException', err => {
+	console.error('uncaughtException', err);
+});
+
+process.on('unhandledRejection', err => {
+	console.error('unhandledRejection', err);
+});
