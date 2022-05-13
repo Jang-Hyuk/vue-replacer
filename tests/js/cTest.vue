@@ -1,4 +1,4 @@
-<template id="photoPopup" depth="0" compile="../html/cTest.html">
+<template id="photoPopup" isTemplate="0" depth="0" fileSrc="../html/cTest.html">
 	<div v-if="isShow" v-cloak id="photoPopup" class="qmeet_pop_wrap qMeet_pop_wrap">
 		<div class="qmeet_banner">
 			<!-- 배너영역 슬라이드-->
@@ -14,7 +14,7 @@
 
 <script>
 export default {
-	props: ['welcome'],
+	props: ['ra!sss'],
 	data() {
 		var vm = this;
 		return {

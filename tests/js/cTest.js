@@ -3,7 +3,7 @@ $(function () {
 	/* ### Vue ### */
 	Vue.use(VueAwesomeSwiper);
 	Vue.component('TalkConts', {
-		props: ['welcome'],
+		props: ['ra!sss'],
 		data() {
 			var vm = this;
 			return {
