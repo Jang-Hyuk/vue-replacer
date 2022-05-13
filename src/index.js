@@ -24,7 +24,7 @@ watch(
 			const vueReplacer = new VueReplacer(filename);
 			vueReplacer.convertVueFile();
 		} else {
-			console.log('🐟 filename not provided');
+			console.log('😈 filename not provided');
 		}
 	}
 );
