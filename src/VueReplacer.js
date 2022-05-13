@@ -4,7 +4,7 @@ import path, { sep } from 'path';
 import _ from 'lodash';
 import iconv from 'iconv-lite';
 
-const NEW_LINE = '\n';
+const NEW_LINE = '\r\n';
 const TAB = '\t';
 class VueReplacer {
 	/**
