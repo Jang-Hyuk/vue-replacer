@@ -1,5 +1,12 @@
-<template id="photoPopup" isTemplate="0" depth="0" fileSrc="../html/cTest.html">
-	<div v-if="isShow" v-cloak id="photoPopup" class="qmeet_pop_wrap qMeet_pop_wrap">
+<!-- 태수투 ss -->
+<template
+	id="photoPopup"
+	isTemplate="0"
+	isSync="1"
+	depth="3"
+	fileSrc="../html/cTest.html"
+>
+	<div v-if="isShow" id="photoPopup" class="qmeet_pop_wrap qMeet_pop_wrap">
 		<div class="qmeet_banner">
 			<!-- 배너영역 슬라이드-->
 			<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
@@ -8,6 +15,9 @@
 				<div class="qmeet_banner__pagination"></div>
 				<!-- 페이지네이션영역 -->
 			</div>
+			<template slot="hi">
+				<div>슬롯이당께</div>
+			</template>
 		</div>
 	</div>
 </template>
@@ -18,6 +28,8 @@ export default {
 	data() {
 		var vm = this;
 		return {
+			isShow: true,
+			isShow2: true,
 			v: vm.row.v,
 			i: vm.row.i,
 			isAdmin: __vars.isAdmin || false,

@@ -105,22 +105,33 @@ class VueReplacer {
 	 * @returns {string}
 	 */
 	extractTemplate(vueFile) {
+		const endDelimiter = '<script';
+		const chunkStartDelimiter = '<template';
+		const chunkEndDelimiter = '</template>';
+
+		const vueOriginalTemplate = _.chain(vueFile.slice(0, vueFile.indexOf(endDelimiter)))
+			.thru(tSrc => tSrc.slice(0, tSrc.lastIndexOf(chunkEndDelimiter)))
+			.thru(tSrc => tSrc.slice(tSrc.indexOf(chunkStartDelimiter)))
+			.value();
+
+		const realTemplateStartIndex = vueOriginalTemplate.indexOf('>');
+
 		// template 시작 tag 닫는 위치부터 template 종료 tag 범위 짜름
-		const { contents, sDelimiterIndex } = VueReplacer.sliceString(
-			vueFile,
-			'>',
-			'</template>'
-		);
-		const vueHeader = vueFile.slice(0, sDelimiterIndex);
+		const vueHeader = vueOriginalTemplate.slice(0, realTemplateStartIndex);
 		const vueHeaderInfo = VueReplacer.toDictionary(vueHeader);
+		const vueBody = vueOriginalTemplate.slice(realTemplateStartIndex + 1);
+
+		if (vueHeaderInfo.isSync !== '1') {
+			return false;
+		}
 
 		if (vueHeaderInfo.fileSrc === undefined) {
 			return false;
 		}
 
-		let realContents = contents;
+		let realContents = vueBody;
 		if (vueHeaderInfo.isTemplate === '1') {
-			realContents = `${NEW_LINE}<template id="${vueHeaderInfo.id}">${contents}${NEW_LINE}</template>`;
+			realContents = `${NEW_LINE}<template id="${vueHeaderInfo.id}">${vueBody}${NEW_LINE}</template>`;
 			this.htmlFileInfo.isTemplate = true;
 		}
 
@@ -130,7 +141,6 @@ class VueReplacer {
 			? parseInt(vueHeaderInfo.depth, 10)
 			: 0;
 		this.htmlFileInfo.positionId = vueHeaderInfo.id ?? '';
-
 		return realContents;
 	}
 

@@ -4,9 +4,11 @@ $(function () {
 	Vue.use(VueAwesomeSwiper);
 	Vue.component('TalkConts', {
 		props: ['ra!sss'],
-		data() {
+		data: function () {
 			var vm = this;
 			return {
+				isShow: true,
+				isShow2: true,
 				v: vm.row.v,
 				i: vm.row.i,
 				isAdmin: __vars.isAdmin || false,
@@ -30,45 +32,45 @@ $(function () {
 		},
 		computed: {
 			/** 회원번호 */
-			memNo() {
+			memNo: function () {
 				return $.cookie('gCCV:NO');
 			},
-	
+
 			/** 회원번호 */
-			memSex() {
+			memSex: function () {
 				return $.cookie('gCCV:SEX');
 			},
-	
+
 			/** 디바이스 정보(return false 이면 앱이 아님) */
-			device() {
+			device: function () {
 				return func.deviceCode();
 			},
-	
+
 			/** 내용 개행문자 처리 */
-			titleConts() {
+			titleConts: function () {
 				return this.row.v.title_conts.replace(/\n/g, '<br />');
 			},
-	
+
 			/** swiper 객체 */
-			swiper() {
+			swiper: function () {
 				return this.$refs.talkSwiper ? this.$refs.talkSwiper.swiper : null;
 			},
-	
+
 			/** 쿼리스트링 리턴 */
-			queryString() {
+			queryString: function () {
 				return $.qStringToJson(location.search.replace('?', ''));
 			}
 		},
 		watch: {
 			/** 게시글 수정으로 swiper 갱신이 될때 */
-			undefined() {
+			undefined: function () {
 				if (this.swiper) this.on.virtualData();
-	
+
 				/** 내용 더보기 버튼 활성화(list dom 렌더링 후 엘리먼트 높이 비교) */
 				this.titleContsArea();
 			}
 		},
-		created() {
+		created: function () {
 			var vm = this;
 			vm.on();
 			vm.job();
@@ -80,19 +82,19 @@ $(function () {
 			 * @param {string} tailMemNo 댓글 작성자 번호
 			 * @returns
 			 */
-			isWriterCheck(talkMemNo, tailMemNo) {
+			isWriterCheck: function (talkMemNo, tailMemNo) {
 				if (this.isAdmin) {
 					return true;
 				}
 				return (tailMemNo === this.memNo || talkMemNo === this.memNo) === true;
 			},
-	
+
 			/**
 			 * 게시글 또는 댓글 작성자일때 비밀글 여부 판단하여 이미지 및 컨텐츠 처리
 			 * @param {object} tailInfo
 			 * @returns
 			 */
-			secretContent(tailInfo) {
+			secretContent: function (tailInfo) {
 				var photoSrc = tailInfo.exit_yn === 'n' ? tailInfo.mem_photo : '';
 				var isContent = true;
 				if (
@@ -103,9 +105,9 @@ $(function () {
 						'https://image.club5678.com/imgs/mobile/talkandtalk/img/ico_lock_cir.png';
 					isContent = false;
 				}
-				return [{ isContent, img: photoSrc }];
+				return [{ isContent: isContent, img: photoSrc }];
 			},
-	
+
 			/**
 			 * 지역 값 추출
 			 * @param loc1
@@ -113,60 +115,60 @@ $(function () {
 			 * @param loc3
 			 * @returns {string}
 			 */
-			productLocInfo(loc1, loc2, loc3) {
+			productLocInfo: function (loc1, loc2, loc3) {
 				if (!loc1) return '#전국';
 				var pdLocInfo = '#' + this.locInfo[loc1];
 				if (loc2) pdLocInfo += ' #' + this.locInfo[loc2];
 				if (loc3) pdLocInfo += ' #' + this.locInfo[loc3];
 				return pdLocInfo;
 			},
-	
+
 			/**
 			 * 3자리수 콤마 노출
 			 * @param _number
 			 * @returns {string}
 			 */
-			setComma(_number) {
+			setComma: function (_number) {
 				return (_number || 0).toString().replace(/(\d)(?=(?:\d{3})+(?!\d))/g, '$1,');
 			},
-	
+
 			/**
 			 * 아바타 이미지 주소
 			 * @param sex
 			 * @param e
 			 * @returns {string}
 			 */
-			noImg(sex, e) {
+			noImg: function (sex, e) {
 				var src =
 					'https://image.club5678.com/imgs/mobile/130417/noimg_' + (sex || 'f') + '.png';
 				if (e) e.target.src = src;
 				else return src;
 			},
-	
+
 			/**
 			 * 숫자에 k 표시 형식
 			 * @param _num
 			 * @returns {string|number|number}
 			 */
-			kFormat(_num) {
+			kFormat: function (_num) {
 				var num = Number(_num) || 0;
 				return num > 1000 ? (num / 1000).toFixed(1) + 'k' : num;
 			},
-	
+
 			/**
 			 * 플러그로 이동
 			 * @param plugNo
 			 */
-			goPlug(plugNo) {
+			goPlug: function (plugNo) {
 				var url = '/?ctrl=cont/plugV2/index&plug_no=' + plugNo;
 				if (!subWin) location.href = url;
 				else closeWinAll({ callFunc: 'function(){ location.href="' + url + '"; }' });
 			},
-	
+
 			/**
 			 * 내용 더보기 버튼 활성화(list dom 렌더링 후 엘리먼트 높이 비교)
 			 */
-			titleContsArea() {
+			titleContsArea: function () {
 				this.$nextTick(function () {
 					var vm = this;
 					var wrap = vm.$el.querySelector('.talk__main_cont_wrap');
@@ -179,11 +181,11 @@ $(function () {
 					}, 0);
 				});
 			},
-	
+
 			/**
 			 * 구인구직 컨텐츠 컨트롤
 			 */
-			job() {
+			job: function () {
 				var vm = this;
 				var fn = vm.job;
 				var clipboard = null;
@@ -210,7 +212,7 @@ $(function () {
 					if (_weekYn === 'y' || !_weekSlct) {
 						return '근무요일 협의';
 					}
-	
+
 					var arWeekSlct = _weekSlct.split(',').sort();
 					var result = [];
 					for (var i = 0; i < arWeekSlct.length; i++) {
@@ -220,7 +222,7 @@ $(function () {
 							}
 						}
 					}
-	
+
 					return result.join(',');
 				};
 				/** 요일출력 */
@@ -247,7 +249,7 @@ $(function () {
 					}
 					$.gapCall({ cmd: 'phoneCall', data: { phoneNumber: _phoneNumber } });
 				};
-	
+
 				(function () {
 					/** 전화문의(구버전 대응) */
 					window.fail_phoneCall = function () {
@@ -266,7 +268,7 @@ $(function () {
 							ui.alert(
 								'전화문의는 앱에서만 가능합니다.<br>확인 버튼을 터치하시면<br><br>다운로드 화면으로 이동합니다.',
 								{
-									done() {
+									done: function () {
 										$.goGooglePlay();
 									}
 								}
@@ -275,11 +277,11 @@ $(function () {
 					};
 				})();
 			},
-	
+
 			/**
 			 * 게시글 컨텐츠 컨트롤
 			 */
-			on() {
+			on: function () {
 				var vm = this;
 				var fn = vm.on;
 				/**
@@ -288,11 +290,15 @@ $(function () {
 				 */
 				var _mediaEvent = function () {
 					var photoInfo = vm.row.v.photo_info[vm.swiper.activeIndex];
-					if (typeof vm.swiper.activeIndex !== 'number' || !photoInfo || photoInfo.active) {
+					if (
+						typeof vm.swiper.activeIndex !== 'number' ||
+						!photoInfo ||
+						photoInfo.active
+					) {
 						return;
 					}
 					photoInfo.active = true;
-	
+
 					var media = vm.swiper.el.querySelectorAll(
 						'.swiper-slide-active video.swiper-lazy,.swiper-slide-active img.swiper-lazy'
 					)[0];
@@ -306,7 +312,7 @@ $(function () {
 						if (aniWrap) aniWrap.remove();
 						return;
 					}
-	
+
 					/** video 일때 이벤트 바인딩 */
 					if (media.tagName === 'VIDEO') {
 						/** 50% 보일때(동영상 재생시도) */
@@ -314,17 +320,17 @@ $(function () {
 							function (entries) {
 								entries.forEach(function (entry) {
 									if (!entry.isIntersecting) return;
-	
+
 									/** 재생가능한 일시정지된 동영상이 보이면 재생 */
 									if (media.readyState > 2 && media.paused) {
 										vueBus.$emit('talkProc', 'play', {
 											video: media,
-											playBtn,
+											playBtn: playBtn,
 											swiper: vm.swiper,
 											row: vm.row.v
 										});
 									}
-	
+
 									/** 인코딩중 동영상일땐 동영상 다시 로드 */
 									var _photoInfo = vm.row.v.photo_info[vm.swiper.activeIndex];
 									if (_photoInfo.loadAction && !_photoInfo.error) {
@@ -334,7 +340,7 @@ $(function () {
 							},
 							{ threshold: 0.5 }
 						).observe(media);
-	
+
 						/** 100% 안보일때(동영상 일시정지) */
 						new IntersectionObserver(function (entries) {
 							entries.forEach(function (entry) {
@@ -342,12 +348,12 @@ $(function () {
 								if (!media.paused) media.pause();
 							});
 						}).observe(media);
-	
+
 						/** 에러 일때 */
 						media.addEventListener('error', function () {
 							var _photoInfo = vm.row.v.photo_info[vm.swiper.activeIndex];
 							if (!_photoInfo.active || _photoInfo.error) return;
-	
+
 							/** 인코딩 안된 동영상 주소 가져오기 시도 */
 							var src = ui.videoUrl('talk', _photoInfo.file_enc) || '';
 							if (src !== '') {
@@ -374,7 +380,7 @@ $(function () {
 										'https://image.club5678.com/imgs/mobile/main_renewal/img/img_talk_bg_novideo.png';
 									return;
 								}
-	
+
 								/** 인코딩중 로띠 애니메이션 */
 								if (_photoInfo.loadAction) return;
 								_photoInfo.loadAction = true;
@@ -397,39 +403,39 @@ $(function () {
 								});
 							}
 						});
-	
+
 						/** 재생버튼 클릭 일때 */
 						playBtn.addEventListener('click', function () {
 							media.click();
 						});
-	
+
 						/** 음소거버튼 클릭 일때 */
 						muteBtn.addEventListener('click', function () {
 							media.muted = !media.muted;
 						});
-	
+
 						/** 상태가 재생가능 일때 */
 						media.addEventListener('canplay', function () {
 							vueBus.$emit('talkProc', 'play', {
 								video: media,
-								playBtn,
+								playBtn: playBtn,
 								swiper: vm.swiper,
 								row: vm.row.v
 							});
 						});
-	
+
 						/** 재생시작 일때 */
 						media.addEventListener('play', function () {
 							playBtn.classList.add('hidden');
 							muteBtn.classList.remove('hidden');
 						});
-	
+
 						/** 일시정지 일때 */
 						media.addEventListener('pause', function () {
 							playBtn.classList.remove('hidden');
 							muteBtn.classList.add('hidden');
 						});
-	
+
 						/** 볼륨조절(음소거) 일때 */
 						media.addEventListener('volumechange', function () {
 							if (!media.muted) {
@@ -441,13 +447,13 @@ $(function () {
 							}
 						});
 					}
-	
+
 					/** video/image 클릭 일때 */
 					media.addEventListener('click', function () {
 						var _photoInfo = vm.row.v.photo_info[vm.swiper.activeIndex];
 						if (_photoInfo.error) return;
 						if (vm.row.playing && !vm.row.playing.paused) vm.row.playing.pause();
-	
+
 						var data = {
 							type: 'talk',
 							plugNo: vm.row.v.mem_no,
@@ -462,7 +468,7 @@ $(function () {
 						openWin('/?ctrl=cont/photoViewer/profilePhotoViewer&' + data);
 					});
 				};
-	
+
 				/**
 				 * 게시글 virtual slides 생성
 				 */
@@ -518,58 +524,58 @@ $(function () {
 						return html;
 					});
 					vm.swiper.virtual.update();
-	
+
 					/** 첫번째 slide의 이벤트 바인딩 */
 					vm.$nextTick(function () {
 						_mediaEvent();
 					});
 				};
-	
+
 				/**
 				 * 게시글 더보기 컨트롤 객체
 				 */
 				fn.talkMore = {
-					click(v) {
+					click: function (v) {
 						v.isShowMore = true;
 						backButtonAction.register(function () {
 							v.isShowMore = false;
 						});
 					} /** 더보기 레이어 열기 */,
-					modify(v) {
+					modify: function (v) {
 						history.back();
 						backButtonAction.callback(function () {
 							vueBus.$emit('talkProc', 'write', v);
 						});
 					} /** 수정 클릭 */,
-					delete(v) {
+					delete: function (v) {
 						history.back();
 						backButtonAction.callback(function () {
 							vueBus.$emit('talkProc', 'delete', v);
 						});
 					} /** 삭제 클릭 */,
-					complete(v) {
+					complete: function (v) {
 						history.back();
 						backButtonAction.callback(function () {
 							vueBus.$emit('talkProc', 'complete', v);
 						});
 					} /** 거래완료 클릭 */,
-					deleteByAdmin(v) {
+					deleteByAdmin: function (v) {
 						vueBus.$emit('talkProc', 'deleteByAdmin', v);
 					} /** (관리자) 삭제하기 */,
-					report(v) {
+					report: function (v) {
 						vueBus.$emit('talkProc', 'report', v);
 					} /** 신고하기 클릭 */,
-					changeToWaiting(v, isWaiting) {
+					changeToWaiting: function (v, isWaiting) {
 						ui.confirm((isWaiting ? '예약중으로' : '예약취소로') + ' 변경하시겠습니까?', {
 							doneTxt: '확인',
-							done() {
+							done: function () {
 								var param = {
 									mode: 'talkWaiting',
 									memNo: v.mem_no,
 									talkNo: v.talk_no,
 									talkSlct: isWaiting ? 'b' : 'n'
 								};
-	
+
 								/** ajax 처리결과 */
 								$.ajax({
 									type: 'post',
@@ -591,7 +597,7 @@ $(function () {
 							}
 						});
 					},
-					pullUp(v) {
+					pullUp: function (v) {
 						var param = {
 							mode: 'talkPullUp',
 							memNo: v.mem_no,
@@ -612,7 +618,7 @@ $(function () {
 							});
 					}
 				};
-	
+
 				/**
 				 * 내용 더보기 클릭
 				 * @param e
@@ -623,7 +629,7 @@ $(function () {
 						.classList.remove('simple');
 					vm.row.v.titleContsMore = false;
 				};
-	
+
 				/**
 				 * 댓글 더보기 클릭(댓글 레이어)
 				 * @param v
@@ -637,7 +643,7 @@ $(function () {
 							v.talk_no
 					);
 				};
-	
+
 				/**
 				 * 추천 애니메이션 효과 실행
 				 * @private
@@ -668,7 +674,7 @@ $(function () {
 						vm.row.v.rcmdAction.playSegments([0, 40], true);
 					}
 				};
-	
+
 				/**
 				 * 추천하기(엄지척) 클릭
 				 */
@@ -680,12 +686,12 @@ $(function () {
 						talkNo: vm.row.v.talk_no,
 						rcmd: vm.row.v.rcmd_yn === 'y' ? 'n' : 'y'
 					};
-	
+
 					/** ajax 처리결과 */
 					$.ajax({
 						type: 'post',
 						dataType: 'json',
-						data,
+						data: data,
 						url: '/cont/talkV2/ajax.proc.php',
 						timeout: 5000
 					})
@@ -699,7 +705,7 @@ $(function () {
 							if (res.retdata.rcmd_yn === 'y') _setRcmd();
 						});
 				};
-	
+
 				/**
 				 * 목록으로 클릭
 				 */
@@ -709,14 +715,14 @@ $(function () {
 					}
 					location.href = '/?ctrl=cont/talk/index';
 				};
-	
+
 				fn.toService = function () {
 					var contName =
 						vm.row.adSrc[vm.memSex === 'm' ? (vm.row.i % 4) % 2 : (vm.row.i % 4) % 3]
 							.service;
 					location.href = '/?ctrl=cont/' + contName + '/index';
 				};
-	
+
 				(function () {
 					/**
 					 * 게시글이 화면에 노출됐을때만
@@ -730,25 +736,25 @@ $(function () {
 									return;
 								}
 								entry.target.style.visibility = '';
-	
+
 								if (!vm.row.v.photo_info || !vm.swiper || vm.row.v.swiperActive) return;
 								vm.row.v.swiperActive = true; /** swiper 활성화 처리 */
-	
+
 								/** swiper 가상데이터 생성 */
 								fn.virtualData();
-	
+
 								/** slide가 처음 노출됐을때 image/video 이벤트 바인딩 */
 								vm.swiper.on('transitionEnd', _mediaEvent);
 							});
 						}).observe(vm.$el);
 					});
-	
+
 					/** 내용 더보기 버튼 활성화(list dom 렌더링 후 엘리먼트 높이 비교) */
 					vm.titleContsArea();
 				})();
 			}
 		},
-	
+
 		template: '#c-talk-conts'
 	});
 	/* ### !Vue ### */

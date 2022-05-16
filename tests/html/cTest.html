@@ -33,18 +33,21 @@ $pmTodayInfo = $row[0][0];
 		z-index: 1110;
 	}
 </style>
-<!-- ### Vue photoPopup ### -->
-<div v-if="isShow" v-cloak id="photoPopup" class="qmeet_pop_wrap qMeet_pop_wrap">
-	<div class="qmeet_banner">
-		<!-- 배너영역 슬라이드-->
-		<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
-		<div class="qmeet_banner__wrap">
-			<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
-			<div class="qmeet_banner__pagination"></div>
-			<!-- 페이지네이션영역 -->
-		</div>
-	</div>
-</div>
+<!-- 그것이 알고 싶다 ### Vue photoPopup ### -->
+			<div v-if="isShow" id="photoPopup" class="qmeet_pop_wrap qMeet_pop_wrap">
+				<div class="qmeet_banner">
+					<!-- 배너영역 슬라이드-->
+					<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
+					<div class="qmeet_banner__wrap">
+						<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
+						<div class="qmeet_banner__pagination"></div>
+						<!-- 페이지네이션영역 -->
+					</div>
+					<template slot="hi">
+						<div>슬롯이당께</div>
+					</template>
+				</div>
+			</div>
 <!-- ### !Vue photoPopup ### -->
 <script>
 	var __varsInsChat = {
