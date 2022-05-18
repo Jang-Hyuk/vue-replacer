@@ -3,17 +3,17 @@ $(function () {
 	/* ### Vue */
 	Vue.use(VueAwesomeSwiper);
 	Vue.component('TalkConts', {
-		data: function () {
+		data() {
 			return {
 				isShow: 1
 			};
 		},
-		created: function () {
+		created() {
 			var vm = this;
 			vm.on();
 			vm.job();
 		},
-
+	
 		template: '#c-talk-conts'
 	});
 	/* ### !Vue */

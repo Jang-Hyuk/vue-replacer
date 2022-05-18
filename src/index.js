@@ -18,7 +18,7 @@ watch(
 		}
 	},
 	(event, filename) => {
-		console.log(`event is: ${event}`);
+		// console.log(`event is: ${event}`);
 		if (filename) {
 			console.log(`🐟 filename provided: ${filename}`);
 			const vueReplacer = new VueReplacer(filename);

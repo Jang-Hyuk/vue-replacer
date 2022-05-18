@@ -4,6 +4,8 @@ import path, { sep } from 'path';
 import _ from 'lodash';
 import iconv from 'iconv-lite';
 
+// import VueParent from './VueParent.js';
+
 const NEW_LINE = '\r\n';
 const TAB = '\t';
 
@@ -93,7 +95,10 @@ class VueReplacer {
 		const chunkStartDelimiter = '<script';
 		const chunkEndDelimiter = '</script>';
 
-		const vueOriginalScript = _.chain(vueFile.slice(vueFile.indexOf(endDelimiter)))
+		// template가 없다면 0을. 아니라면 indexOf 값 정의
+		const startIndex =
+			vueFile.indexOf(endDelimiter) === -1 ? 0 : vueFile.indexOf(endDelimiter);
+		const vueOriginalScript = _.chain(vueFile.slice(startIndex))
 			.thru(tSrc => tSrc.slice(0, tSrc.lastIndexOf(chunkEndDelimiter)))
 			.thru(tSrc => tSrc.slice(tSrc.indexOf(chunkStartDelimiter)))
 			.value();
@@ -228,7 +233,7 @@ class VueReplacer {
 
 		// vue 파일을 기반으로 js 영역 교체
 		this.replaceVueScript(this.extractScript(vueFile));
-		// vue 파일을 기반으로 html 영역 교체
+		// // vue 파일을 기반으로 html 영역 교체
 		this.replaceVueTemplate(this.extractTemplate(vueFile));
 	}
 
