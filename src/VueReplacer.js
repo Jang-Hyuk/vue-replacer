@@ -6,7 +6,7 @@ import iconv from 'iconv-lite';
 
 // import VueParent from './VueParent.js';
 
-const NEW_LINE = '\r\n';
+let NEW_LINE = '\r\n';
 const TAB = '\t';
 
 // NOTE return false 로 되어있는 부분들 예외처리가 필요시 구현해야함
@@ -226,6 +226,8 @@ class VueReplacer {
 	 */
 	async convertVueFile() {
 		const vueFile = await this.getFile(this.vueFilePath);
+
+		NEW_LINE = vueFile.indexOf(NEW_LINE) >= 0 ? NEW_LINE : '\n';
 
 		if (!vueFile.length) {
 			return false;
