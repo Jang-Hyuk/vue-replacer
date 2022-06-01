@@ -1,11 +1,11 @@
 var ttt = null;
 $(function () {
-	/* ### Vue */
 	Vue.use(VueAwesomeSwiper);
+	/* ### Vue */
 	Vue.component('TalkConts', {
 		data() {
 			return {
-				isShow: 1
+				isShow: 12
 			};
 		},
 		created() {

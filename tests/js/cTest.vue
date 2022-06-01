@@ -38,12 +38,24 @@
 	</div>
 </template>
 
-<script id="photoPopup" isSync="1">
+<script id="photoPopup" isSync="1" isTemplate="1">
 console.log('hi');
+/**
+ * @typedef {Object} tableSchema
+ * @property {string} [id=''] column id
+ */
+
+var defaultLabels = {
+	first: 'First',
+	last: 'Last',
+	previous: 'Previous',
+	next: 'Next'
+};
+
 export default {
 	data() {
 		return {
-			isShow: 1
+			isShow: 12
 		};
 	},
 	created() {

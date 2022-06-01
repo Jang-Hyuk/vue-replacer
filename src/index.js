@@ -20,6 +20,7 @@ watch(
 	(event, filename) => {
 		// console.log(`event is: ${event}`);
 		if (filename) {
+			// if (filename.indexOf('ftp-kr')) return false;
 			console.log(`🐟 filename provided: ${filename}`);
 			const vueReplacer = new VueReplacer(filename);
 			vueReplacer.convertVueFile();
