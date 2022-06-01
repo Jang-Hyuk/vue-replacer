@@ -100,7 +100,7 @@ class VueReplacer extends VueParent {
 		const scriptConfigIndex = srcBody.indexOf(srcDelimiter);
 		let scriptOuter = srcBody.slice(0, scriptConfigIndex);
 		// import 사용시 끝나는 지점 추출
-		if (scriptOuter.indexOf(" from '")) {
+		if (scriptOuter.indexOf(" from '") !== -1) {
 			const tempIndex = scriptOuter.indexOf(';', scriptOuter.lastIndexOf(" from '"));
 			scriptOuter = scriptOuter.slice(scriptOuter.indexOf(this.NEW_LINE, tempIndex + 1));
 		}

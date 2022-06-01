@@ -40,16 +40,6 @@
 </template>
 
 <script id="photoPopup" fileSrc="../js/cTest.js" isSync="1" isTemplate="1">
-import CompTemp from './CompTemp.vue';
-
-console.log('«„«„');
-
-console.log('hi');
-/**
- * @typedef {Object} tableSchema
- * @property {string} [id=''] column id
- */
-
 var defaultLabels = {
 	first: 'First123544',
 	last: 'Last',
