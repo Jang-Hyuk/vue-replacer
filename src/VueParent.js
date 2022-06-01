@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-unused-expressions */
 import fs from 'fs';
 import { exec } from 'child_process';
 
@@ -6,7 +8,7 @@ import iconv from 'iconv-lite';
 
 function execute(command, callback) {
 	exec(command, (error, stdout, stderr) => {
-		callback(stdout);
+		typeof callback === 'function' && callback(stdout);
 	});
 }
 
@@ -93,7 +95,7 @@ class VueParent {
 					if (err) {
 						console.error(err);
 					}
-					// IE용. File을 저장한 후 ESLint 과정을 추가로 할지 여부. 시간 소요가 큼(2초 이상)
+					// FIXME (인코딩이 안맞음) IE용. File을 저장한 후 ESLint 과정을 추가로 할지 여부. 시간 소요가 큼(2초 이상)
 					if (this.isIeMode && isEnabledEncoding) {
 						execute(`eslint --fix ${filePath}`);
 					}
