@@ -1,7 +1,14 @@
 import fs from 'fs';
-import { ESLint } from 'eslint';
+import { exec } from 'child_process';
 
+import { ESLint } from 'eslint';
 import iconv from 'iconv-lite';
+
+function execute(command, callback) {
+	exec(command, (error, stdout, stderr) => {
+		callback(stdout);
+	});
+}
 
 class VueParent {
 	/**
@@ -69,20 +76,12 @@ class VueParent {
 	}
 
 	/**
-	 * Description
-	 * @param {string} filePath
-	 * @param {string} contents
-	 * @param {boolean} [isEnabledEncoding=false]
+	 * 해당 경로에 파일을 덮어씀
+	 * @param {string} filePath 경로
+	 * @param {string} contents 덮어쓸 file text
+	 * @param {boolean} [isEnabledEncoding=false] (Js 파일만 가능) 인코딩 추가로 처리할 수 있는지 여부
 	 */
-	async writeFile(filePath, contents = '', isEnabledEncoding = false) {
-		// console.time('wtf');
-		// IE 인코딩 모드이고 JS 파일일 경우에만 eslint 적용
-		if (this.isIeMode && isEnabledEncoding) {
-			const file = await this.eslint.lintText(contents);
-			contents = file[0].output;
-		}
-		// console.timeEnd('wtf');
-
+	writeFile(filePath, contents = '', isEnabledEncoding = false) {
 		if (this.isEuckr) {
 			fs.writeFile(
 				filePath,
@@ -93,6 +92,10 @@ class VueParent {
 				err => {
 					if (err) {
 						console.error(err);
+					}
+					// IE용. File을 저장한 후 ESLint 과정을 추가로 할지 여부. 시간 소요가 큼(2초 이상)
+					if (this.isIeMode && isEnabledEncoding) {
+						execute(`eslint --fix ${filePath}`);
 					}
 				}
 			);

@@ -113,7 +113,7 @@ class VueReplacer extends VueParent {
 
 		// 컴포넌트를 사용하고 있다면 해당 구간을 삭제
 		const componentIndex = vueOption.indexOf('components: {');
-		if (componentIndex) {
+		if (componentIndex !== -1) {
 			const componentsPrevContents = vueOption.slice(0, componentIndex);
 			const componentsNextIndex = vueOption.indexOf('},', componentIndex);
 
@@ -200,6 +200,7 @@ class VueReplacer extends VueParent {
 
 		// ANCHOR Converter
 		// replaceVueScript vue 파일을 기반으로 js 영역 교체
+		// this.extractScript(vueFile);
 		this.replaceVueScript(this.extractScript(vueFile));
 		// replaceVueTemplate vue 파일을 기반으로 html 영역 교체
 		this.replaceVueTemplate(this.extractTemplate(vueFile));

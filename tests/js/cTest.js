@@ -2,12 +2,6 @@ const ttt = null;
 $(function () {
 	Vue.use(VueAwesomeSwiper);
 	/* ### Vue */
-var defaultLabels = {
-	first: 'First123544',
-	last: 'Last',
-	previous: 'Previous',
-	next: 'Next'
-};
 
 	Vue.component('TalkConts', {
 	

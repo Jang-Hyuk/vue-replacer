@@ -44,7 +44,9 @@ watch(
 	}
 );
 
-console.info('✅ start VueReplacer watcher !!!');
+console.info(
+	`✅ start VueReplacer watcher !!! ${config.isIeMode ? '=== IE Mode ===' : ''}}`
+);
 
 process.on('uncaughtException', err => {
 	console.error('uncaughtException', err);
