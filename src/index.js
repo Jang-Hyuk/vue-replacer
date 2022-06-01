@@ -1,7 +1,19 @@
 import watch from 'node-watch';
+import path, { sep } from 'path';
+import _ from 'lodash';
 import VueReplacer from './VueReplacer.js';
 
 const rootPath = '../';
+
+const argvValue = process.argv.slice(2)[0];
+const filePath = 'tests/vue/cTest.vue';
+
+const config = {
+	filePath: path.join(process.cwd(), filePath.replace(/\//g, sep)),
+	isEucKr: true,
+	fileSep: sep,
+	isIeMode: argvValue === 'ie'
+};
 
 // 워치 동작
 watch(
@@ -22,7 +34,9 @@ watch(
 		if (filename) {
 			// if (filename.indexOf('ftp-kr')) return false;
 			console.log(`🐟 filename provided: ${filename}`);
-			const vueReplacer = new VueReplacer(filename);
+			const vueReplacer = new VueReplacer(
+				_.chain(config).clone().set('filePath', filename).value()
+			);
 			vueReplacer.convertVueFile();
 		} else {
 			console.log('😈 filename not provided');

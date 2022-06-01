@@ -6,8 +6,11 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "start:ie": "node src/index.js ie",
     "dev": "nodemon --trace-warnings src/index.js",
-    "test": "nodemon src/runTest.js"
+    "dev:ie": "nodemon --trace-warnings src/index.js ie",
+    "test": "nodemon  --trace-warnings src/runTest.js",
+    "test:ie": "nodemon  --trace-warnings src/runTest.js ie"
   },
   "keywords": [],
   "author": "",

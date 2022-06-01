@@ -1,19 +1,35 @@
-var ttt = null;
+const ttt = null;
 $(function () {
 	Vue.use(VueAwesomeSwiper);
 	/* ### Vue */
+
+	console.log('«„«„');
+
+	console.log('hi');
+	/**
+	 * @typedef {Object} tableSchema
+	 * @property {string} [id=''] column id
+	 */
+
+	var defaultLabels = {
+		first: 'First123544',
+		last: 'Last',
+		previous: 'Previous',
+		next: 'Next'
+	};
+
 	Vue.component('TalkConts', {
-		data() {
+		data: function () {
 			return {
-				isShow: 12
+				isShow: 121
 			};
 		},
-		created() {
+		created: function () {
 			var vm = this;
 			vm.on();
 			vm.job();
 		},
-	
+
 		template: '#c-talk-conts'
 	});
 	/* ### !Vue */

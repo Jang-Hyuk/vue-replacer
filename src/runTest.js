@@ -1,11 +1,17 @@
-import path from 'path';
+import path, { sep } from 'path';
 
 import VueReplacer from './VueReplacer.js';
-import VueRestorer from './VueRestorer.js';
-// import vueConverter from './vueConverter.js';
-const targetPath = path.join(process.cwd(), 'tests/js/cTest.vue');
-const vueReplacer = new VueReplacer(targetPath, true, '\\');
-const vueRestorer = new VueRestorer(targetPath, true, '\\');
-console.log('targetPath: ', targetPath);
+
+const argvValue = process.argv.slice(2)[0];
+const filePath = 'tests/vue/cTest.vue';
+
+const config = {
+	filePath: path.join(process.cwd(), filePath.replace(/\//g, sep)),
+	isEucKr: true,
+	fileSep: sep,
+	isIeMode: argvValue === 'ie'
+};
+
+const vueReplacer = new VueReplacer(config);
+
 vueReplacer.convertVueFile();
-// vueRestorer.convertVueFile();

@@ -6,12 +6,17 @@ import VueParent from './VueParent.js';
 
 class VueReplacer extends VueParent {
 	/**
-	 * @param {string} filePath file full path (d:/temp/conts/js/*.vue)
-	 * @param {boolean} [isEuckr = true]
-	 * @param {string} [fileSep = sep]
+	 * @param {Object} config Replacer 생성자 옵션
+	 * @param {string} config.filePath file full path (d:/temp/conts/js/*.vue)
+	 * @param {boolean} [config.isEuckr = true] iconv 로 최종 내보낼 파일 인코딩 형식
+	 * @param {string} [config.fileSep = sep] window vs linux file 구분자에 따른 값
+	 * @param {string} [config.isIeMode = false] IE 모드일 경우 output file에 eslint 를 적용하여 저장. 속도가 느린 단점이 있음
 	 */
-	constructor(filePath, isEuckr = true, fileSep = sep) {
-		super();
+	constructor(config) {
+		super(config);
+
+		const { filePath, fileSep = sep, isEuckr = true } = config;
+
 		// ↓↓↓ set constructor params
 		this.vueFileFolder = _(filePath).split(fileSep).initial().join(fileSep);
 		this.vueFilePath = filePath;
@@ -93,15 +98,33 @@ class VueReplacer extends VueParent {
 
 		const srcDelimiter = 'export default';
 		const scriptConfigIndex = srcBody.indexOf(srcDelimiter);
-		const scriptOuter = srcBody.slice(0, scriptConfigIndex);
+		let scriptOuter = srcBody.slice(0, scriptConfigIndex);
+		// import 사용시 끝나는 지점 추출
+		if (scriptOuter.indexOf(" from '")) {
+			const tempIndex = scriptOuter.indexOf(';', scriptOuter.lastIndexOf(" from '"));
+			scriptOuter = scriptOuter.slice(scriptOuter.indexOf(this.NEW_LINE, tempIndex + 1));
+		}
+
+		let vueOption = _.chain(srcBody.slice(scriptConfigIndex))
+			.replace(srcDelimiter, '')
+			.trim()
+			.thru(str => str.slice(0, str.length - 1))
+			.value();
+
+		// 컴포넌트를 사용하고 있다면 해당 구간을 삭제
+		const componentIndex = vueOption.indexOf('components: {');
+		if (componentIndex) {
+			const componentsPrevContents = vueOption.slice(0, componentIndex);
+			const componentsNextIndex = vueOption.indexOf('},', componentIndex);
+
+			vueOption = componentsPrevContents.concat(
+				vueOption.slice(vueOption.indexOf(this.NEW_LINE, componentsNextIndex))
+			);
+		}
 
 		return {
 			scriptOuter,
-			vueOption: _.chain(srcBody.slice(scriptConfigIndex))
-				.replace(srcDelimiter, '')
-				.trim()
-				.thru(str => str.slice(0, str.length - 1))
-				.value()
+			vueOption
 		};
 	}
 
@@ -175,9 +198,10 @@ class VueReplacer extends VueParent {
 			return false;
 		}
 
-		// NOTE replaceVueScript vue 파일을 기반으로 js 영역 교체
+		// ANCHOR Converter
+		// replaceVueScript vue 파일을 기반으로 js 영역 교체
 		this.replaceVueScript(this.extractScript(vueFile));
-		// NOTE replaceVueTemplate vue 파일을 기반으로 html 영역 교체
+		// replaceVueTemplate vue 파일을 기반으로 html 영역 교체
 		this.replaceVueTemplate(this.extractTemplate(vueFile));
 	}
 
@@ -218,17 +242,23 @@ class VueReplacer extends VueParent {
 		if (vueOptDelimiterIndex === -1) {
 			throw new Error('유효한 vue delemiter가 존재하지 않습니다.');
 		}
-		const headerLastPositionIndex = jsFile.indexOf('{', sDelimiterIndex);
-		// Header + Vue Script + Footer 조합
-		const regExp = new RegExp(this.NEW_LINE, 'g');
-		const overwrittenJs = jsFile
-			.slice(0, headerLastPositionIndex)
-			.concat(
-				vueOption.replace(regExp, `${this.NEW_LINE}${this.TAB}`),
-				jsFile.slice(jsFile.slice(0, eDelimiterIndex).lastIndexOf('}') + 1)
-			);
 
-		this.writeFile(this.jsFileInfo.filePath, overwrittenJs);
+		const savedLine = _.chain(jsFile.split(this.NEW_LINE))
+			.find(str => str.indexOf(vueOptDelimiter) !== -1)
+			.thru(str => str.slice(0, str.lastIndexOf('{')))
+			.value();
+
+		const scriptContents = `${scriptOuter + savedLine + vueOption}`;
+
+		const headerLastPositionIndex = jsFile.indexOf(this.NEW_LINE, sDelimiterIndex);
+		// Header + Vue Script + Footer 조합
+		const overwrittenJs = jsFile.slice(0, headerLastPositionIndex).concat(
+			scriptContents,
+			// vueOption.replace(regExp, `${this.NEW_LINE}${this.TAB}`),
+			jsFile.slice(jsFile.slice(0, eDelimiterIndex).lastIndexOf('}') + 1)
+		);
+
+		this.writeFile(this.jsFileInfo.filePath, overwrittenJs, true);
 	}
 
 	/**
@@ -243,6 +273,7 @@ class VueReplacer extends VueParent {
 		const { filePath, indentDepth, positionId } = this.htmlFileInfo;
 		// 덮어쓸 html 파일을 읽음
 		const htmlFile = await this.getFile(filePath);
+		// return;
 		if (!htmlFile.length) {
 			throw new Error('html file이 존재하지 않음');
 		}

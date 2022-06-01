@@ -15,6 +15,7 @@
 				<div class="qmeet_banner__pagination"></div>
 				<!-- 페이지네이션영역 -->
 			</div>
+			<comp-temp></comp-temp>
 			<div class="cs_inperson__mylist_reply_master_wrap">
 				<div class="cs_inperson__mylist_reply_master_title">
 					<span class="cs_inperson__mylist_reply_master_ico_reply">[관리자 답변]</span>
@@ -38,7 +39,11 @@
 	</div>
 </template>
 
-<script id="photoPopup" isSync="1" isTemplate="1">
+<script id="photoPopup" fileSrc="../js/cTest.js" isSync="1" isTemplate="1">
+import CompTemp from './CompTemp.vue';
+
+console.log('허허');
+
 console.log('hi');
 /**
  * @typedef {Object} tableSchema
@@ -46,16 +51,17 @@ console.log('hi');
  */
 
 var defaultLabels = {
-	first: 'First',
+	first: 'First123544',
 	last: 'Last',
 	previous: 'Previous',
 	next: 'Next'
 };
 
 export default {
+	components: { CompTemp },
 	data() {
 		return {
-			isShow: 12
+			isShow: 121
 		};
 	},
 	created() {
