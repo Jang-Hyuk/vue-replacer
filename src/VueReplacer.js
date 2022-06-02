@@ -11,16 +11,18 @@ class VueReplacer extends VueParent {
 	 * @param {boolean} [config.isEuckr = true] iconv 로 최종 내보낼 파일 인코딩 형식
 	 * @param {string} [config.fileSep = sep] window vs linux file 구분자에 따른 값
 	 * @param {string} [config.isIeMode = false] IE 모드일 경우 output file에 eslint 를 적용하여 저장. 속도가 느린 단점이 있음
+	 * @param {string} config.adminFolder admin 폴더명. IE 모드 동작시 해당 폴더 아래에 존재하는 js만 유효한 걸로 판단
 	 */
 	constructor(config) {
 		super(config);
 
-		const { filePath, fileSep = sep, isEuckr = true } = config;
+		const { filePath, fileSep = sep, isEuckr = true, adminFolder } = config;
 
 		// ↓↓↓ set constructor params
 		this.vueFileFolder = _(filePath).split(fileSep).initial().join(fileSep);
 		this.vueFilePath = filePath;
 		this.isEuckr = isEuckr;
+		this.adminFolder = adminFolder;
 
 		// ↓↓↓ set dynamic instance value
 		const fileName = filePath.slice(0, filePath.lastIndexOf('.'));
@@ -174,6 +176,52 @@ class VueReplacer extends VueParent {
 		return realContents;
 	}
 
+	/**
+	 * Extract *.Vue Template
+	 * @alias Template Converter
+	 * @param {string} vueFile
+	 * @returns {string}
+	 */
+	extractTemplate(vueFile) {
+		const endDelimiter = '<script';
+		const chunkStartDelimiter = '<template';
+		const chunkEndDelimiter = '</template>';
+
+		const vueOriginalTpl = _.chain(vueFile.slice(0, vueFile.indexOf(endDelimiter)))
+			.thru(tSrc => tSrc.slice(0, tSrc.lastIndexOf(chunkEndDelimiter)))
+			.thru(tSrc => tSrc.slice(tSrc.indexOf(chunkStartDelimiter)))
+			.value();
+
+		const realTplStartIndex = vueOriginalTpl.indexOf('>');
+
+		// template(tpl) 시작 tag 닫는 위치부터 template 종료 tag 범위 짜름
+		const tplHeader = vueOriginalTpl.slice(0, realTplStartIndex);
+		const tplHeaderInfo = this.toDictionary(tplHeader);
+		const tplBody = vueOriginalTpl.slice(realTplStartIndex + 1);
+
+		if (tplHeaderInfo.isSync !== '1') {
+			return false;
+		}
+
+		let realContents = tplBody;
+		if (tplHeaderInfo.isTemplate === '1') {
+			realContents = `${this.NEW_LINE}<template v-cloak id="${tplHeaderInfo.id}">${tplBody}${this.NEW_LINE}</template>`;
+			this.htmlFileInfo.isTemplate = true;
+		}
+
+		// 파일 경로가 있다면 경로 수정
+		if (tplHeaderInfo.fileSrc) {
+			this.htmlFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
+		}
+
+		// this.htmlFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
+		this.htmlFileInfo.indentDepth = tplHeaderInfo.depth
+			? parseInt(tplHeaderInfo.depth, 10)
+			: 0;
+		this.htmlFileInfo.positionId = tplHeaderInfo.id ?? '';
+		return realContents;
+	}
+
 	async getFile(filePath) {
 		let file = '';
 		if (this.isEuckr) {
@@ -201,9 +249,9 @@ class VueReplacer extends VueParent {
 		// ANCHOR Converter
 		// replaceVueScript vue 파일을 기반으로 js 영역 교체
 		// this.extractScript(vueFile);
-		this.replaceVueScript(this.extractScript(vueFile));
-		// replaceVueTemplate vue 파일을 기반으로 html 영역 교체
-		this.replaceVueTemplate(this.extractTemplate(vueFile));
+		// this.replaceVueScript(this.extractScript(vueFile));
+		// // replaceVueTemplate vue 파일을 기반으로 html 영역 교체
+		// this.replaceVueTemplate(this.extractTemplate(vueFile));
 	}
 
 	/**
@@ -253,13 +301,14 @@ class VueReplacer extends VueParent {
 
 		const headerLastPositionIndex = jsFile.indexOf(this.NEW_LINE, sDelimiterIndex);
 		// Header + Vue Script + Footer 조합
-		const overwrittenJs = jsFile.slice(0, headerLastPositionIndex).concat(
-			scriptContents,
-			// vueOption.replace(regExp, `${this.NEW_LINE}${this.TAB}`),
-			jsFile.slice(jsFile.slice(0, eDelimiterIndex).lastIndexOf('}') + 1)
-		);
+		const overwrittenJs = jsFile
+			.slice(0, headerLastPositionIndex)
+			.concat(
+				scriptContents,
+				jsFile.slice(jsFile.slice(0, eDelimiterIndex).lastIndexOf('}') + 1)
+			);
 
-		this.writeFile(this.jsFileInfo.filePath, overwrittenJs, true);
+		this.writeFile(this.jsFileInfo.filePath, overwrittenJs);
 	}
 
 	/**
