@@ -1,7 +1,11 @@
 import watch from 'node-watch';
 import path, { sep } from 'path';
 import _ from 'lodash';
+import { config as dotConfig } from 'dotenv';
+
 import VueReplacer from './VueReplacer.js';
+
+dotConfig();
 
 const rootPath = '../';
 
@@ -12,7 +16,8 @@ const config = {
 	filePath: path.join(process.cwd(), filePath.replace(/\//g, sep)),
 	isEucKr: true,
 	fileSep: sep,
-	isIeMode: argvValue === 'ie'
+	isIeMode: argvValue === 'ie',
+	adminFolder: process.env.ADMIN_FOLDER
 };
 
 // 워치 동작
@@ -45,7 +50,7 @@ watch(
 );
 
 console.info(
-	`✅ start VueReplacer watcher !!! ${config.isIeMode ? '=== IE Mode ===' : ''}}`
+	`✅ start VueReplacer watcher !!! ${config.isIeMode ? '👹👹👹 IE Mode 💩💩💩' : ''}`
 );
 
 process.on('uncaughtException', err => {

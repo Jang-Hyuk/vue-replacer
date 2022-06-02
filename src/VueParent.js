@@ -99,11 +99,33 @@ class VueParent {
 	}
 
 	/**
+	 * 조건에 따라 파일 교체
+	 * @param {string} filePath
+	 * @param {string} contents
+	 */
+	writeFile(filePath, contents = '') {
+		const isJsFile =
+			filePath.slice(filePath.lastIndexOf('.')).toLocaleLowerCase() === '.js';
+		// IE 모드이면서 Js 파일일 경우 bak 파일에 인코딩 과정을 거친 후 저장
+		if (isJsFile) {
+			if (this.isIeMode && filePath.includes(this.adminFolder)) {
+				return this.writeEncodeJsFile(filePath, contents);
+			}
+			// Js 파일일 경우 파일에 저장 후 해당 파일을 인코딩 과정을 거친 후 저장
+			this.writePureFile(filePath, contents);
+			return this.writeEncodeJsFile(filePath, contents);
+		}
+
+		// 그냥 저장
+		this.writePureFile(filePath, contents);
+	}
+
+	/**
 	 * IE용. File을 저장한 후 ESLint 과정을 추가 수행. CLI eslint 과정에 시간 소요가 큼(2초 이상)
 	 * @param {string} filePath
 	 * @param {string} contents utf-8
 	 */
-	writeTempJsFile(filePath, contents = '') {
+	writeEncodeJsFile(filePath, contents = '') {
 		// 1. IE + js 파일일 경우 UTF-8로 임시 파일 저장.
 		const tempFilePath = _.chain(filePath)
 			.split('.')
@@ -130,7 +152,7 @@ class VueParent {
 							console.log('🚀 ~ file: VueParent.js ~ line 137 ~ rmErr', rmErr);
 						}
 					});
-					this.writeFile(filePath, fileText);
+					this.writePureFile(filePath, fileText);
 				});
 			});
 		});
@@ -140,34 +162,27 @@ class VueParent {
 	 * 해당 경로에 파일을 덮어씀
 	 * @param {string} filePath 경로
 	 * @param {string} contents 덮어쓸 file text
-	 * @param {boolean} [isEnabledEncoding=false] (Js 파일만 가능) 인코딩 추가로 처리할 수 있는지 여부
 	 */
-	writeFile(filePath, contents = '', isEnabledEncoding = false) {
-		if (this.isIeMode && isEnabledEncoding) {
-			return this.writeTempJsFile(filePath, contents);
-		}
-
+	writePureFile(filePath, contents = '') {
 		if (this.isEuckr) {
-			fs.writeFile(
-				filePath,
-				iconv.encode(contents, 'euc-kr'),
-				{
-					encoding: 'binary'
-				},
-				err => {
-					if (err) {
-						console.error(err);
+			return new Promise((resolve, reject) => {
+				fs.writeFile(
+					filePath,
+					iconv.encode(contents, 'euc-kr'),
+					{
+						encoding: 'binary'
+					},
+					err => {
+						if (err) {
+							reject(err);
+						}
+
+						resolve(true);
 					}
-					// // FIXME (인코딩이 안맞음) IE용. File을 저장한 후 ESLint 과정을 추가로 할지 여부. 시간 소요가 큼(2초 이상)
-					// if (this.isIeMode && isEnabledEncoding) {
-					// 	console.log('fix');
-					// 	execute(`eslint --fix ${filePath}`);
-					// }
-				}
-			);
-		} else {
-			// FIXME utf-8 구현
+				);
+			});
 		}
+		// FIXME utf-8 구현
 	}
 }
 

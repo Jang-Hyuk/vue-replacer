@@ -1,5 +1,6 @@
 # ignore IDE/hidden/OS cache files
 .idea
 .vscode
+.env
 
 node_modules
