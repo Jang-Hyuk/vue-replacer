@@ -4,7 +4,7 @@
 - [ O ] (Encoding) IE 일 경우 ESLint 전처리 후 저장
 - [ O ] (Replace) Js Script Outer 영역 Replace
 - [ O ] (Replace) Js import 영역 제거 후 replace
-- [ ] (Replace) Style - replace
+- [ O ] (Replace) Style - replace
 - [ ] (Init) Watcher
 - [ ] (Restore) Js
 - [ ] (Resotre) Html & Php

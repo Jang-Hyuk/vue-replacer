@@ -1,6 +1,6 @@
 <?php
 /**
- * #6870 당일 빠른대화 첫 방문시 소개글 수정 & 위로 올리기
+ * #6870 ?떦?씪 鍮좊Ⅸ????솕 泥? 諛⑸Ц?떆 ?냼媛쒓?? ?닔?젙 & ?쐞濡? ?삱由ш린
  */
 if (!defined('_CLUB5678_')) exit;
 $dbC_FASTCONTS = &func_getDBClass("c_fast_conts");
@@ -8,13 +8,13 @@ $memNo = $gCCV['NO'];
 
 /**
  * CALL c_fast_conts.p_pm_chat_mem_today_login_chk (
- * memNo	INT	# 회원번호
+ * memNo	INT	# ?쉶?썝踰덊샇
  * )
  * > RETURN
  * [0]
- * chk_today	금일접속여부 [y:오늘접속O, n:오늘접속X] ==> n일 경우 팝업 오픈 ----->안씁니다 localstorage 활용으로 변경
- * chat_conts	소개글
- * chk_data	소개글등록여부 [y:소개글O, n:소개글X]
+ * chk_today	湲덉씪?젒?냽?뿬遺? [y:?삤?뒛?젒?냽O, n:?삤?뒛?젒?냽X] ==> n?씪 寃쎌슦 ?뙘?뾽 ?삤?뵂 ----->?븞?봺?땲?떎 localstorage ?솢?슜?쑝濡? 蹂?寃?
+ * chat_conts	?냼媛쒓??
+ * chk_data	?냼媛쒓???벑濡앹뿬遺? [y:?냼媛쒓??O, n:?냼媛쒓??X]
  */
 $row = $dbC_FASTCONTS->proExecuteSQL("CALL c_fast_conts.p_pm_chat_mem_today_login_chk ('$memNo')");
 $pmTodayInfo = $row[0][0];
@@ -26,52 +26,106 @@ $pmTodayInfo = $row[0][0];
 	}
 </style>
 
-<!-- #7826 빠른대화 사진등록 활성화 팝업 추가 끝 -->
+<!-- style ### Vue cssPhotoPopup -->
+	<style>
+		table td {
+			word-wrap: break-word !important;
+			word-break: break-word !important;
+		}
+		
+		.cs_inperson {
+			margin: 94px 0 11;
+		}
+		
+		/* #8072 자주하는질문(FAQ) */
+		.cs_inperson__faq {
+			padding: 0 0 60px 0;
+		}
+		
+		.hello {
+			color: aliceblue;
+		}
+		
+		/* #8072 자주하는질문(FAQ) 끝 */
+	</style>
+<!-- style ### !Vue cssPhotoPopup -->
+
+<!-- #7826 鍮좊Ⅸ????솕 ?궗吏꾨벑濡? ?솢?꽦?솕 ?뙘?뾽 異붽?? ?걹 -->
 <style>
 	.qmeet_banner {
 		position: relative;
 		z-index: 1110;
 	}
 </style>
-<!-- 그것이 알고 싶다 ### Vue photoPopup ### -->
-			<div v-if="isShow" id="photoPopup" class="qmeet_pop_wrap qMeet_pop_wrap">
-				<div class="qmeet_banner">
-					<!-- 배너영역 슬라이드-->
-					<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
-					<div class="qmeet_banner__wrap">
-						<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
-						<div class="qmeet_banner__pagination"></div>
-						<!-- 페이지네이션영역 -->
-					</div>
-					<comp-temp></comp-temp>
-					<div class="cs_inperson__mylist_reply_master_wrap">
-						<div class="cs_inperson__mylist_reply_master_title">
-							<span class="cs_inperson__mylist_reply_master_ico_reply">[관리자 답변]</span>
-							<span class="cs_inperson__mylist_reply_master_date">{{
-								inquiryInfo.re_date
-							}}</span>
-						</div>
-						<div class="cs_inperson__mylist_reply_master_txt_wrap">
-							<pre class="cs_inperson__mylist_reply_master_txt">
-													{{ inquiryInfo.response }}
-												</pre>
-						</div>
-					</div>
-					<pre class="cs_inperson__mylist_reply_txt_detail">
-						{{ inquiryInfo.contents }}
-								</pre>
-					<template slot="hi">
-						<div>슬롯이당께</div>
-					</template>
+<!-- ### Vue photoPopup ### -->
+	<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
+		<div class="qmeet_banner">
+			<!-- 배너영역 슬라이드-->
+			<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
+			<div class="qmeet_banner__wrap">
+				<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
+				<div class="qmeet_banner__pagination"></div>
+				<!-- 페이지네이션영역 -->
+			</div>
+			<comp-temp></comp-temp>
+			<div class="cs_inperson__mylist_reply_master_wrap">
+				<div class="cs_inperson__mylist_reply_master_title">
+					<span class="cs_inperson__mylist_reply_master_ico_reply">[관리자 답변]</span>
+					<span class="cs_inperson__mylist_reply_master_date">{{
+						inquiryInfo.re_date
+					}}</span>
+				</div>
+				<div class="cs_inperson__mylist_reply_master_txt_wrap">
+					<pre class="cs_inperson__mylist_reply_master_txt">
+											{{ inquiryInfo.response }}
+										</pre>
 				</div>
 			</div>
+			<pre class="cs_inperson__mylist_reply_txt_detail">
+				{{ inquiryInfo.contents }}
+						</pre>
+			<template slot="hi">
+				<div>슬롯이당께</div>
+			</template>
+		</div>
+	</div>
 <!-- ### !Vue photoPopup ### -->
 <script>
 	var __varsInsChat = {
-		// 소개글 등록 여부
+		// ?냼媛쒓?? ?벑濡? ?뿬遺?
 		hasIntro: "<?= $pmTodayInfo['chk_data'] ?>" === 'y',
 		chatConts: "<?= preg_replace('/\r\n|\r|\n/', '', $pmTodayInfo['chat_conts']) ?>"
 	}
+
+
+		/* ### Vue JsPhotoPopup */
+var defaultLabels = {
+	first: 'First',
+	last: 'Last',
+	previous: 'Previous',
+	next: 'Next'
+};
+
+	Vue.component('TalkConts', {
+	
+	data() {
+		return {
+			isShow: 1212,
+			한글: '테스트1'
+		};
+	},
+	created() {
+		var vm = this;
+		vm.on();
+		vm.job();
+	},
+
+	template: '#c-talk-conts'
+});
+		/* ### !Vue JsPhotoPopup */
+
+
+
 </script>
 
 <script src="/cont/pmchat/js/insChatConts.js?ver=<?= $csMbBase->fileToDate($_SERVER['DOCUMENT_ROOT'] . '/cont/pmchat/js/insChatConts.js') ?>"></script>

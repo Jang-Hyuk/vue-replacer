@@ -6,7 +6,7 @@
     "dist",
     "coverage",
     "cTest.js",
-    "*.bak.js"
+    "*.temp.js"
   ],
   "watch": [
     "."

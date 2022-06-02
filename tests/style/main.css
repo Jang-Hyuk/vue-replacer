@@ -1,0 +1,28 @@
+.main {
+	margin: 94px 0 0;
+}
+
+
+/* ### Vue photoPopupCss */
+table td {
+	word-wrap: break-word !important;
+	word-break: break-word !important;
+}
+
+.cs_inperson {
+	margin: 94px 0 10;
+}
+
+/* #8072 자주하는질문(FAQ) */
+.cs_inperson__faq {
+	padding: 0 0 60px 0;
+}
+
+.hello {
+	color: aliceblue;
+}
+
+/* #8072 자주하는질문(FAQ) 끝 */
+/* ### !Vue photoPopupCss */
+
+

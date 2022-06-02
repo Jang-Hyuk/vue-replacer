@@ -117,7 +117,7 @@ class VueParent {
 		}
 
 		// 그냥 저장
-		this.writePureFile(filePath, contents);
+		return this.writePureFile(filePath, contents);
 	}
 
 	/**
@@ -130,29 +130,30 @@ class VueParent {
 		const tempFilePath = _.chain(filePath)
 			.split('.')
 			.initial()
-			.push('bak', 'js')
+			.push('temp', 'js')
 			.join('.')
 			.value();
 
-		fs.writeFile(tempFilePath, contents, err => {
-			if (err) {
-				console.error(err);
-			}
-			// 2. 해당 파일 eslint 적용
-			execute(`eslint --fix ${tempFilePath}`, (error, result, stderr) => {
-				if (stderr) {
-					console.log('🚀 ~ file: VueParent.js ~ line 126 ~ execute eslint', stderr);
-					return false;
+		return new Promise((resolve, reject) => {
+			fs.writeFile(tempFilePath, contents, err => {
+				if (err) {
+					reject(err);
 				}
+				// 2. 해당 파일 eslint 적용
+				execute(`eslint --fix ${tempFilePath}`, (error, result, stderr) => {
+					if (stderr) {
+						reject(stderr);
+					}
 
-				// 3. 해당 파일 다시 읽어 들여 파일씀
-				VueParent.readUtfFile(tempFilePath).then(fileText => {
-					fs.rm(tempFilePath, rmErr => {
-						if (rmErr) {
-							console.log('🚀 ~ file: VueParent.js ~ line 137 ~ rmErr', rmErr);
-						}
+					// 3. 해당 파일 다시 읽어 들여 파일씀
+					VueParent.readUtfFile(tempFilePath).then(fileText => {
+						fs.rm(tempFilePath, rmErr => {
+							if (rmErr) {
+								reject(rmErr);
+							}
+						});
+						return this.writePureFile(filePath, fileText);
 					});
-					this.writePureFile(filePath, fileText);
 				});
 			});
 		});

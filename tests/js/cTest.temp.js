@@ -11,7 +11,7 @@ Vue.component('TalkConts', {
 	data() {
 		return {
 			isShow: 1212,
-			�ѱ�: '�׽�Ʈ1'
+			한글: '테스트1'
 		};
 	},
 	created() {

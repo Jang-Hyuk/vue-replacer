@@ -3,10 +3,10 @@
 	id="photoPopup"
 	isTemplate="0"
 	isSync="1"
-	depth="3"
+	depth="1"
 	fileSrc="../html/cTest.html"
 >
-	<div v-if="isShow" id="photoPopup" class="qmeet_pop_wrap qMeet_pop_wrap">
+	<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
 		<div class="qmeet_banner">
 			<!-- 배너영역 슬라이드-->
 			<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
@@ -39,9 +39,9 @@
 	</div>
 </template>
 
-<script id="photoPopup" fileSrc="../js/cTest.js" isSync="1" isTemplate="1">
+<script id="JsPhotoPopup" fileSrc="../js/cTest.js" isSync="1" isTemplate="1">
 var defaultLabels = {
-	first: 'First123544',
+	first: 'First',
 	last: 'Last',
 	previous: 'Previous',
 	next: 'Next'
@@ -51,8 +51,8 @@ export default {
 	components: { CompTemp },
 	data() {
 		return {
-			isShow: 121,
-			한글: '테스트?'
+			isShow: 1212,
+			한글: '테스트1'
 		};
 	},
 	created() {
@@ -64,3 +64,31 @@ export default {
 	template: '#c-talk-conts'
 };
 </script>
+
+<style
+	id="cssPhotoPopup"
+	isSync="1"
+	isTemplate="1"
+	depth="1"
+	fileSrc="../html/cTest.html"
+>
+table td {
+	word-wrap: break-word !important;
+	word-break: break-word !important;
+}
+
+.cs_inperson {
+	margin: 94px 0 11;
+}
+
+/* #8072 자주하는질문(FAQ) */
+.cs_inperson__faq {
+	padding: 0 0 60px 0;
+}
+
+.hello {
+	color: aliceblue;
+}
+
+/* #8072 자주하는질문(FAQ) 끝 */
+</style>

@@ -1,8 +1,20 @@
+/* eslint-disable no-param-reassign */
 import path, { sep } from 'path';
 
 import _ from 'lodash';
 
 import VueParent from './VueParent.js';
+
+/**
+ * @typedef {object} replaceTargetFileInfo
+ * @property {string} filePath
+ * @property {boolean} [isTemplate=false] wrapping 여부
+ * @property {boolean} [isSync=false] 덮어쓰기 여부
+ * @property {string|object} contents wrapping 여부
+ * @property {string} positionId 교체 대상 Id
+ * @property {number} indentDepth 들여쓰기 Tab 수
+ * @property {Function} task 덮어쓸 로직을 가지고 있는 비동기 함수 명
+ */
 
 class VueReplacer extends VueParent {
 	/**
@@ -27,19 +39,39 @@ class VueReplacer extends VueParent {
 		// ↓↓↓ set dynamic instance value
 		const fileName = filePath.slice(0, filePath.lastIndexOf('.'));
 
-		/** vue template 영역을 변환하여 저장할  */
-		this.htmlFileInfo = {
+		/** @type {replaceTargetFileInfo} vue template 영역을 변환하여 저장할  */
+		this.tplFileInfo = {
 			filePath: `${fileName}.html`,
-			indentDepth: 0,
 			isTemplate: false,
-			positionId: ''
+			isSync: false,
+			contents: '',
+			positionId: '',
+			indentDepth: 0,
+			task: this.replaceVueTemplate
 		};
 
-		this.jsFileInfo = {
+		/** @type {replaceTargetFileInfo}  */
+		this.scriptFileInfo = {
+			filePath: `${fileName}.js`,
 			/** Template일 경우 Vue.component 아닐 경우 new Vue 를 delimiter 검색 조건으로 함 */
 			isTemplate: false,
+			isSync: false,
+			contents: {},
+			positionId: '',
 			/** vue script 영역을 변환하여 저장할 파일 */
-			filePath: `${fileName}.js`
+			task: this.replaceVueScript
+		};
+
+		/** @type {replaceTargetFileInfo} vue script 영역을 변환하여 저장할 파일 */
+		this.styleFileInfo = {
+			filePath: '',
+			/** style tag wrapping 여부 */
+			isTemplate: false,
+			isSync: false,
+			contents: '',
+			indentDepth: 0,
+			positionId: '',
+			task: this.replaceVueStyle
 		};
 	}
 
@@ -87,16 +119,21 @@ class VueReplacer extends VueParent {
 		const srcHeaderInfo = this.toDictionary(srcHeader);
 		const srcBody = vueOriginalScript.slice(realScriptStartIndex + 1);
 
-		if (srcHeaderInfo.isSync !== '1') {
+		const isSync = srcHeaderInfo.isSync === '1';
+		this.scriptFileInfo.isSync = isSync;
+
+		if (!isSync) {
 			return false;
 		}
 
-		this.jsFileInfo.isTemplate = srcHeaderInfo.isTemplate === '1';
+		this.scriptFileInfo.isTemplate = srcHeaderInfo.isTemplate === '1';
 
 		// 파일 경로가 있다면 경로 수정
 		if (srcHeaderInfo.fileSrc) {
-			this.jsFileInfo.filePath = path.join(this.vueFileFolder, srcHeaderInfo.fileSrc);
+			this.scriptFileInfo.filePath = path.join(this.vueFileFolder, srcHeaderInfo.fileSrc);
 		}
+
+		this.scriptFileInfo.positionId = srcHeaderInfo.id ?? '';
 
 		const srcDelimiter = 'export default';
 		const scriptConfigIndex = srcBody.indexOf(srcDelimiter);
@@ -153,26 +190,29 @@ class VueReplacer extends VueParent {
 		const tplHeaderInfo = this.toDictionary(tplHeader);
 		const tplBody = vueOriginalTpl.slice(realTplStartIndex + 1);
 
-		if (tplHeaderInfo.isSync !== '1') {
+		const isSync = tplHeaderInfo.isSync === '1';
+		this.tplFileInfo.isSync = isSync;
+
+		if (!isSync) {
 			return false;
 		}
 
 		let realContents = tplBody;
 		if (tplHeaderInfo.isTemplate === '1') {
 			realContents = `${this.NEW_LINE}<template v-cloak id="${tplHeaderInfo.id}">${tplBody}${this.NEW_LINE}</template>`;
-			this.htmlFileInfo.isTemplate = true;
+			this.tplFileInfo.isTemplate = true;
 		}
 
 		// 파일 경로가 있다면 경로 수정
 		if (tplHeaderInfo.fileSrc) {
-			this.htmlFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
+			this.tplFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
 		}
 
 		// this.htmlFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
-		this.htmlFileInfo.indentDepth = tplHeaderInfo.depth
+		this.tplFileInfo.indentDepth = tplHeaderInfo.depth
 			? parseInt(tplHeaderInfo.depth, 10)
 			: 0;
-		this.htmlFileInfo.positionId = tplHeaderInfo.id ?? '';
+		this.tplFileInfo.positionId = tplHeaderInfo.id ?? '';
 		return realContents;
 	}
 
@@ -182,43 +222,52 @@ class VueReplacer extends VueParent {
 	 * @param {string} vueFile
 	 * @returns {string}
 	 */
-	extractTemplate(vueFile) {
-		const endDelimiter = '<script';
-		const chunkStartDelimiter = '<template';
-		const chunkEndDelimiter = '</template>';
+	extractStyle(vueFile) {
+		const chunkStartDelimiter = '<style';
+		const chunkEndDelimiter = '</style>';
 
-		const vueOriginalTpl = _.chain(vueFile.slice(0, vueFile.indexOf(endDelimiter)))
-			.thru(tSrc => tSrc.slice(0, tSrc.lastIndexOf(chunkEndDelimiter)))
-			.thru(tSrc => tSrc.slice(tSrc.indexOf(chunkStartDelimiter)))
-			.value();
+		const startRangeIndex = vueFile.lastIndexOf(chunkStartDelimiter);
+		const endRangeIndex = vueFile.lastIndexOf(chunkEndDelimiter);
 
-		const realTplStartIndex = vueOriginalTpl.indexOf('>');
+		const vueOriginalStyle = vueFile.slice(startRangeIndex, endRangeIndex);
+		const realStyleStartIndex = vueOriginalStyle.indexOf('>');
 
 		// template(tpl) 시작 tag 닫는 위치부터 template 종료 tag 범위 짜름
-		const tplHeader = vueOriginalTpl.slice(0, realTplStartIndex);
-		const tplHeaderInfo = this.toDictionary(tplHeader);
-		const tplBody = vueOriginalTpl.slice(realTplStartIndex + 1);
+		const styleHeader = vueOriginalStyle.slice(0, realStyleStartIndex);
+		const styleHeaderInfo = this.toDictionary(styleHeader);
+		let styleBody = vueOriginalStyle
+			.slice(realStyleStartIndex + 1)
+			.split(this.NEW_LINE)
+			.join(this.NEW_LINE + this.TAB);
 
-		if (tplHeaderInfo.isSync !== '1') {
+		styleBody = _(styleBody.split(this.NEW_LINE)).initial().join(this.NEW_LINE);
+
+		const isSync = styleHeaderInfo.isSync === '1';
+		this.styleFileInfo.isSync = isSync;
+
+		if (!isSync) {
 			return false;
 		}
 
-		let realContents = tplBody;
-		if (tplHeaderInfo.isTemplate === '1') {
-			realContents = `${this.NEW_LINE}<template v-cloak id="${tplHeaderInfo.id}">${tplBody}${this.NEW_LINE}</template>`;
-			this.htmlFileInfo.isTemplate = true;
+		let realContents = styleBody;
+		if (styleHeaderInfo.isTemplate === '1') {
+			realContents = `${this.NEW_LINE}<style>${styleBody}${this.NEW_LINE}</style>`;
+			this.styleFileInfo.isTemplate = true;
 		}
 
 		// 파일 경로가 있다면 경로 수정
-		if (tplHeaderInfo.fileSrc) {
-			this.htmlFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
+		if (styleHeaderInfo.fileSrc) {
+			this.styleFileInfo.filePath = path.join(
+				this.vueFileFolder,
+				styleHeaderInfo.fileSrc
+			);
 		}
 
 		// this.htmlFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
-		this.htmlFileInfo.indentDepth = tplHeaderInfo.depth
-			? parseInt(tplHeaderInfo.depth, 10)
+		this.styleFileInfo.indentDepth = styleHeaderInfo.depth
+			? parseInt(styleHeaderInfo.depth, 10)
 			: 0;
-		this.htmlFileInfo.positionId = tplHeaderInfo.id ?? '';
+		this.styleFileInfo.positionId = styleHeaderInfo.id ?? '';
 		return realContents;
 	}
 
@@ -247,36 +296,68 @@ class VueReplacer extends VueParent {
 		}
 
 		// ANCHOR Converter
-		// replaceVueScript vue 파일을 기반으로 js 영역 교체
-		// this.extractScript(vueFile);
-		// this.replaceVueScript(this.extractScript(vueFile));
-		// // replaceVueTemplate vue 파일을 기반으로 html 영역 교체
-		// this.replaceVueTemplate(this.extractTemplate(vueFile));
+		this.tplFileInfo.contents = this.extractTemplate(vueFile);
+		this.scriptFileInfo.contents = this.extractScript(vueFile);
+		this.styleFileInfo.contents = this.extractStyle(vueFile);
+
+		const fileConfigs = [this.tplFileInfo, this.scriptFileInfo, this.styleFileInfo];
+
+		_.chain(fileConfigs)
+			.filter(config => config.isSync && config.filePath.length)
+			.groupBy('filePath')
+			.forEach(configList => this.replaceEachFiles(configList))
+			.value();
+	}
+
+	/**
+	 * file 교체 pipe로 연결해서 처리
+	 * @param {replaceTargetFileInfo[]} fileConfigList
+	 */
+	async replaceEachFiles(fileConfigList = []) {
+		await fileConfigList.reduce((prevTask, currTask, index) => {
+			if (index + 1 === fileConfigList.length) {
+				return prevTask
+					.then(results => currTask.task.call(this, currTask.contents, results))
+					.then(fileTxt => this.writeFile(currTask.filePath, fileTxt));
+			}
+			return prevTask.then(results =>
+				currTask.task.call(this, currTask.contents, results)
+			);
+		}, Promise.resolve());
 	}
 
 	/**
 	 * Vue script 안의 내용을 동일 {fileName}.js 영역 교체 수행
 	 * @alias Js Converter
 	 * @param {{scriptOuter: string, vueOption: string}} vueScriptInfo
+	 * @param {string} [targetFile]
 	 */
-	async replaceVueScript(vueScriptInfo) {
+	async replaceVueScript(vueScriptInfo, targetFile = '') {
 		if (_.isEmpty(vueScriptInfo)) {
 			throw new Error('vueScript가 비어있음');
 		}
 
 		const { scriptOuter, vueOption } = vueScriptInfo;
 
-		// 덮어쓸 js 파일을 읽음
-		const jsFile = await this.getFile(this.jsFileInfo.filePath);
+		const { filePath, positionId } = this.scriptFileInfo;
 
-		if (!jsFile.length) {
+		// 덮어쓸 js 파일을 읽음
+		if (targetFile.length === 0) {
+			if (filePath.length === 0) {
+				return false;
+			}
+
+			targetFile = await this.getFile(filePath);
+		}
+
+		if (!targetFile.length) {
 			throw new Error('js file이 존재하지 않음');
 		}
 		// Vue Deleimiter Range 에 해당하는 부분을 추출
 		const { sDelimiterIndex, eDelimiterIndex } = VueParent.sliceString(
-			jsFile,
-			this.vueStartDelimiter,
-			this.vueEndDelimiter
+			targetFile,
+			`${this.vueStartDelimiter} ${positionId}`,
+			`${this.vueEndDelimiter} ${positionId}`
 		);
 		// Vue Delimiter에 해당하는 부분이 없다면 종료
 		if (_.includes([sDelimiterIndex, eDelimiterIndex], -1)) {
@@ -285,53 +366,62 @@ class VueReplacer extends VueParent {
 			);
 		}
 		// js파일에 덮어쓸 최초 시작 포인트 index를 읽어옴 => (new Vue({), Vue.component('any', {)) 이런식으로 { 가 시작점
-		const vueOptDelimiter = this.jsFileInfo.isTemplate ? 'Vue.component' : 'new Vue';
+		const vueOptDelimiter = this.scriptFileInfo.isTemplate ? 'Vue.component' : 'new Vue';
 
-		const vueOptDelimiterIndex = jsFile.indexOf(vueOptDelimiter);
+		const vueOptDelimiterIndex = targetFile.indexOf(vueOptDelimiter);
 		if (vueOptDelimiterIndex === -1) {
 			throw new Error('유효한 vue delemiter가 존재하지 않습니다.');
 		}
 
-		const savedLine = _.chain(jsFile.split(this.NEW_LINE))
+		const savedLine = _.chain(targetFile.split(this.NEW_LINE))
 			.find(str => str.indexOf(vueOptDelimiter) !== -1)
 			.thru(str => str.slice(0, str.lastIndexOf('{')))
 			.value();
 
 		const scriptContents = `${scriptOuter + savedLine + vueOption}`;
 
-		const headerLastPositionIndex = jsFile.indexOf(this.NEW_LINE, sDelimiterIndex);
+		const headerLastPositionIndex = targetFile.indexOf(this.NEW_LINE, sDelimiterIndex);
 		// Header + Vue Script + Footer 조합
-		const overwrittenJs = jsFile
+		const overwrittenJs = targetFile
 			.slice(0, headerLastPositionIndex)
 			.concat(
 				scriptContents,
-				jsFile.slice(jsFile.slice(0, eDelimiterIndex).lastIndexOf('}') + 1)
+				targetFile.slice(targetFile.slice(0, eDelimiterIndex).lastIndexOf('}') + 1)
 			);
 
-		this.writeFile(this.jsFileInfo.filePath, overwrittenJs);
+		return overwrittenJs;
 	}
 
 	/**
 	 * Vue template 안의 내용을 지정된 {fileName}.html 영역 교체 수행
 	 * @param {string} vueTemplate
-	 * @returns {any}
+	 * @param {string} [targetFiles]
 	 */
-	async replaceVueTemplate(vueTemplate) {
+	async replaceVueTemplate(vueTemplate, targetFile = '') {
 		if (_.isEmpty(vueTemplate)) {
 			throw new Error('vueTemplate이 비어있음');
 		}
-		const { filePath, indentDepth, positionId } = this.htmlFileInfo;
+
+		const { filePath, indentDepth, positionId } = this.tplFileInfo;
 		// 덮어쓸 html 파일을 읽음
-		const htmlFile = await this.getFile(filePath);
+		if (targetFile.length === 0) {
+			if (filePath.length === 0) {
+				return false;
+			}
+
+			// eslint-disable-next-line no-param-reassign
+			targetFile = await this.getFile(filePath);
+		}
+
 		// return;
-		if (!htmlFile.length) {
+		if (!targetFile.length) {
 			throw new Error('html file이 존재하지 않음');
 		}
 		// Vue Deleimiter Range 에 해당하는 부분을 추출
 		const { sDelimiterIndex, eDelimiterIndex } = VueParent.sliceString(
-			htmlFile,
-			`${this.vueStartDelimiter} ${positionId}`,
-			`${this.vueEndDelimiter} ${positionId}`
+			targetFile,
+			`${this.vueStartDelimiter} ${positionId} `,
+			`${this.vueEndDelimiter} ${positionId} `
 		);
 
 		// Vue Delimiter에 해당하는 부분이 없다면 종료
@@ -342,13 +432,13 @@ class VueReplacer extends VueParent {
 		}
 
 		// html파일에 덮어쓸 최초 시작 포인트 index를 읽어옴(개행)
-		const headerLastPositionIndex = htmlFile.indexOf(this.NEW_LINE, sDelimiterIndex);
+		const headerLastPositionIndex = targetFile.indexOf(this.NEW_LINE, sDelimiterIndex);
 
 		// html indent depth 에 따라 tab 간격 조절
 		const splittedVueTemplate = vueTemplate.split(this.NEW_LINE);
 		let realVueTemplate = _(splittedVueTemplate).initial().join(this.NEW_LINE);
 		// 템플릿 모드 일 경우
-		if (this.htmlFileInfo.isTemplate) {
+		if (this.tplFileInfo.isTemplate) {
 			if (indentDepth >= 1) {
 				const regExp = new RegExp(this.NEW_LINE, 'g');
 				realVueTemplate = realVueTemplate.replace(
@@ -370,14 +460,89 @@ class VueReplacer extends VueParent {
 		realVueTemplate = realVueTemplate.concat(_.last(splittedVueTemplate));
 
 		// Header + Vue Script + Footer 조합
-		const overwrittenHtml = htmlFile
+		const overwrittenHtml = targetFile
 			.slice(0, headerLastPositionIndex)
 			.concat(
 				realVueTemplate,
-				htmlFile.slice(htmlFile.slice(0, eDelimiterIndex).lastIndexOf(this.NEW_LINE))
+				targetFile.slice(targetFile.slice(0, eDelimiterIndex).lastIndexOf(this.NEW_LINE))
 			);
 
-		this.writeFile(filePath, overwrittenHtml);
+		return overwrittenHtml;
+	}
+
+	/**
+	 * Vue template 안의 내용을 지정된 {fileName}.html 영역 교체 수행
+	 * @param {string} vueStyle
+	 * @param {string} [targetFile]
+	 * @returns {any}
+	 */
+	async replaceVueStyle(vueStyle, targetFile = '') {
+		if (_.isEmpty(vueStyle)) {
+			throw new Error('vue style이 비어있음');
+		}
+		const { filePath, indentDepth, positionId } = this.styleFileInfo;
+
+		if (targetFile.length === 0) {
+			if (filePath.length === 0) {
+				return false;
+			}
+
+			// eslint-disable-next-line no-param-reassign
+			targetFile = await this.getFile(filePath);
+		}
+		// 덮어쓸 html 파일을 읽음
+		// return;
+		if (!targetFile.length) {
+			throw new Error('html file이 존재하지 않음');
+		}
+		// Vue Deleimiter Range 에 해당하는 부분을 추출
+		const { sDelimiterIndex, eDelimiterIndex } = VueParent.sliceString(
+			targetFile,
+			`${this.vueStartDelimiter} ${positionId} `,
+			`${this.vueEndDelimiter} ${positionId} `
+		);
+
+		// Vue Delimiter에 해당하는 부분이 없다면 종료
+		if (_.includes([sDelimiterIndex, eDelimiterIndex], -1)) {
+			throw new Error(
+				`vue style delimiter가 이상함 ${sDelimiterIndex}, ${eDelimiterIndex}`
+			);
+		}
+
+		// html파일에 덮어쓸 최초 시작 포인트 index를 읽어옴(개행)
+		const headerLastPositionIndex = targetFile.indexOf(this.NEW_LINE, sDelimiterIndex);
+
+		let realVueStyle = vueStyle;
+		// 템플릿 모드 일 경우
+		// html indent depth 에 따라 tab 간격 조절
+		if (this.styleFileInfo.isTemplate) {
+			if (indentDepth >= 1) {
+				const regExp = new RegExp(this.NEW_LINE, 'g');
+				realVueStyle = realVueStyle.replace(
+					regExp,
+					`${this.NEW_LINE}${_.repeat(this.TAB, indentDepth)}`
+				);
+			}
+		} else if (indentDepth === 0) {
+			const regExp = new RegExp(this.NEW_LINE + this.TAB, 'g');
+			realVueStyle = realVueStyle.replace(regExp, this.NEW_LINE);
+		} else if (indentDepth > 1) {
+			const regExp = new RegExp(this.NEW_LINE, 'g');
+			realVueStyle = realVueStyle.replace(
+				regExp,
+				`${this.NEW_LINE}${_.repeat(this.TAB, indentDepth - 1)}`
+			);
+		}
+
+		// Header + Vue Script + Footer 조합
+		const overwrittenHtml = targetFile
+			.slice(0, headerLastPositionIndex)
+			.concat(
+				realVueStyle,
+				targetFile.slice(targetFile.slice(0, eDelimiterIndex).lastIndexOf(this.NEW_LINE))
+			);
+
+		return overwrittenHtml;
 	}
 }
 
