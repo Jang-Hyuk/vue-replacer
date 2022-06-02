@@ -5,10 +5,11 @@ import { exec } from 'child_process';
 
 import { ESLint } from 'eslint';
 import iconv from 'iconv-lite';
+import _ from 'lodash';
 
 function execute(command, callback) {
 	exec(command, (error, stdout, stderr) => {
-		typeof callback === 'function' && callback(stdout);
+		typeof callback === 'function' && callback(error, stdout, stderr);
 	});
 }
 
@@ -37,13 +38,33 @@ class VueParent {
 	/**
 	 * euc-kr 형식의 파일을 utf8 형식으로 변환하여 반환
 	 * @param {string} filePath
-	 * @returns {string}
 	 */
 	static readEuckrFile(filePath) {
 		return new Promise(resolve => {
 			try {
 				fs.createReadStream(filePath)
 					.pipe(iconv.decodeStream('euc-kr'))
+					.collect((err, decodedBody) => {
+						if (err) {
+							resolve('');
+						}
+						resolve(decodedBody);
+					});
+			} catch (error) {
+				resolve('');
+			}
+		});
+	}
+
+	/**
+	 * euc-kr 형식의 파일을 utf8 형식으로 변환하여 반환
+	 * @param {string} filePath
+	 */
+	static readUtfFile(filePath) {
+		return new Promise(resolve => {
+			try {
+				fs.createReadStream(filePath)
+					.pipe(iconv.decodeStream('utf-8'))
 					.collect((err, decodedBody) => {
 						if (err) {
 							resolve('');
@@ -78,12 +99,54 @@ class VueParent {
 	}
 
 	/**
+	 * IE용. File을 저장한 후 ESLint 과정을 추가 수행. CLI eslint 과정에 시간 소요가 큼(2초 이상)
+	 * @param {string} filePath
+	 * @param {string} contents utf-8
+	 */
+	writeTempJsFile(filePath, contents = '') {
+		// 1. IE + js 파일일 경우 UTF-8로 임시 파일 저장.
+		const tempFilePath = _.chain(filePath)
+			.split('.')
+			.initial()
+			.push('bak', 'js')
+			.join('.')
+			.value();
+
+		fs.writeFile(tempFilePath, contents, err => {
+			if (err) {
+				console.error(err);
+			}
+			// 2. 해당 파일 eslint 적용
+			execute(`eslint --fix ${tempFilePath}`, (error, result, stderr) => {
+				if (stderr) {
+					console.log('🚀 ~ file: VueParent.js ~ line 126 ~ execute eslint', stderr);
+					return false;
+				}
+
+				// 3. 해당 파일 다시 읽어 들여 파일씀
+				VueParent.readUtfFile(tempFilePath).then(fileText => {
+					fs.rm(tempFilePath, rmErr => {
+						if (rmErr) {
+							console.log('🚀 ~ file: VueParent.js ~ line 137 ~ rmErr', rmErr);
+						}
+					});
+					this.writeFile(filePath, fileText);
+				});
+			});
+		});
+	}
+
+	/**
 	 * 해당 경로에 파일을 덮어씀
 	 * @param {string} filePath 경로
 	 * @param {string} contents 덮어쓸 file text
 	 * @param {boolean} [isEnabledEncoding=false] (Js 파일만 가능) 인코딩 추가로 처리할 수 있는지 여부
 	 */
 	writeFile(filePath, contents = '', isEnabledEncoding = false) {
+		if (this.isIeMode && isEnabledEncoding) {
+			return this.writeTempJsFile(filePath, contents);
+		}
+
 		if (this.isEuckr) {
 			fs.writeFile(
 				filePath,
@@ -95,10 +158,11 @@ class VueParent {
 					if (err) {
 						console.error(err);
 					}
-					// FIXME (인코딩이 안맞음) IE용. File을 저장한 후 ESLint 과정을 추가로 할지 여부. 시간 소요가 큼(2초 이상)
-					if (this.isIeMode && isEnabledEncoding) {
-						execute(`eslint --fix ${filePath}`);
-					}
+					// // FIXME (인코딩이 안맞음) IE용. File을 저장한 후 ESLint 과정을 추가로 할지 여부. 시간 소요가 큼(2초 이상)
+					// if (this.isIeMode && isEnabledEncoding) {
+					// 	console.log('fix');
+					// 	execute(`eslint --fix ${filePath}`);
+					// }
 				}
 			);
 		} else {

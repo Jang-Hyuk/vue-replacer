@@ -5,7 +5,8 @@
     "node_modules",
     "dist",
     "coverage",
-    "cTest.js"
+    "cTest.js",
+    "*.bak.js"
   ],
   "watch": [
     "."

@@ -51,7 +51,8 @@ export default {
 	components: { CompTemp },
 	data() {
 		return {
-			isShow: 121
+			isShow: 121,
+			한글: '테스트?'
 		};
 	},
 	created() {

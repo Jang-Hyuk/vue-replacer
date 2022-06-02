@@ -13,7 +13,7 @@ $(function () {
 		data: function () {
 			return {
 				isShow: 121,
-				�ѱ�: '�׽�Ʈ?'
+				한글: '테스트?'
 			};
 		},
 		created: function () {
