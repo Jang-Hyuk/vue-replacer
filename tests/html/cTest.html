@@ -34,7 +34,7 @@ $pmTodayInfo = $row[0][0];
 		}
 		
 		.cs_inperson {
-			margin: 94px 0 11;
+			margin: 94px 0 113;
 		}
 		
 		/* #8072 자주하는질문(FAQ) */
@@ -58,37 +58,39 @@ $pmTodayInfo = $row[0][0];
 	}
 </style>
 <!-- ### Vue photoPopup ### -->
-	<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
-		<div class="qmeet_banner">
-			<!-- 배너영역 슬라이드-->
-			<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
-			<div class="qmeet_banner__wrap">
-				<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
-				<div class="qmeet_banner__pagination"></div>
-				<!-- 페이지네이션영역 -->
-			</div>
-			<comp-temp></comp-temp>
-			<div class="cs_inperson__mylist_reply_master_wrap">
-				<div class="cs_inperson__mylist_reply_master_title">
-					<span class="cs_inperson__mylist_reply_master_ico_reply">[관리자 답변]</span>
-					<span class="cs_inperson__mylist_reply_master_date">{{
-						inquiryInfo.re_date
-					}}</span>
+	<template v-cloak id="photoPopup">
+		<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
+			<div class="qmeet_banner">
+				<!-- 배너영역 슬라이드-->
+				<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
+				<div class="qmeet_banner__wrap">
+					<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
+					<div class="qmeet_banner__pagination"></div>
+					<!-- 페이지네이션영역 -->
 				</div>
-				<div class="cs_inperson__mylist_reply_master_txt_wrap">
-					<pre class="cs_inperson__mylist_reply_master_txt">
-											{{ inquiryInfo.response }}
-										</pre>
+				<comp-temp></comp-temp>
+				<div class="cs_inperson__mylist_reply_master_wrap">
+					<div class="cs_inperson__mylist_reply_master_title">
+						<span class="cs_inperson__mylist_reply_master_ico_reply">[관리자 답변]</span>
+						<span class="cs_inperson__mylist_reply_master_date">
+							{{ inquiryInfo.re_date }}
+						</span>
+					</div>
+					<div class="cs_inperson__mylist_reply_master_txt_wrap">
+						<pre class="cs_inperson__mylist_reply_master_txt">
+												{{ inquiryInfo.response }}
+											</pre>
+					</div>
 				</div>
+				<pre class="cs_inperson__mylist_reply_txt_detail">
+					{{ inquiryInfo.contents }}
+							</pre>
+				<template slot="hi">
+					<div>슬롯이당께</div>
+				</template>
 			</div>
-			<pre class="cs_inperson__mylist_reply_txt_detail">
-				{{ inquiryInfo.contents }}
-						</pre>
-			<template slot="hi">
-				<div>슬롯이당께</div>
-			</template>
 		</div>
-	</div>
+</template>
 <!-- ### !Vue photoPopup ### -->
 <script>
 	var __varsInsChat = {
@@ -110,7 +112,7 @@ var defaultLabels = {
 	
 	data() {
 		return {
-			isShow: 1212,
+			isShow: 12345,
 			한글: '테스트1'
 		};
 	},

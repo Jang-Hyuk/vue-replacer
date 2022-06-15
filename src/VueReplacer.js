@@ -58,6 +58,7 @@ class VueReplacer extends VueParent {
 			isSync: false,
 			contents: {},
 			positionId: '',
+			indentDepth: 0,
 			/** vue script 영역을 변환하여 저장할 파일 */
 			task: this.replaceVueScript
 		};
@@ -133,6 +134,9 @@ class VueReplacer extends VueParent {
 			this.scriptFileInfo.filePath = path.join(this.vueFileFolder, srcHeaderInfo.fileSrc);
 		}
 
+		this.scriptFileInfo.indentDepth = srcHeaderInfo.depth
+			? parseInt(srcHeaderInfo.depth, 10)
+			: 0;
 		this.scriptFileInfo.positionId = srcHeaderInfo.id ?? '';
 
 		const srcDelimiter = 'export default';
@@ -339,7 +343,7 @@ class VueReplacer extends VueParent {
 
 		const { scriptOuter, vueOption } = vueScriptInfo;
 
-		const { filePath, positionId } = this.scriptFileInfo;
+		const { filePath, positionId, indentDepth } = this.scriptFileInfo;
 
 		// 덮어쓸 js 파일을 읽음
 		if (targetFile.length === 0) {
@@ -378,7 +382,11 @@ class VueReplacer extends VueParent {
 			.thru(str => str.slice(0, str.lastIndexOf('{')))
 			.value();
 
-		const scriptContents = `${scriptOuter + savedLine + vueOption}`;
+		const scriptContents = `${
+			this.addTabSpace(scriptOuter, indentDepth) +
+			savedLine +
+			this.addTabSpace(vueOption, indentDepth, true)
+		}`;
 
 		const headerLastPositionIndex = targetFile.indexOf(this.NEW_LINE, sDelimiterIndex);
 		// Header + Vue Script + Footer 조합
@@ -439,22 +447,12 @@ class VueReplacer extends VueParent {
 		let realVueTemplate = _(splittedVueTemplate).initial().join(this.NEW_LINE);
 		// 템플릿 모드 일 경우
 		if (this.tplFileInfo.isTemplate) {
-			if (indentDepth >= 1) {
-				const regExp = new RegExp(this.NEW_LINE, 'g');
-				realVueTemplate = realVueTemplate.replace(
-					regExp,
-					`${this.NEW_LINE}${_.repeat(this.TAB, indentDepth)}`
-				);
-			}
+			realVueTemplate = this.addTabSpace(realVueTemplate, indentDepth);
 		} else if (indentDepth === 0) {
 			const regExp = new RegExp(this.NEW_LINE + this.TAB, 'g');
 			realVueTemplate = realVueTemplate.replace(regExp, this.NEW_LINE);
 		} else if (indentDepth > 1) {
-			const regExp = new RegExp(this.NEW_LINE, 'g');
-			realVueTemplate = realVueTemplate.replace(
-				regExp,
-				`${this.NEW_LINE}${_.repeat(this.TAB, indentDepth - 1)}`
-			);
+			realVueTemplate = this.addTabSpace(realVueTemplate, indentDepth - 1);
 		}
 
 		realVueTemplate = realVueTemplate.concat(_.last(splittedVueTemplate));
@@ -516,22 +514,12 @@ class VueReplacer extends VueParent {
 		// 템플릿 모드 일 경우
 		// html indent depth 에 따라 tab 간격 조절
 		if (this.styleFileInfo.isTemplate) {
-			if (indentDepth >= 1) {
-				const regExp = new RegExp(this.NEW_LINE, 'g');
-				realVueStyle = realVueStyle.replace(
-					regExp,
-					`${this.NEW_LINE}${_.repeat(this.TAB, indentDepth)}`
-				);
-			}
+			realVueStyle = this.addTabSpace(realVueStyle, indentDepth);
 		} else if (indentDepth === 0) {
 			const regExp = new RegExp(this.NEW_LINE + this.TAB, 'g');
 			realVueStyle = realVueStyle.replace(regExp, this.NEW_LINE);
 		} else if (indentDepth > 1) {
-			const regExp = new RegExp(this.NEW_LINE, 'g');
-			realVueStyle = realVueStyle.replace(
-				regExp,
-				`${this.NEW_LINE}${_.repeat(this.TAB, indentDepth - 1)}`
-			);
+			realVueStyle = this.addTabSpace(realVueStyle, indentDepth - 1);
 		}
 
 		// Header + Vue Script + Footer 조합

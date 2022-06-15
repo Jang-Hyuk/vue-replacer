@@ -99,6 +99,34 @@ class VueParent {
 	}
 
 	/**
+	 * 소스에 탭을 삽입하여 반환
+	 * @param {string} source
+	 * @param {number} [tabCount = 1]
+	 * @param {boolean} [isTail=false] 첫번재 녀석 제외 여부
+	 * @param {boolean} [isInitial=false] 마지막 녀석 제외 여부
+	 */
+	addTabSpace(source = '', tabCount = 1, isTail = false, isInitial = false) {
+		const tabValue = _.repeat(this.TAB, tabCount);
+
+		const result = _(source)
+			.split(this.NEW_LINE)
+			.map((v, index, arr) => {
+				if (isTail && index === 0) {
+					return v;
+				}
+
+				if (isInitial && index === arr.length - 1) {
+					return v;
+				}
+
+				return v.length ? tabValue + v : v;
+			})
+			.join(this.NEW_LINE);
+
+		return result;
+	}
+
+	/**
 	 * 조건에 따라 파일 교체
 	 * @param {string} filePath
 	 * @param {string} contents

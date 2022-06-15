@@ -7,14 +7,13 @@ var defaultLabels = {
 };
 
 Vue.component('TalkConts', {
-	
-	data() {
+	data: function () {
 		return {
-			isShow: 1212,
+			isShow: 12345,
 			한글: '테스트1'
 		};
 	},
-	created() {
+	created: function () {
 		var vm = this;
 		vm.on();
 		vm.job();

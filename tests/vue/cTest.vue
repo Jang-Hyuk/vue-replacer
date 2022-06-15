@@ -1,7 +1,7 @@
 <!-- 태수투 ss -->
 <template
 	id="photoPopup"
-	isTemplate="0"
+	isTemplate="1"
 	isSync="1"
 	depth="1"
 	fileSrc="../html/cTest.html"
@@ -19,9 +19,9 @@
 			<div class="cs_inperson__mylist_reply_master_wrap">
 				<div class="cs_inperson__mylist_reply_master_title">
 					<span class="cs_inperson__mylist_reply_master_ico_reply">[관리자 답변]</span>
-					<span class="cs_inperson__mylist_reply_master_date">{{
-						inquiryInfo.re_date
-					}}</span>
+					<span class="cs_inperson__mylist_reply_master_date">
+						{{ inquiryInfo.re_date }}
+					</span>
 				</div>
 				<div class="cs_inperson__mylist_reply_master_txt_wrap">
 					<pre class="cs_inperson__mylist_reply_master_txt">
@@ -39,7 +39,7 @@
 	</div>
 </template>
 
-<script id="JsPhotoPopup" fileSrc="../js/cTest.js" isSync="1" isTemplate="1">
+<script id="JsPhotoPopup" fileSrc="../js/cTest.js" isSync="1" isTemplate="1" depth="1">
 var defaultLabels = {
 	first: 'First',
 	last: 'Last',
@@ -51,7 +51,7 @@ export default {
 	components: { CompTemp },
 	data() {
 		return {
-			isShow: 1212,
+			isShow: 12345,
 			한글: '테스트1'
 		};
 	},
@@ -78,7 +78,7 @@ table td {
 }
 
 .cs_inperson {
-	margin: 94px 0 11;
+	margin: 94px 0 113;
 }
 
 /* #8072 자주하는질문(FAQ) */
