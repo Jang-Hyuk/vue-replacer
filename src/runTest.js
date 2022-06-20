@@ -1,6 +1,6 @@
 import path, { sep } from 'path';
 
-import VueReplacer from './VueReplacer.js';
+import VueEncoder from './VueEncoder.js';
 
 const argvValue = process.argv.slice(2)[0];
 const filePath = 'tests/vue/cTest.vue';
@@ -12,6 +12,7 @@ const config = {
 	isIeMode: argvValue === 'ie'
 };
 
-const vueReplacer = new VueReplacer(config);
-
-vueReplacer.convertVueFile();
+const vueReplacer = new VueEncoder(config);
+vueReplacer.init().then(() => {
+	vueReplacer.convertVueFile();
+});

@@ -1,21 +1,4 @@
 <?php
-/**
- * #6870 ?‹¹?¼ ë¹ ë¥¸????™” ì²? ë°©ë¬¸?‹œ ?†Œê°œê?? ?ˆ˜? • & ?œ„ë¡? ?˜¬ë¦¬ê¸°
- */
-if (!defined('_CLUB5678_')) exit;
-$dbC_FASTCONTS = &func_getDBClass("c_fast_conts");
-$memNo = $gCCV['NO'];
-
-/**
- * CALL c_fast_conts.p_pm_chat_mem_today_login_chk (
- * memNo	INT	# ?šŒ?›ë²ˆí˜¸
- * )
- * > RETURN
- * [0]
- * chk_today	ê¸ˆì¼? ‘?†?—¬ë¶? [y:?˜¤?Š˜? ‘?†O, n:?˜¤?Š˜? ‘?†X] ==> n?¼ ê²½ìš° ?Œ?—… ?˜¤?”ˆ ----->?•ˆ?”?‹ˆ?‹¤ localstorage ?™œ?š©?œ¼ë¡? ë³?ê²?
- * chat_conts	?†Œê°œê??
- * chk_data	?†Œê°œê???“±ë¡ì—¬ë¶? [y:?†Œê°œê??O, n:?†Œê°œê??X]
- */
 $row = $dbC_FASTCONTS->proExecuteSQL("CALL c_fast_conts.p_pm_chat_mem_today_login_chk ('$memNo')");
 $pmTodayInfo = $row[0][0];
 ?>
@@ -34,7 +17,7 @@ $pmTodayInfo = $row[0][0];
 		}
 		
 		.cs_inperson {
-			margin: 94px 0 113;
+			margin: 94px 0 1131;
 		}
 		
 		/* #8072 ÀÚÁÖÇÏ´ÂÁú¹®(FAQ) */
@@ -50,7 +33,7 @@ $pmTodayInfo = $row[0][0];
 	</style>
 <!-- style ### !Vue cssPhotoPopup -->
 
-<!-- #7826 ë¹ ë¥¸????™” ?‚¬ì§„ë“±ë¡? ?™œ?„±?™” ?Œ?—… ì¶”ê?? ? -->
+<!-- #7826 -->
 <style>
 	.qmeet_banner {
 		position: relative;
@@ -59,7 +42,7 @@ $pmTodayInfo = $row[0][0];
 </style>
 <!-- ### Vue photoPopup ### -->
 	<template v-cloak id="photoPopup">
-		<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
+		<div v-if="isShow1" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
 			<div class="qmeet_banner">
 				<!-- ¹è³Ê¿µ¿ª ½½¶óÀÌµå-->
 				<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
@@ -94,36 +77,35 @@ $pmTodayInfo = $row[0][0];
 <!-- ### !Vue photoPopup ### -->
 <script>
 	var __varsInsChat = {
-		// ?†Œê°œê?? ?“±ë¡? ?—¬ë¶?
 		hasIntro: "<?= $pmTodayInfo['chk_data'] ?>" === 'y',
 		chatConts: "<?= preg_replace('/\r\n|\r|\n/', '', $pmTodayInfo['chat_conts']) ?>"
 	}
 
 
 		/* ### Vue JsPhotoPopup */
-var defaultLabels = {
-	first: 'First',
-	last: 'Last',
-	previous: 'Previous',
-	next: 'Next'
-};
+	var defaultLabels = {
+		first: 'First',
+		last: 'Last',
+		previous: 'Previous',
+		next: 'Next'
+	};
 
 	Vue.component('TalkConts', {
-	
-	data() {
-		return {
-			isShow: 12345,
-			ÇÑ±Û: 'Å×½ºÆ®1'
-		};
-	},
-	created() {
-		var vm = this;
-		vm.on();
-		vm.job();
-	},
+		
+		data() {
+			return {
+				isShow: 123456,
+				ÇÑ±Û: 'Å×½ºÆ®111'
+			};
+		},
+		created() {
+			var vm = this;
+			vm.on();
+			vm.job();
+		},
 
-	template: '#c-talk-conts'
-});
+		template: '#c-talk-conts'
+	});
 		/* ### !Vue JsPhotoPopup */
 
 

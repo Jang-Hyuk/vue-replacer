@@ -9,7 +9,7 @@ var defaultLabels = {
 Vue.component('TalkConts', {
 	data: function () {
 		return {
-			isShow: 12345,
+			isShow: 123456,
 			한글: '테스트1'
 		};
 	},

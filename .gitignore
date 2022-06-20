@@ -4,3 +4,9 @@
 .env
 
 node_modules
+.eslintrc
+package*.json
+yarn*
+
+jsconfig.json
+@types/

@@ -6,7 +6,7 @@
 	depth="1"
 	fileSrc="../html/cTest.html"
 >
-	<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
+	<div v-if="isShow1" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
 		<div class="qmeet_banner">
 			<!-- 배너영역 슬라이드-->
 			<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
@@ -51,7 +51,7 @@ export default {
 	components: { CompTemp },
 	data() {
 		return {
-			isShow: 12345,
+			isShow: 123456,
 			한글: '테스트1'
 		};
 	},
@@ -78,7 +78,7 @@ table td {
 }
 
 .cs_inperson {
-	margin: 94px 0 113;
+	margin: 94px 0 1131;
 }
 
 /* #8072 자주하는질문(FAQ) */

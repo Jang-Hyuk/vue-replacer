@@ -381,7 +381,7 @@ $(function () {
 								memNo: item.mem_no,
 								actMode: 'talkAdmin'
 							};
-							adminAct.adminStopWarn(fnBase.toPairs(paramInfo, '&', '='));
+							adminAct.adminStopWarn(cuBase.toPairs(paramInfo, '&', '='));
 						});
 					},
 

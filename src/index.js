@@ -3,7 +3,7 @@ import path, { sep } from 'path';
 import _ from 'lodash';
 import { config as dotConfig } from 'dotenv';
 
-import VueReplacer from './VueReplacer.js';
+import VueEncoder from './VueEncoder.js';
 
 dotConfig();
 
@@ -37,12 +37,13 @@ watch(
 	(event, filename) => {
 		// console.log(`event is: ${event}`);
 		if (filename) {
-			// if (filename.indexOf('ftp-kr')) return false;
 			console.log(`🐟 filename provided: ${filename}`);
-			const vueReplacer = new VueReplacer(
+			const vueReplacer = new VueEncoder(
 				_.chain(config).clone().set('filePath', filename).value()
 			);
-			vueReplacer.convertVueFile();
+			vueReplacer.init().then(() => {
+				vueReplacer.convertVueFile();
+			});
 		} else {
 			console.log('😈 filename not provided');
 		}

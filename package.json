@@ -5,6 +5,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
+    "manage": "nodemon src/FileManager.js",
     "start": "node src/index.js",
     "start:ie": "node src/index.js ie",
     "dev": "nodemon --trace-warnings src/index.js",
