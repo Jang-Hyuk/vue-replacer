@@ -1,8 +1,16 @@
 import fs from 'fs';
 import iconv from 'iconv-lite';
 
-export default {
-	readEuckrFile(filePath) {
+class FileReader {
+	constructor(config) {
+		const { isEuckr = true, adminFolder, isIeMode = false } = config;
+
+		this.isIeMode = isIeMode;
+		this.isEuckr = isEuckr;
+		this.adminFolder = adminFolder;
+	}
+
+	static readEuckrFile(filePath) {
 		return new Promise(resolve => {
 			try {
 				fs.createReadStream(filePath)
@@ -17,8 +25,9 @@ export default {
 				resolve('');
 			}
 		});
-	},
-	readUtfFile(filePath) {
+	}
+
+	static readUtfFile(filePath) {
 		return new Promise(resolve => {
 			try {
 				fs.createReadStream(filePath)
@@ -34,4 +43,17 @@ export default {
 			}
 		});
 	}
-};
+
+	async getFile(filePath) {
+		let file = '';
+		if (this.isEuckr) {
+			file = await FileReader.readEuckrFile(filePath);
+		} else {
+			// FIXME utf-8 구현
+		}
+
+		return file;
+	}
+}
+
+export default FileReader;

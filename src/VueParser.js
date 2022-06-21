@@ -5,7 +5,7 @@ import BaseUtil from './BaseUtil.js';
 
 /**
  * @typedef {object} replaceTargetFileInfo
- * @property {string} filePath
+ * @property {string} filePath 파일 경로
  * @property {boolean} [isTemplate=false] wrapping 여부
  * @property {boolean} [isSync=false] 덮어쓰기 여부
  * @property {string|object} contents wrapping 여부
@@ -17,7 +17,7 @@ import BaseUtil from './BaseUtil.js';
 /** *.vue 파일을 구문 분석하여 Vue Replace 하기위한 정보를 추출 */
 class VueParser {
 	/**
-	 * @param {Object} config Replacer 생성자 옵션
+	 * @param {object} config Replacer 생성자 옵션
 	 * @param {string} config.filePath file full path (d:/temp/conts/js/*.vue)
 	 * @param {string} [config.fileSep = sep] window vs linux file 구분자에 따른 값
 	 */

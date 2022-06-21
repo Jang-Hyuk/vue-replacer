@@ -10,8 +10,10 @@
     "start:ie": "node src/index.js ie",
     "dev": "nodemon --trace-warnings src/index.js",
     "dev:ie": "nodemon --trace-warnings src/index.js ie",
-    "test": "nodemon  --trace-warnings src/runTest.js",
-    "test:ie": "nodemon  --trace-warnings src/runTest.js ie"
+    "test-encode": "nodemon  --trace-warnings src/tests/encode.js",
+    "test-encode:ie": "nodemon  --trace-warnings src/tests/encode.js ie",
+    "test-decode": "nodemon  --trace-warnings src/tests/decode.js",
+    "test-decode:ie": "nodemon  --trace-warnings src/tests/decode.js ie"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +25,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-es5": "^1.5.0",
     "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-jsdoc": "^39.3.3",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.3.0",
     "prettier": "^2.5.1",

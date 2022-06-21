@@ -9,7 +9,7 @@ class VueEncoder extends VueReplacer {
 	 * Vue 파일 변경될 경우 변환 작업 처리
 	 * @param {string} path fileFullPath
 	 */
-	async convertVueFile() {
+	async encodeVueFile() {
 		this.vueParser.tplFileInfo.task = this.replaceVueTemplate;
 		this.vueParser.scriptFileInfo.task = this.replaceVueScript;
 		this.vueParser.styleFileInfo.task = this.replaceVueStyle;
@@ -23,25 +23,8 @@ class VueEncoder extends VueReplacer {
 		_.chain(fileConfigs)
 			.filter(config => config.isSync && config.filePath.length)
 			.groupBy('filePath')
-			.forEach(configList => this.replaceEachFiles(configList))
+			.forEach(configList => this.fileWriter.replaceEachFiles(configList, this))
 			.value();
-	}
-
-	/**
-	 * file 교체 pipe로 연결해서 처리
-	 * @param {replaceTargetFileInfo[]} fileConfigList
-	 */
-	async replaceEachFiles(fileConfigList = []) {
-		await fileConfigList.reduce((prevTask, currTask, index) => {
-			if (index + 1 === fileConfigList.length) {
-				return prevTask
-					.then(results => currTask.task.call(this, currTask.contents, results))
-					.then(fileTxt => this.writeFile(currTask.filePath, fileTxt));
-			}
-			return prevTask.then(results =>
-				currTask.task.call(this, currTask.contents, results)
-			);
-		}, Promise.resolve());
 	}
 
 	/**
@@ -65,7 +48,7 @@ class VueEncoder extends VueReplacer {
 				return false;
 			}
 
-			targetFile = await this.getFile(filePath);
+			targetFile = await this.fileReader.getFile(filePath);
 		}
 
 		if (!targetFile.length) {
@@ -134,7 +117,7 @@ class VueEncoder extends VueReplacer {
 			}
 
 			// eslint-disable-next-line no-param-reassign
-			targetFile = await this.getFile(filePath);
+			targetFile = await this.fileReader.getFile(filePath);
 		}
 
 		// return;
@@ -202,7 +185,7 @@ class VueEncoder extends VueReplacer {
 			}
 
 			// eslint-disable-next-line no-param-reassign
-			targetFile = await this.getFile(filePath);
+			targetFile = await this.fileReader.getFile(filePath);
 		}
 		// 덮어쓸 html 파일을 읽음
 		// return;

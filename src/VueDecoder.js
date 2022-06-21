@@ -1,39 +1,29 @@
-import fs from 'fs';
-import path, { sep } from 'path';
-
 import _ from 'lodash';
-import iconv from 'iconv-lite';
 
-import VueParent from './VueParent.js';
+import VueReplacer from './VueReplacer.js';
+import BaseUtil from './BaseUtil.js';
 
-class VueRestorer extends VueParent {
+class VueDecoder extends VueReplacer {
 	/**
-	 * @param {string} filePath file full path (d:/temp/conts/js/*.vue)
-	 * @param {boolean} [isEuckr = true]
-	 * @param {string} [fileSep = sep]
+	 * Vue 파일 변경될 경우 변환 작업 처리
+	 * @param {string} path fileFullPath
 	 */
-	constructor(filePath, isEuckr = true, fileSep = sep) {
-		super();
-		// ↓↓↓ set constructor params
-		this.vueFileFolder = _(filePath).split(fileSep).initial().join(fileSep);
-		this.vueFilePath = filePath;
-		this.isEuckr = isEuckr;
+	async decodeVueFile() {
+		this.vueParser.tplFileInfo.task = this.replaceVueTemplate;
+		this.vueParser.scriptFileInfo.task = this.replaceVueScript;
+		this.vueParser.styleFileInfo.task = this.replaceVueStyle;
 
-		// ↓↓↓ set dynamic instance value
-		const fileName = filePath.slice(0, filePath.lastIndexOf('.'));
+		const fileConfigs = [
+			this.vueParser.tplFileInfo,
+			this.vueParser.scriptFileInfo,
+			this.vueParser.styleFileInfo
+		];
 
-		/** vue template 영역을 변환하여 저장할  */
-		this.htmlFileInfo = {
-			filePath: '',
-			indentDepth: 0,
-			isTemplate: false,
-			positionId: ''
-		};
-
-		this.jsFileInfo = {
-			/** vue script 영역을 변환하여 저장할 파일 */
-			filePath: `${fileName}.js`
-		};
+		_.chain(fileConfigs)
+			.filter(config => config.isSync && config.filePath.length)
+			.groupBy('filePath')
+			.forEach(configList => this.replaceEachFiles(configList))
+			.value();
 	}
 
 	/**
@@ -95,4 +85,4 @@ class VueRestorer extends VueParent {
 	}
 }
 
-export default VueRestorer;
+export default VueDecoder;
