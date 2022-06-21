@@ -4,15 +4,9 @@ import path, { resolve, join } from 'path';
 
 import BaseUtil from './BaseUtil.js';
 
-dotenv.config();
+import './type.d.js';
 
-/**
- * @typedef {object} manageInfo
- * @property {boolean} isChangeChild vue 파일과 관련된 파일이 외부에 의해 변경될 경우
- * @property {string} [tplPath] template path
- * @property {string} [srcPath] source path
- * @property {string} [cssPath] style path
- */
+dotenv.config();
 
 class FileManager {
 	constructor(rootPath = '') {

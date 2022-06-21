@@ -3,15 +3,17 @@ import _ from 'lodash';
 import VueReplacer from './VueReplacer.js';
 import BaseUtil from './BaseUtil.js';
 
+import './type.d.js';
+
 class VueDecoder extends VueReplacer {
 	/**
 	 * Vue 파일 변경될 경우 변환 작업 처리
 	 * @param {string} path fileFullPath
 	 */
 	async decodeVueFile() {
-		this.vueParser.tplFileInfo.task = this.replaceVueTemplate;
-		this.vueParser.scriptFileInfo.task = this.replaceVueScript;
-		this.vueParser.styleFileInfo.task = this.replaceVueStyle;
+		this.vueParser.tplFileInfo.task = this.parseOtherFile;
+		this.vueParser.scriptFileInfo.task = this.parseJavascriptFile;
+		this.vueParser.styleFileInfo.task = this.parseOtherFile;
 
 		const fileConfigs = [
 			this.vueParser.tplFileInfo,
@@ -19,31 +21,25 @@ class VueDecoder extends VueReplacer {
 			this.vueParser.styleFileInfo
 		];
 
-		_.chain(fileConfigs)
-			.filter(config => config.isSync && config.filePath.length)
-			.groupBy('filePath')
-			.forEach(configList => this.replaceEachFiles(configList))
-			.value();
+		// console.log('🚀 ~ file: VueDecoder.js ~ line 17 ~ fileConfigs', fileConfigs);
+
+		// _.chain(fileConfigs)
+		// 	.filter(config => config.filePath.length)
+		// 	.groupBy('filePath')
+		// 	.forEach(configList => this.replaceEachFiles(configList))
+		// 	.value();
 	}
+
+	async parseFile(fileConfigList) {}
+
+	async parseJavascriptFile(filePath) {}
 
 	/**
-	 * Vue 파일 변경될 경우 변환 작업 처리
-	 * @param {string} path fileFullPath
+	 *
+	 * @param {string} contents 파일 내용
+	 * @param {replaceTargetFileInfo} config
 	 */
-	async convertVueFile() {
-		const vueFile = await this.getFile(this.vueFilePath);
-
-		this.NEW_LINE = vueFile.indexOf(this.NEW_LINE) >= 0 ? this.NEW_LINE : '\n';
-
-		if (!vueFile.length) {
-			return false;
-		}
-
-		// vue 파일을 기반으로 js 영역 교체
-		this.replaceVueScript(this.extractScript(vueFile));
-		// // vue 파일을 기반으로 html 영역 교체
-		this.replaceVueTemplate(this.extractTemplate(vueFile));
-	}
+	async parseOtherFile(contents, config) {}
 
 	/**
 	 * Vue script 안의 내용을 동일 {fileName}.js 영역 교체 수행
@@ -55,7 +51,7 @@ class VueDecoder extends VueReplacer {
 			return false;
 		}
 		// 덮어쓸 js 파일을 읽음
-		const jsFile = await this.getFile(this.jsFileInfo.filePath);
+		const jsFile = await this.fileReader.getFile(this.jsFileInfo.filePath);
 
 		if (!jsFile.length) {
 			return false;

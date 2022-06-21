@@ -4,6 +4,8 @@ import _ from 'lodash';
 import VueReplacer from './VueReplacer.js';
 import BaseUtil from './BaseUtil.js';
 
+import './type.d.js';
+
 class VueEncoder extends VueReplacer {
 	/**
 	 * Vue 파일 변경될 경우 변환 작업 처리

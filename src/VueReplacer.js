@@ -1,25 +1,11 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-unused-expressions */
-import fs from 'fs';
-import { exec } from 'child_process';
-import path, { sep } from 'path';
+import { sep } from 'path';
 
 import { ESLint } from 'eslint';
-import iconv from 'iconv-lite';
 import _ from 'lodash';
 
 import FileReader from './FileReader.js';
 import FileWriter from './FileWriter.js';
 import VueParser from './VueParser.js';
-
-/**
- *
- */
-function execute(command, callback) {
-	exec(command, (error, stdout, stderr) => {
-		typeof callback === 'function' && callback(error, stdout, stderr);
-	});
-}
 
 class VueReplacer {
 	/**
@@ -58,7 +44,7 @@ class VueReplacer {
 		this.fileWriter = new FileWriter(config);
 
 		// Create an instance with the `fix` option.
-		this.eslint = new ESLint({ fix: true });
+		// this.eslint = new ESLint({ fix: true });
 	}
 
 	async init() {

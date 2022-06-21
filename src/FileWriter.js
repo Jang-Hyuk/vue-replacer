@@ -18,7 +18,7 @@ class FileWriter {
 	}
 
 	/**
-	 *
+	 * stdout
 	 */
 	static execute(command, callback) {
 		exec(command, (error, stdout, stderr) => {

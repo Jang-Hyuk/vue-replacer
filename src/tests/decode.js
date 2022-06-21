@@ -14,5 +14,5 @@ const config = {
 
 const vueReplacer = new VueDecoder(config);
 vueReplacer.init().then(() => {
-	vueReplacer.convertVueFile();
+	vueReplacer.decodeVueFile();
 });

@@ -3,16 +3,7 @@ import path, { sep } from 'path';
 
 import BaseUtil from './BaseUtil.js';
 
-/**
- * @typedef {object} replaceTargetFileInfo
- * @property {string} filePath 파일 경로
- * @property {boolean} [isTemplate=false] wrapping 여부
- * @property {boolean} [isSync=false] 덮어쓰기 여부
- * @property {string|object} contents wrapping 여부
- * @property {string} positionId 교체 대상 Id
- * @property {number} indentDepth 들여쓰기 Tab 수
- * @property {Function} task 덮어쓸 로직을 가지고 있는 비동기 함수 명
- */
+import './type.d.js';
 
 /** *.vue 파일을 구문 분석하여 Vue Replace 하기위한 정보를 추출 */
 class VueParser {
@@ -88,6 +79,55 @@ class VueParser {
 		this.tplFileInfo.contents = this.extractTemplate(vueFileContents);
 		this.scriptFileInfo.contents = this.extractScript(vueFileContents);
 		this.styleFileInfo.contents = this.extractStyle(vueFileContents);
+	}
+
+	/**
+	 * Extract *.Vue Template
+	 * @alias Template Converter
+	 * @param {string} vueFile
+	 * @returns {string}
+	 */
+	extractTemplate(vueFile) {
+		const endDelimiter = '<script';
+		const chunkStartDelimiter = '<template';
+		const chunkEndDelimiter = '</template>';
+
+		const vueOriginalTpl = _.chain(vueFile.slice(0, vueFile.indexOf(endDelimiter)))
+			.thru(tSrc => tSrc.slice(0, tSrc.lastIndexOf(chunkEndDelimiter)))
+			.thru(tSrc => tSrc.slice(tSrc.indexOf(chunkStartDelimiter)))
+			.value();
+
+		const realTplStartIndex = vueOriginalTpl.indexOf('>');
+
+		// template(tpl) 시작 tag 닫는 위치부터 template 종료 tag 범위 짜름
+		const tplHeader = vueOriginalTpl.slice(0, realTplStartIndex);
+		const tplHeaderInfo = BaseUtil.toDictionary(tplHeader, ' ', '=', this.NEW_LINE);
+		const tplBody = vueOriginalTpl.slice(realTplStartIndex + 1);
+
+		const isSync = tplHeaderInfo.isSync === '1';
+		this.tplFileInfo.isSync = isSync;
+
+		if (!isSync) {
+			return false;
+		}
+
+		let realContents = tplBody;
+		if (tplHeaderInfo.isTemplate === '1') {
+			realContents = `${this.NEW_LINE}<template v-cloak id="${tplHeaderInfo.id}">${tplBody}${this.NEW_LINE}</template>`;
+			this.tplFileInfo.isTemplate = true;
+		}
+
+		// 파일 경로가 있다면 경로 수정
+		if (tplHeaderInfo.fileSrc) {
+			this.tplFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
+		}
+
+		// this.htmlFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
+		this.tplFileInfo.indentDepth = tplHeaderInfo.depth
+			? parseInt(tplHeaderInfo.depth, 10)
+			: 0;
+		this.tplFileInfo.positionId = tplHeaderInfo.id ?? '';
+		return realContents;
 	}
 
 	/**
@@ -168,57 +208,7 @@ class VueParser {
 	}
 
 	/**
-	 * Extract *.Vue Template
-	 * @alias Template Converter
-	 * @param {string} vueFile
-	 * @returns {string}
-	 */
-	extractTemplate(vueFile) {
-		const endDelimiter = '<script';
-		const chunkStartDelimiter = '<template';
-		const chunkEndDelimiter = '</template>';
-
-		const vueOriginalTpl = _.chain(vueFile.slice(0, vueFile.indexOf(endDelimiter)))
-			.thru(tSrc => tSrc.slice(0, tSrc.lastIndexOf(chunkEndDelimiter)))
-			.thru(tSrc => tSrc.slice(tSrc.indexOf(chunkStartDelimiter)))
-			.value();
-
-		const realTplStartIndex = vueOriginalTpl.indexOf('>');
-
-		// template(tpl) 시작 tag 닫는 위치부터 template 종료 tag 범위 짜름
-		const tplHeader = vueOriginalTpl.slice(0, realTplStartIndex);
-		const tplHeaderInfo = BaseUtil.toDictionary(tplHeader, ' ', '=', this.NEW_LINE);
-		const tplBody = vueOriginalTpl.slice(realTplStartIndex + 1);
-
-		const isSync = tplHeaderInfo.isSync === '1';
-		this.tplFileInfo.isSync = isSync;
-
-		if (!isSync) {
-			return false;
-		}
-
-		let realContents = tplBody;
-		if (tplHeaderInfo.isTemplate === '1') {
-			realContents = `${this.NEW_LINE}<template v-cloak id="${tplHeaderInfo.id}">${tplBody}${this.NEW_LINE}</template>`;
-			this.tplFileInfo.isTemplate = true;
-		}
-
-		// 파일 경로가 있다면 경로 수정
-		if (tplHeaderInfo.fileSrc) {
-			this.tplFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
-		}
-
-		// this.htmlFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
-		this.tplFileInfo.indentDepth = tplHeaderInfo.depth
-			? parseInt(tplHeaderInfo.depth, 10)
-			: 0;
-		this.tplFileInfo.positionId = tplHeaderInfo.id ?? '';
-		return realContents;
-	}
-
-	/**
-	 * Extract *.Vue Template
-	 * @alias Template Converter
+	 * Extract *.Vue Style
 	 * @param {string} vueFile
 	 * @returns {string}
 	 */
