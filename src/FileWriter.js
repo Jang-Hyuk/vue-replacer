@@ -8,10 +8,10 @@ import FileReader from './FileReader.js';
 
 class FileWriter {
 	constructor(config) {
-		const { isEuckr = true, adminFolder, isIeMode = false } = config;
+		const { isEucKr = true, adminFolder, isIeMode = false } = config;
 
 		this.isIeMode = isIeMode;
-		this.isEuckr = isEuckr;
+		this.isEucKr = isEucKr;
 		this.adminFolder = adminFolder;
 
 		this.fileReader = new FileReader(config);
@@ -22,9 +22,7 @@ class FileWriter {
 	 */
 	static execute(command, callback) {
 		exec(command, (error, stdout, stderr) => {
-			if (typeof callback === 'function') {
-				callback(error, stdout, stderr);
-			}
+			typeof callback === 'function' && callback(error, stdout, stderr);
 		});
 	}
 
@@ -113,7 +111,7 @@ class FileWriter {
 	 * @param {string} contents 덮어쓸 file text
 	 */
 	writePureFile(filePath, contents = '') {
-		if (this.isEuckr) {
+		if (this.isEucKr) {
 			return new Promise((resolve, reject) => {
 				fs.writeFile(
 					filePath,
@@ -121,17 +119,14 @@ class FileWriter {
 					{
 						encoding: 'binary'
 					},
-					err => {
-						if (err) {
-							reject(err);
-						}
-
-						resolve(true);
-					}
+					err => (err ? reject(err) : resolve(true))
 				);
 			});
 		}
-		// FIXME utf-8 구현
+		// utf-8
+		return new Promise((resolve, reject) => {
+			fs.writeFile(filePath, contents, err => (err ? reject(err) : resolve(true)));
+		});
 	}
 }
 

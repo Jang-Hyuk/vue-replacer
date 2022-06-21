@@ -11,7 +11,7 @@ class VueReplacer {
 	/**
 	 * @param {object} config Replacer 생성자 옵션
 	 * @param {string} config.filePath file full path (d:/temp/conts/js/*.vue)
-	 * @param {boolean} [config.isEuckr = true] iconv 로 최종 내보낼 파일 인코딩 형식
+	 * @param {boolean} [config.isEucKr = true] iconv 로 최종 내보낼 파일 인코딩 형식
 	 * @param {string} [config.fileSep = sep] window vs linux file 구분자에 따른 값
 	 * @param {string} [config.isIeMode = false] IE 모드일 경우 output file에 eslint 를 적용하여 저장. 속도가 느린 단점이 있음
 	 * @param {string} config.adminFolder admin 폴더명. IE 모드 동작시 해당 폴더 아래에 존재하는 js만 유효한 걸로 판단
@@ -20,7 +20,7 @@ class VueReplacer {
 		const {
 			filePath,
 			fileSep = sep,
-			isEuckr = true,
+			isEucKr = true,
 			adminFolder,
 			isIeMode = false
 		} = config;
@@ -36,7 +36,7 @@ class VueReplacer {
 		// ↓↓↓ set constructor params
 		this.vueFileFolder = _(filePath).split(fileSep).initial().join(fileSep);
 		this.vueFilePath = filePath;
-		this.isEuckr = isEuckr;
+		this.isEucKr = isEucKr;
 		this.adminFolder = adminFolder;
 
 		this.vueParser = new VueParser(config);

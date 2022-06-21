@@ -3,14 +3,14 @@ import iconv from 'iconv-lite';
 
 class FileReader {
 	constructor(config) {
-		const { isEuckr = true, adminFolder, isIeMode = false } = config;
+		const { isEucKr = true, adminFolder, isIeMode = false } = config;
 
 		this.isIeMode = isIeMode;
-		this.isEuckr = isEuckr;
+		this.isEucKr = isEucKr;
 		this.adminFolder = adminFolder;
 	}
 
-	static readEuckrFile(filePath) {
+	static readEucKrFile(filePath) {
 		return new Promise(resolve => {
 			try {
 				fs.createReadStream(filePath)
@@ -30,14 +30,13 @@ class FileReader {
 	static readUtfFile(filePath) {
 		return new Promise(resolve => {
 			try {
-				fs.createReadStream(filePath)
-					.pipe(iconv.decodeStream('utf-8'))
-					.collect((err, decodedBody) => {
-						if (err) {
-							resolve('');
-						}
-						resolve(decodedBody);
-					});
+				fs.readFile(filePath, (err, data) => {
+					if (err) {
+						resolve('');
+					}
+
+					resolve(data.toString());
+				});
 			} catch (error) {
 				resolve('');
 			}
@@ -46,10 +45,10 @@ class FileReader {
 
 	async getFile(filePath) {
 		let file = '';
-		if (this.isEuckr) {
-			file = await FileReader.readEuckrFile(filePath);
+		if (this.isEucKr) {
+			file = await FileReader.readEucKrFile(filePath);
 		} else {
-			// FIXME utf-8 구현
+			file = await FileReader.readUtfFile(filePath);
 		}
 
 		return file;

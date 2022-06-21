@@ -40,6 +40,8 @@
 		/**********************/
 		"prettier/prettier": "error",
 
+		"no-unused-expressions": "off",
+
 		"consistent-return": "off",
 		"no-console": "off",
 		// "import/no-named-as-default": "off",
