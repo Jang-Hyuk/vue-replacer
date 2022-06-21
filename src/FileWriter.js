@@ -55,11 +55,16 @@ class FileWriter {
 		// IE 모드이면 bak 파일에 인코딩 과정을 거친 후 저장
 		if (isNeedEslintFix) {
 			const isAdminIeMode = this.isIeMode && filePath.includes(this.adminFolder);
-			if (!isAdminIeMode) {
+			// admin ie로 페이지를 수정할 경우 es5 문법에 의한 오류가 생기므로 하지 않음
+			if (isAdminIeMode === false) {
 				this.writePureFile(filePath, contents);
 			}
-			// 파일에 저장 후 해당 파일을 인코딩 과정을 거친 후 저장
-			return this.writeEslintFixFile(filePath, contents, ext);
+			// euc-kr일 경우 eslint --fix 하면 파일 변환이 깨지므로 utf-8로 임시 저장 후 --fix 처리하고 다시 저장
+			if (this.isEucKr) {
+				return this.writeEslintFixFile(filePath, contents, ext);
+			}
+
+			return FileWriter.execute(`eslint --fix ${filePath}`);
 		}
 
 		// 그냥 저장
@@ -67,6 +72,7 @@ class FileWriter {
 	}
 
 	/**
+	 * Euc-Kr일 경우 eslint가 깨지므로 temp파일에 임시 저장 후 처리
 	 * IE용. File을 저장한 후 ESLint 과정을 추가 수행. CLI eslint 과정에 시간 소요가 큼(2초 이상)
 	 * @param {string} filePath
 	 * @param {string} contents utf-8
@@ -123,6 +129,7 @@ class FileWriter {
 				);
 			});
 		}
+
 		// utf-8
 		return new Promise((resolve, reject) => {
 			fs.writeFile(filePath, contents, err => (err ? reject(err) : resolve(true)));
