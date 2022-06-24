@@ -32,13 +32,13 @@ class FileReader {
 			try {
 				fs.readFile(filePath, (err, data) => {
 					if (err) {
-						resolve('');
+						resolve(err);
 					}
 
 					resolve(data.toString());
 				});
 			} catch (error) {
-				resolve('');
+				resolve(error);
 			}
 		});
 	}

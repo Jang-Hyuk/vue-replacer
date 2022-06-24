@@ -6,6 +6,7 @@ import _ from 'lodash';
 import FileReader from './FileReader.js';
 import FileWriter from './FileWriter.js';
 import VueParser from './VueParser.js';
+import BaseUtil from './BaseUtil.js';
 
 class VueReplacer {
 	/**
@@ -36,6 +37,7 @@ class VueReplacer {
 		// ↓↓↓ set constructor params
 		this.vueFileFolder = _(filePath).split(fileSep).initial().join(fileSep);
 		this.vueFilePath = filePath;
+		this.vuefile = '';
 		this.isEucKr = isEucKr;
 		this.adminFolder = adminFolder;
 
@@ -49,6 +51,7 @@ class VueReplacer {
 
 	async init() {
 		const vueFile = await this.fileReader.getFile(this.vueFilePath);
+		this.vuefile = vueFile;
 
 		this.NEW_LINE = vueFile.indexOf(this.NEW_LINE) >= 0 ? this.NEW_LINE : '\n';
 
@@ -86,6 +89,49 @@ class VueReplacer {
 			.join(this.NEW_LINE);
 
 		return result;
+	}
+
+	/**
+	 * vue path 사용하는 부분 분석
+	 * @param {replaceTargetFileInfo} config
+	 * @param {string} [targetFile]
+	 */
+	async parseDelimiterFile(config, targetFile = '') {
+		const { filePath, positionId } = config;
+
+		// 덮어쓸 html 파일을 읽음
+		if (targetFile.length === 0) {
+			if (filePath.length === 0) {
+				return {};
+			}
+
+			targetFile = await this.fileReader.getFile(filePath);
+		}
+
+		// return;
+		if (!targetFile.length) {
+			throw new Error(`${filePath}이 존재하지 않음`);
+		}
+		// Vue Deleimiter Range 에 해당하는 부분을 추출
+		const delimiterFileInfo = BaseUtil.sliceString(
+			targetFile,
+			`${this.vueStartDelimiter} ${positionId}`,
+			`${this.vueEndDelimiter} ${positionId}`
+		);
+
+		const { sDelimiterIndex, eDelimiterIndex } = delimiterFileInfo;
+
+		// Vue Delimiter에 해당하는 부분이 없다면 종료
+		if (_.includes([sDelimiterIndex, eDelimiterIndex], -1)) {
+			throw new Error(
+				`${filePath}: vue delimiter가 이상함 ${sDelimiterIndex}, ${eDelimiterIndex}`
+			);
+		}
+
+		return {
+			targetFile,
+			delimiterFileInfo
+		};
 	}
 }
 

@@ -36,7 +36,10 @@ class FileWriter {
 			if (index + 1 === fileConfigList.length) {
 				return prevTask
 					.then(results => currTask.task.call(caller, currTask.contents, results))
-					.then(fileTxt => this.writeFile(currTask.filePath, fileTxt));
+					.then(fileTxt => this.writeFile(currTask.filePath, fileTxt))
+					.catch(err => {
+						console.log('🚀 ~ file: fileWriter.js ~ line 41 ~ err', err);
+					});
 			}
 			return prevTask.then(results =>
 				currTask.task.call(caller, currTask.contents, results)
@@ -50,7 +53,7 @@ class FileWriter {
 	 * @param {string} contents
 	 */
 	writeFile(filePath, contents = '') {
-		const ext = filePath.split('.').pop().toLocaleLowerCase();
+		const ext = filePath.split('.').pop().toLowerCase();
 		const isNeedEslintFix = ['js', 'vue'].includes(ext);
 		// IE 모드이면 bak 파일에 인코딩 과정을 거친 후 저장
 		if (isNeedEslintFix) {
@@ -64,7 +67,9 @@ class FileWriter {
 				return this.writeEslintFixFile(filePath, contents, ext);
 			}
 
-			return FileWriter.execute(`eslint --fix ${filePath}`);
+			FileWriter.execute(`eslint --fix ${filePath}`);
+
+			return Promise.resolve();
 		}
 
 		// 그냥 저장
@@ -89,19 +94,19 @@ class FileWriter {
 		return new Promise((resolve, reject) => {
 			fs.writeFile(tempFilePath, contents, err => {
 				if (err) {
-					reject(err);
+					return reject(err);
 				}
 				// 2. 해당 파일 eslint 적용
 				FileWriter.execute(`eslint --fix ${tempFilePath}`, (error, result, stderr) => {
 					if (stderr) {
-						reject(stderr);
+						return reject(stderr);
 					}
 
 					// 3. 해당 파일 다시 읽어 들여 파일씀
 					FileReader.readUtfFile(tempFilePath).then(fileText => {
 						fs.rm(tempFilePath, rmErr => {
 							if (rmErr) {
-								reject(rmErr);
+								return reject(rmErr);
 							}
 						});
 						return this.writePureFile(filePath, fileText);
@@ -116,7 +121,18 @@ class FileWriter {
 	 * @param {string} filePath 경로
 	 * @param {string} contents 덮어쓸 file text
 	 */
-	writePureFile(filePath, contents = '') {
+	async writePureFile(filePath, contents = '') {
+		// 어떠한 이유에서든지 컨텐츠가 없다면 무시. 에러코드가 들어가는 경우도 있어서 무시처리
+		if (contents.length === 0 || contents.slice(0, 5) === 'Error') {
+			throw new Error(`❌ no file content. \n ${filePath}`);
+		}
+		const isExistFile = await fs.existsSync(filePath);
+
+		// 덮어쓸 파일이 없다면 무시
+		if (isExistFile === false) {
+			throw new Error(`❓ file does not exist. \n ${filePath}`);
+		}
+
 		if (this.isEucKr) {
 			return new Promise((resolve, reject) => {
 				fs.writeFile(

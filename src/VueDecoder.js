@@ -1,7 +1,6 @@
 import _ from 'lodash';
 
 import VueReplacer from './VueReplacer.js';
-import BaseUtil from './BaseUtil.js';
 
 import './type.d.js';
 
@@ -12,7 +11,7 @@ class VueDecoder extends VueReplacer {
 	 */
 	async decodeVueFile() {
 		this.vueParser.tplFileInfo.task = this.parseOtherFile;
-		this.vueParser.scriptFileInfo.task = this.parseJavascriptFile;
+		this.vueParser.scriptFileInfo.task = this.parseScriptFile;
 		this.vueParser.styleFileInfo.task = this.parseOtherFile;
 
 		const fileConfigs = [
@@ -21,63 +20,146 @@ class VueDecoder extends VueReplacer {
 			this.vueParser.styleFileInfo
 		];
 
-		// console.log('🚀 ~ file: VueDecoder.js ~ line 17 ~ fileConfigs', fileConfigs);
+		const promiseList = _.chain(fileConfigs)
+			.filter(config => config.filePath.length)
+			.groupBy('filePath')
+			.map((configList, filePath) => {
+				return new Promise(resolve => {
+					this.fileReader.getFile(filePath).then(fileConts => {
+						configList.forEach(config => {
+							config.task.call(this, config, fileConts).then(contents => {
+								config.contents = contents;
+								// 중복해서 resolve가 발생하지만 로직상 문제는 없으므로 그냥 둠
+								resolve(true);
+							});
+						});
+					});
+				});
+			})
+			.value();
 
-		// _.chain(fileConfigs)
-		// 	.filter(config => config.filePath.length)
-		// 	.groupBy('filePath')
-		// 	.forEach(configList => this.replaceEachFiles(configList))
-		// 	.value();
+		await Promise.all(promiseList);
+
+		const restoreVueFile = _.flow(
+			this.restoreTemplate,
+			this.restoreScript,
+			this.restoreStyle
+		);
+		console.log('vue file 쓰기 필요');
+
+		await this.fileWriter.writeFile(this.vueFilePath, restoreVueFile(this.vuefile));
+
+		console.log('decode complete');
 	}
 
-	async parseFile(fileConfigList) {}
+	/**
+	 * Script 영역 분석
+	 * @param {replaceTargetFileInfo} config
+	 * @param {string} fileConts 파일 내용
+	 */
+	async parseScriptFile(config, fileConts) {
+		try {
+			const { targetFile, delimiterFileInfo } = await this.parseDelimiterFile(
+				config,
+				fileConts
+			);
 
-	async parseJavascriptFile(filePath) {}
+			if (!targetFile.length) {
+				return '';
+			}
+			const { contents = '' } = delimiterFileInfo;
+
+			const vueOptDelimiter = this.vueParser.scriptFileInfo.isTemplate
+				? 'Vue.component'
+				: 'new Vue';
+
+			const vueOptDelimiterIndex = targetFile.indexOf(vueOptDelimiter);
+			if (vueOptDelimiterIndex === -1) {
+				throw new Error('유효한 vue delemiter가 존재하지 않습니다.');
+			}
+
+			return _.chain(contents.slice(0, contents.lastIndexOf(')')))
+				.split(this.NEW_LINE)
+				.tail()
+				.map(str => {
+					if (str.indexOf(vueOptDelimiter) !== -1) {
+						return 'export default {';
+					}
+					return str;
+				})
+				.join(this.NEW_LINE)
+				.value();
+		} catch (error) {
+			console.error(error);
+			return '';
+		}
+	}
+
+	/**
+	 * Template, Style 분석
+	 * @param {replaceTargetFileInfo} config
+	 * @param {string} fileConts 파일 내용
+	 */
+	async parseOtherFile(config, fileConts) {
+		try {
+			const { targetFile, delimiterFileInfo } = await this.parseDelimiterFile(
+				config,
+				fileConts
+			);
+
+			if (!targetFile.length) {
+				return '';
+			}
+			const { contents = '' } = delimiterFileInfo;
+
+			return _(contents)
+				.split(this.NEW_LINE)
+				.initial()
+				.tail()
+				.thru(contsArr => {
+					// script or template 태그 제거
+					if (config.isTemplate) {
+						return _(contsArr).initial().tail().value();
+					}
+					return contsArr;
+				})
+				.join(this.NEW_LINE);
+		} catch (error) {
+			console.error(error);
+			return '';
+		}
+	}
 
 	/**
 	 *
-	 * @param {string} contents 파일 내용
 	 * @param {replaceTargetFileInfo} config
 	 */
-	async parseOtherFile(contents, config) {}
+	getRestoreRangeIndex(config) {
+		const {} = config;
+	}
 
 	/**
 	 * Vue script 안의 내용을 동일 {fileName}.js 영역 교체 수행
-	 * @alias Js Converter
-	 * @param {string} vueScript
+	 * @param {string} vueFile
 	 */
-	async replaceVueScript(vueScript) {
-		if (_.isEmpty(vueScript)) {
-			return false;
-		}
-		// 덮어쓸 js 파일을 읽음
-		const jsFile = await this.fileReader.getFile(this.jsFileInfo.filePath);
+	restoreTemplate(vueFile) {
+		return vueFile;
+	}
 
-		if (!jsFile.length) {
-			return false;
-		}
-		// Vue Deleimiter Range 에 해당하는 부분을 추출
-		const { sDelimiterIndex, eDelimiterIndex } = VueReplacer.sliceString(
-			jsFile,
-			this.vueStartDelimiter,
-			this.vueEndDelimiter
-		);
-		// Vue Delimiter에 해당하는 부분이 없다면 종료
-		if (_.includes([sDelimiterIndex, eDelimiterIndex], -1)) {
-			return false;
-		}
-		// js파일에 덮어쓸 최초 시작 포인트 index를 읽어옴 => (new Vue({), Vue.component('any', {)) 이런식으로 { 가 시작점
-		const headerLastPositionIndex = jsFile.indexOf('{', sDelimiterIndex);
-		// Header + Vue Script + Footer 조합
-		const regExp = new RegExp(this.NEW_LINE, 'g');
-		const overwrittenJs = jsFile
-			.slice(0, headerLastPositionIndex)
-			.concat(
-				vueScript.replace(regExp, `${this.NEW_LINE}${this.TAB}`),
-				jsFile.slice(jsFile.slice(0, eDelimiterIndex).lastIndexOf('}') + 1)
-			);
+	/**
+	 * Vue script 안의 내용을 동일 {fileName}.js 영역 교체 수행
+	 * @param {string} vueFile
+	 */
+	restoreScript(vueFile) {
+		return vueFile;
+	}
 
-		this.writeFile(this.jsFileInfo.filePath, overwrittenJs);
+	/**
+	 * Vue script 안의 내용을 동일 {fileName}.js 영역 교체 수행
+	 * @param {string} vueFile
+	 */
+	restoreStyle(vueFile) {
+		return vueFile;
 	}
 }
 

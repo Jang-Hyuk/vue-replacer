@@ -2,7 +2,6 @@
 import _ from 'lodash';
 
 import VueReplacer from './VueReplacer.js';
-import BaseUtil from './BaseUtil.js';
 
 import './type.d.js';
 
@@ -33,41 +32,25 @@ class VueEncoder extends VueReplacer {
 	 * Vue script 안의 내용을 동일 {fileName}.js 영역 교체 수행
 	 * @alias Js Converter
 	 * @param {{scriptOuter: string, vueOption: string}} vueScriptInfo
-	 * @param {string} [targetFile]
+	 * @param {string} [file]
 	 */
-	async replaceVueScript(vueScriptInfo, targetFile = '') {
+	async replaceVueScript(vueScriptInfo, file = '') {
 		if (_.isEmpty(vueScriptInfo)) {
 			throw new Error('vueScript가 비어있음');
 		}
 
 		const { scriptOuter, vueOption } = vueScriptInfo;
 
-		const { filePath, positionId, indentDepth } = this.vueParser.scriptFileInfo;
-
-		// 덮어쓸 js 파일을 읽음
-		if (targetFile.length === 0) {
-			if (filePath.length === 0) {
-				return false;
-			}
-
-			targetFile = await this.fileReader.getFile(filePath);
-		}
-
-		if (!targetFile.length) {
-			throw new Error('js file이 존재하지 않음');
-		}
-		// Vue Deleimiter Range 에 해당하는 부분을 추출
-		const { sDelimiterIndex, eDelimiterIndex } = BaseUtil.sliceString(
-			targetFile,
-			`${this.vueStartDelimiter} ${positionId}`,
-			`${this.vueEndDelimiter} ${positionId}`
+		const { targetFile = '', delimiterFileInfo } = await this.parseDelimiterFile(
+			this.vueParser.scriptFileInfo,
+			file
 		);
-		// Vue Delimiter에 해당하는 부분이 없다면 종료
-		if (_.includes([sDelimiterIndex, eDelimiterIndex], -1)) {
-			throw new Error(
-				`js script delimiter가 이상함 ${sDelimiterIndex}, ${eDelimiterIndex}`
-			);
+		if (!targetFile.length) {
+			return false;
 		}
+
+		const { sDelimiterIndex, eDelimiterIndex } = delimiterFileInfo;
+
 		// js파일에 덮어쓸 최초 시작 포인트 index를 읽어옴 => (new Vue({), Vue.component('any', {)) 이런식으로 { 가 시작점
 		const vueOptDelimiter = this.vueParser.scriptFileInfo.isTemplate
 			? 'Vue.component'
@@ -83,6 +66,7 @@ class VueEncoder extends VueReplacer {
 			.thru(str => str.slice(0, str.lastIndexOf('{')))
 			.value();
 
+		const { indentDepth } = this.vueParser.scriptFileInfo;
 		const scriptContents = `${
 			this.addTabSpace(scriptOuter, indentDepth) +
 			savedLine +
@@ -104,45 +88,28 @@ class VueEncoder extends VueReplacer {
 	/**
 	 * Vue template 안의 내용을 지정된 {fileName}.html 영역 교체 수행
 	 * @param {string} vueTemplate
-	 * @param {string} [targetFiles]
+	 * @param {string} [file]
 	 */
-	async replaceVueTemplate(vueTemplate, targetFile = '') {
+	async replaceVueTemplate(vueTemplate, file = '') {
 		if (_.isEmpty(vueTemplate)) {
 			throw new Error('vueTemplate이 비어있음');
 		}
 
-		const { filePath, indentDepth, positionId } = this.vueParser.tplFileInfo;
-		// 덮어쓸 html 파일을 읽음
-		if (targetFile.length === 0) {
-			if (filePath.length === 0) {
-				return false;
-			}
-
-			// eslint-disable-next-line no-param-reassign
-			targetFile = await this.fileReader.getFile(filePath);
-		}
-
-		// return;
-		if (!targetFile.length) {
-			throw new Error('html file이 존재하지 않음');
-		}
-		// Vue Deleimiter Range 에 해당하는 부분을 추출
-		const { sDelimiterIndex, eDelimiterIndex } = BaseUtil.sliceString(
-			targetFile,
-			`${this.vueStartDelimiter} ${positionId} `,
-			`${this.vueEndDelimiter} ${positionId} `
+		const { targetFile = '', delimiterFileInfo } = await this.parseDelimiterFile(
+			this.vueParser.tplFileInfo,
+			file
 		);
 
-		// Vue Delimiter에 해당하는 부분이 없다면 종료
-		if (_.includes([sDelimiterIndex, eDelimiterIndex], -1)) {
-			throw new Error(
-				`vue template delimiter가 이상함 ${sDelimiterIndex}, ${eDelimiterIndex}`
-			);
+		if (!targetFile.length) {
+			return false;
 		}
+
+		const { sDelimiterIndex, eDelimiterIndex } = delimiterFileInfo;
 
 		// html파일에 덮어쓸 최초 시작 포인트 index를 읽어옴(개행)
 		const headerLastPositionIndex = targetFile.indexOf(this.NEW_LINE, sDelimiterIndex);
 
+		const { indentDepth } = this.vueParser.tplFileInfo;
 		// html indent depth 에 따라 tab 간격 조절
 		const splittedVueTemplate = vueTemplate.split(this.NEW_LINE);
 		let realVueTemplate = _(splittedVueTemplate).initial().join(this.NEW_LINE);
@@ -172,45 +139,29 @@ class VueEncoder extends VueReplacer {
 	/**
 	 * Vue template 안의 내용을 지정된 {fileName}.html 영역 교체 수행
 	 * @param {string} vueStyle
-	 * @param {string} [targetFile]
+	 * @param {string} [file]
 	 * @returns {any}
 	 */
-	async replaceVueStyle(vueStyle, targetFile = '') {
+	async replaceVueStyle(vueStyle, file = '') {
 		if (_.isEmpty(vueStyle)) {
 			throw new Error('vue style이 비어있음');
 		}
-		const { filePath, indentDepth, positionId } = this.vueParser.styleFileInfo;
 
-		if (targetFile.length === 0) {
-			if (filePath.length === 0) {
-				return false;
-			}
-
-			// eslint-disable-next-line no-param-reassign
-			targetFile = await this.fileReader.getFile(filePath);
-		}
-		// 덮어쓸 html 파일을 읽음
-		// return;
-		if (!targetFile.length) {
-			throw new Error('html file이 존재하지 않음');
-		}
-		// Vue Deleimiter Range 에 해당하는 부분을 추출
-		const { sDelimiterIndex, eDelimiterIndex } = BaseUtil.sliceString(
-			targetFile,
-			`${this.vueStartDelimiter} ${positionId} `,
-			`${this.vueEndDelimiter} ${positionId} `
+		const { targetFile = '', delimiterFileInfo } = await this.parseDelimiterFile(
+			this.vueParser.styleFileInfo,
+			file
 		);
 
-		// Vue Delimiter에 해당하는 부분이 없다면 종료
-		if (_.includes([sDelimiterIndex, eDelimiterIndex], -1)) {
-			throw new Error(
-				`vue style delimiter가 이상함 ${sDelimiterIndex}, ${eDelimiterIndex}`
-			);
+		if (!targetFile.length) {
+			return false;
 		}
+
+		const { sDelimiterIndex, eDelimiterIndex } = delimiterFileInfo;
 
 		// html파일에 덮어쓸 최초 시작 포인트 index를 읽어옴(개행)
 		const headerLastPositionIndex = targetFile.indexOf(this.NEW_LINE, sDelimiterIndex);
 
+		const { indentDepth } = this.vueParser.styleFileInfo;
 		let realVueStyle = vueStyle;
 		// 템플릿 모드 일 경우
 		// html indent depth 에 따라 tab 간격 조절

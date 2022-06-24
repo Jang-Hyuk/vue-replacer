@@ -42,7 +42,7 @@ watch(
 				_.chain(config).clone().set('filePath', filename).value()
 			);
 			vueReplacer.init().then(() => {
-				vueReplacer.convertVueFile();
+				vueReplacer.encodeVueFile();
 			});
 		} else {
 			console.log('😈 filename not provided');

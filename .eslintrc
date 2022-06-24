@@ -41,6 +41,7 @@
 		"prettier/prettier": "error",
 
 		"no-unused-expressions": "off",
+		"no-param-reassign": "off",
 
 		"consistent-return": "off",
 		"no-console": "off",
