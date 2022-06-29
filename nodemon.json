@@ -5,8 +5,11 @@
     "node_modules",
     "dist",
     "coverage",
-    "cTest.js",
-    "*.temp.js"
+    "**/cTest.vue",
+    "**/cTest.html",
+    "**/cTest.js",
+    "**/*.temp.js",
+    "**/*.temp.vue"
   ],
   "watch": [
     "."

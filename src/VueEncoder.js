@@ -6,10 +6,7 @@ import VueReplacer from './VueReplacer.js';
 import './type.d.js';
 
 class VueEncoder extends VueReplacer {
-	/**
-	 * Vue 파일 변경될 경우 변환 작업 처리
-	 * @param {string} path fileFullPath
-	 */
+	/** Vue 파일 변경될 경우 변환 작업 처리 */
 	async encodeVueFile() {
 		this.vueParser.tplFileInfo.task = this.replaceVueTemplate;
 		this.vueParser.scriptFileInfo.task = this.replaceVueScript;

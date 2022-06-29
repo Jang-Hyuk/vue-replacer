@@ -1,6 +1,5 @@
 import { sep } from 'path';
 
-import { ESLint } from 'eslint';
 import _ from 'lodash';
 
 import FileReader from './FileReader.js';
@@ -44,9 +43,6 @@ class VueReplacer {
 		this.vueParser = new VueParser(config);
 		this.fileReader = new FileReader(config);
 		this.fileWriter = new FileWriter(config);
-
-		// Create an instance with the `fix` option.
-		// this.eslint = new ESLint({ fix: true });
 	}
 
 	async init() {
