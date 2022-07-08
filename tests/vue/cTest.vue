@@ -25,13 +25,16 @@
 				</div>
 				<div class="cs_inperson__mylist_reply_master_txt_wrap">
 					<pre class="cs_inperson__mylist_reply_master_txt">
-											{{ inquiryInfo.response }}
-										</pre>
+												{{ inquiryInfo.response }}
+												</pre
+					>
 				</div>
 			</div>
 			<pre class="cs_inperson__mylist_reply_txt_detail">
-				{{ inquiryInfo.contents }}
-						</pre>
+					{{ inquiryInfo.contents }}
+							</pre
+			>
+
 			<template slot="hi">
 				<div>ΩΩ∑‘¿Ã¥Á≤≤</div>
 			</template>

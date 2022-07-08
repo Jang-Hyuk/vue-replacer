@@ -5,6 +5,37 @@ import _ from 'lodash';
 
 class BaseUtil {
 	/**
+	 * 특정 문자열 사이의 문자열 추출
+	 * @param {string} str 추출할 대상이 되는 문자열
+	 * @param {string} sDelimiter 특정 문자열 시작 구분자
+	 * @param {string} eDelimiter 특정 문자열 종료 구분자
+	 * @param {{shouldTrim: boolean, shouldLowerCase: boolean, shouldUppercase: boolean}} [option] 추가적인 정제처리 여부.
+	 * @returns {string[]} 추출한 문자열 목록
+	 * @example
+	 * extractBetweenStrings('01234567', '23', '56'): ['45']
+	 * extractBetweenStrings('hi #a# 여긴 무시  # b# end', '#', '#'): ['a', 'b']
+	 */
+	static extractBetweenStrings(str, sDelimiter, eDelimiter, option = {}) {
+		const startRegex = new RegExp(`(${sDelimiter}).*?(${eDelimiter})`, 'g');
+
+		let results = str
+			.match(startRegex)
+			.map(s => s.replace(sDelimiter, '').replace(eDelimiter, ''));
+
+		const commnadList = [];
+
+		option.shouldTrim && commnadList.push(_.trim);
+		option.shouldLowerCase && commnadList.push(_.toLower);
+		option.shouldUppercase && commnadList.push(_.toUpper);
+
+		if (commnadList.length) {
+			const flowCommand = _.flow(commnadList);
+			results = results.map(flowCommand);
+		}
+		return results;
+	}
+
+	/**
 	 * @param {string} dirName Folder 경로
 	 * @returns {string[]} 폴더 이름
 	 */

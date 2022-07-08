@@ -178,27 +178,49 @@ class VueParser {
 		const srcDelimiter = 'export default';
 		const scriptConfigIndex = srcBody.indexOf(srcDelimiter);
 		let scriptOuter = srcBody.slice(0, scriptConfigIndex);
+
+		let componentList = [];
+
 		// import 사용시 끝나는 지점 추출
-		if (scriptOuter.indexOf(" from '") !== -1) {
+		if (/(?=import)(.*?)(?=from)/g.test(scriptOuter)) {
+			componentList = BaseUtil.extractBetweenStrings(scriptOuter, 'import', 'from', {
+				shouldTrim: true
+			}).filter(str => /^[a-zA-Z0-9]*$/g.test(str));
 			const tempIndex = scriptOuter.indexOf(';', scriptOuter.lastIndexOf(" from '"));
 			scriptOuter = scriptOuter.slice(scriptOuter.indexOf(this.NEW_LINE, tempIndex + 1));
 		}
-
 		let vueOption = _.chain(srcBody.slice(scriptConfigIndex))
 			.replace(srcDelimiter, '')
 			.trim()
 			.thru(str => str.slice(0, str.length - 1))
 			.value();
 
-		// 컴포넌트를 사용하고 있다면 해당 구간을 삭제
-		const componentIndex = vueOption.indexOf('components: {');
+		// 컴포넌트를 사용하고 있다면 해당 컴포넌트 위에서 추출한 componentList와 비교하여 제거
+		const componentDelimiter = 'components: {';
+		const componentIndex = vueOption.indexOf(componentDelimiter);
 		if (componentIndex !== -1) {
 			const componentsPrevContents = vueOption.slice(0, componentIndex);
 			const componentsNextIndex = vueOption.indexOf('},', componentIndex);
-
-			vueOption = componentsPrevContents.concat(
-				vueOption.slice(vueOption.indexOf(this.NEW_LINE, componentsNextIndex))
+			const componentStr = vueOption.slice(
+				componentIndex + componentDelimiter.length,
+				componentsNextIndex
 			);
+			const realComponents = componentStr
+				.split(',')
+				.map(_.trim)
+				.filter(comp => !componentList.includes(comp))
+				.join(',');
+			// 컴포넌트가 존재한다면 삽입
+			if (realComponents) {
+				vueOption = componentsPrevContents.concat(
+					`${componentDelimiter} ${realComponents} },`,
+					vueOption.slice(vueOption.indexOf(this.NEW_LINE, componentsNextIndex))
+				);
+			} else {
+				vueOption = componentsPrevContents.concat(
+					vueOption.slice(vueOption.indexOf(this.NEW_LINE, componentsNextIndex))
+				);
+			}
 		}
 
 		return {

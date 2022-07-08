@@ -7,6 +7,7 @@ var defaultLabels = {
 };
 
 Vue.component('TalkConts', {
+	components: { CompTemp: CompTemp },
 	data: function () {
 		return {
 			isShow: 123456,

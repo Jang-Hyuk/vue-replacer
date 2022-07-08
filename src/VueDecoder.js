@@ -45,11 +45,11 @@ class VueDecoder extends VueReplacer {
 			this.restoreScript,
 			this.restoreStyle
 		);
-		console.log('vue file 쓰기 필요');
+		const results = restoreVueFile.call(this, this.vuefile);
 
-		await this.fileWriter.writeFile(this.vueFilePath, restoreVueFile(this.vuefile));
+		await this.fileWriter.writeFile(this.vueFilePath, results);
 
-		console.log('decode complete');
+		console.log('decode complete', this.vueFilePath);
 	}
 
 	/**
@@ -131,35 +131,77 @@ class VueDecoder extends VueReplacer {
 	}
 
 	/**
-	 *
-	 * @param {replaceTargetFileInfo} config
+	 * 파일 복원 계산
+	 * @param {string} vueFile vue 파일
+	 * @param {string} source 바꿔치기할 내용
+	 * @param {object} config
+	 * @param {string} [config.endDelimiter] 영역이 끝나는 지점 구분자
+	 * @param {string} config.chunkStartDelimiter 잘라낼 청크 시작 구분자
+	 * @param {string} config.chunkEndDelimiter 잘라낼 청크 끝 구분자
 	 */
-	getRestoreRangeIndex(config) {
-		const {} = config;
+	restore(vueFile, source, config) {
+		const { chunkEndDelimiter, chunkStartDelimiter, endDelimiter = '' } = config;
+
+		let nextChunkIndex = vueFile.lastIndexOf(endDelimiter);
+		nextChunkIndex = nextChunkIndex === -1 ? vueFile.length - 1 : nextChunkIndex;
+
+		const rangeStartIndex = _.chain(vueFile.indexOf(chunkStartDelimiter))
+			.thru(index => vueFile.indexOf('>', index))
+			.value();
+		const rangeEndIndex = _.chain(vueFile.slice(0, nextChunkIndex))
+			.thru(tSrc => tSrc.lastIndexOf(chunkEndDelimiter))
+			.value();
+
+		const header = vueFile.slice(0, rangeStartIndex + 1);
+		const footer = vueFile.slice(rangeEndIndex);
+
+		return `${header}${this.NEW_LINE}${source}${this.NEW_LINE}${footer}`;
 	}
 
 	/**
-	 * Vue script 안의 내용을 동일 {fileName}.js 영역 교체 수행
+	 * Vue Template 안의 내용을 동일 영역 교체 수행
 	 * @param {string} vueFile
 	 */
 	restoreTemplate(vueFile) {
-		return vueFile;
+		const chunkStartDelimiter = '<template';
+		const chunkEndDelimiter = '</template>';
+		const endDelimiter = '<script';
+
+		return this.restore(vueFile, this.vueParser.tplFileInfo.contents, {
+			chunkStartDelimiter,
+			chunkEndDelimiter,
+			endDelimiter
+		});
 	}
 
 	/**
-	 * Vue script 안의 내용을 동일 {fileName}.js 영역 교체 수행
+	 * Vue script 안의 내용을 동일 영역 교체 수행
 	 * @param {string} vueFile
 	 */
 	restoreScript(vueFile) {
-		return vueFile;
+		const chunkStartDelimiter = '<script';
+		const chunkEndDelimiter = '</script>';
+		const endDelimiter = '<style';
+
+		return this.restore(vueFile, this.vueParser.scriptFileInfo.contents, {
+			chunkStartDelimiter,
+			chunkEndDelimiter,
+			endDelimiter
+		});
 	}
 
 	/**
-	 * Vue script 안의 내용을 동일 {fileName}.js 영역 교체 수행
+	 * Vue style 안의 내용을 동일 영역 교체 수행
 	 * @param {string} vueFile
 	 */
 	restoreStyle(vueFile) {
-		return vueFile;
+		const chunkStartDelimiter = '<style';
+		const chunkEndDelimiter = '</style>';
+
+		return this.restore(vueFile, this.vueParser.styleFileInfo.contents, {
+			chunkStartDelimiter,
+			chunkEndDelimiter
+		});
 	}
 }
 
