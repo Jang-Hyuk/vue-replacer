@@ -7,14 +7,11 @@ import FileWriter from './FileWriter.js';
 import VueParser from './VueParser.js';
 import BaseUtil from './BaseUtil.js';
 
+import './type.d.js';
+
 class VueReplacer {
 	/**
-	 * @param {object} config Replacer 생성자 옵션
-	 * @param {string} config.filePath file full path (d:/temp/conts/js/*.vue)
-	 * @param {boolean} [config.isEucKr = true] iconv 로 최종 내보낼 파일 인코딩 형식
-	 * @param {string} [config.fileSep = sep] window vs linux file 구분자에 따른 값
-	 * @param {string} [config.isIeMode = false] IE 모드일 경우 output file에 eslint 를 적용하여 저장. 속도가 느린 단점이 있음
-	 * @param {string} config.adminFolder admin 폴더명. IE 모드 동작시 해당 폴더 아래에 존재하는 js만 유효한 걸로 판단
+	 * @param {replacerConfig} config Replacer 생성자 옵션
 	 */
 	constructor(config) {
 		const {
@@ -43,6 +40,8 @@ class VueReplacer {
 		this.vueParser = new VueParser(config);
 		this.fileReader = new FileReader(config);
 		this.fileWriter = new FileWriter(config);
+
+		this.observers = [];
 	}
 
 	async init() {
@@ -128,6 +127,26 @@ class VueReplacer {
 			targetFile,
 			delimiterFileInfo
 		};
+	}
+
+	attachObserver(observer) {
+		this.observers.push(observer);
+	}
+
+	dettachObserver(observer) {
+		this.observers = this.observers.filter(ob => ob !== observer);
+	}
+
+	notifyCompleteEncode() {
+		this.observers.forEach(ob => {
+			typeof ob.onCompleteEncode === 'function' && ob.onCompleteEncode(this);
+		});
+	}
+
+	notifyCompleteDecode() {
+		this.observers.forEach(ob => {
+			typeof ob.onCompleteDecode === 'function' && ob.onCompleteDecode(this);
+		});
 	}
 }
 

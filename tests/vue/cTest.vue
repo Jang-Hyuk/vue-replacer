@@ -8,7 +8,7 @@
 >
 	<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
 		<div class="qmeet_banner">
-			<!-- 배너영역 슬라이드-->
+			<!-- 배너영역 슬라이드 ㅎㅎ  -->
 			<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
 			<div class="qmeet_banner__wrap">
 				<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
@@ -23,17 +23,8 @@
 						{{ inquiryInfo.re_date }}
 					</span>
 				</div>
-				<div class="cs_inperson__mylist_reply_master_txt_wrap">
-					<pre class="cs_inperson__mylist_reply_master_txt">
-												{{ inquiryInfo.response }}
-												</pre
-					>
-				</div>
+				<div class="cs_inperson__mylist_reply_master_txt_wrap"></div>
 			</div>
-			<pre class="cs_inperson__mylist_reply_txt_detail">
-					{{ inquiryInfo.contents }}
-							</pre
-			>
 
 			<template slot="hi">
 				<div>슬롯이당께</div>

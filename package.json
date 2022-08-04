@@ -5,11 +5,11 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "manage": "nodemon src/FileManager.js",
     "start": "node src/index.js",
     "start:ie": "node src/index.js ie",
     "dev": "nodemon --trace-warnings src/index.js",
     "dev:ie": "nodemon --trace-warnings src/index.js ie",
+    "test-manage": "nodemon --trace-warnings src/tests/fileManage.js",
     "test-encode": "nodemon  --trace-warnings src/tests/encode.js",
     "test-encode:ie": "nodemon  --trace-warnings src/tests/encode.js ie",
     "test-decode": "nodemon  --trace-warnings src/tests/decode.js",

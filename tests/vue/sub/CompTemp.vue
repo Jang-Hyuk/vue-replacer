@@ -1,14 +1,24 @@
-<template>
-	<div></div>
+<template
+	id="tplCompTemp"
+	isTemplate="1"
+	isSync="1"
+	depth="1"
+	fileSrc="../../html/cTest.html"
+>
+	<div>hello CompTemp</div>
 </template>
 
-<script>
-console.log('hi');
+<script
+	id="jsCompTemp"
+	fileSrc="../../html/cTest.html"
+	isSync="1"
+	isTemplate="1"
+	depth="1"
+>
 /**
  * @typedef {Object} tableSchema
  * @property {string} [id=''] column id
  */
-
 var defaultLabels = {
 	first: 'First',
 	last: 'Last',
@@ -43,3 +53,5 @@ export default {
 	template: '#c-talk-conts'
 };
 </script>
+
+<style></style>

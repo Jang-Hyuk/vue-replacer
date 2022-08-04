@@ -18,11 +18,17 @@ class VueEncoder extends VueReplacer {
 			this.vueParser.styleFileInfo
 		];
 
-		_.chain(fileConfigs)
+		const promiseList = _.chain(fileConfigs)
 			.filter(config => config.isSync && config.filePath.length)
 			.groupBy('filePath')
-			.forEach(configList => this.fileWriter.replaceEachFiles(configList, this))
+			.map(configList => this.fileWriter.replaceEachFiles(configList, this))
 			.value();
+
+		await Promise.all(promiseList);
+
+		this.notifyCompleteEncode();
+
+		console.log('💚 encode complete', this.vueFilePath);
 	}
 
 	/**
@@ -32,6 +38,7 @@ class VueEncoder extends VueReplacer {
 	 * @param {string} [file]
 	 */
 	async replaceVueScript(vueScriptInfo, file = '') {
+		// console.log('🚀 ~ file: VueEncoder.js ~ line 41 ~ vueScriptInfo', vueScriptInfo);
 		if (_.isEmpty(vueScriptInfo)) {
 			throw new Error('vueScript가 비어있음');
 		}

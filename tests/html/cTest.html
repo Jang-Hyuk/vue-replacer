@@ -44,7 +44,7 @@ $pmTodayInfo = $row[0][0];
 	<template v-cloak id="photoPopup">
 		<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
 			<div class="qmeet_banner">
-				<!-- 배너영역 슬라이드-->
+				<!-- 배너영역 슬라이드 ㅎㅎ  -->
 				<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
 				<div class="qmeet_banner__wrap">
 					<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
@@ -59,17 +59,8 @@ $pmTodayInfo = $row[0][0];
 							{{ inquiryInfo.re_date }}
 						</span>
 					</div>
-					<div class="cs_inperson__mylist_reply_master_txt_wrap">
-						<pre class="cs_inperson__mylist_reply_master_txt">
-													{{ inquiryInfo.response }}
-													</pre
-						>
-					</div>
+					<div class="cs_inperson__mylist_reply_master_txt_wrap"></div>
 				</div>
-				<pre class="cs_inperson__mylist_reply_txt_detail">
-						{{ inquiryInfo.contents }}
-								</pre
-				>
 
 				<template slot="hi">
 					<div>슬롯이당께</div>
@@ -78,6 +69,15 @@ $pmTodayInfo = $row[0][0];
 		</div>
 </template>
 <!-- ### !Vue photoPopup ### -->
+
+
+<!-- ### Vue tplCompTemp -->
+	<template v-cloak id="tplCompTemp">
+		<div>hello CompTemp</div>
+</template>
+<!-- ### !Vue tplCompTemp -->
+
+
 <script>
 	var __varsInsChat = {
 		hasIntro: "<?= $pmTodayInfo['chk_data'] ?>" === 'y',
@@ -113,6 +113,48 @@ $pmTodayInfo = $row[0][0];
 
 
 
+</script>
+
+<script>
+	// ### Vue jsCompTemp 
+	/**
+	 * @typedef {Object} tableSchema
+	 * @property {string} [id=''] column id
+	 */
+	var defaultLabels = {
+		first: 'First',
+		last: 'Last',
+		previous: 'Previous',
+		next: 'Next'
+	};
+
+	Vue.component('TalkConts', {
+		props: {
+			info: {
+				type: Object,
+				default() {
+					return {};
+				}
+			},
+			num: {
+				type: Number,
+				default: 0
+			}
+		},
+		data() {
+			return {
+				isShow: 13
+			};
+		},
+		created() {
+			var vm = this;
+			vm.on();
+			vm.job();
+		},
+
+		template: '#c-talk-conts'
+	});
+	/* ### !Vue jsCompTemp  */
 </script>
 
 <script src="/cont/pmchat/js/insChatConts.js?ver=<?= $csMbBase->fileToDate($_SERVER['DOCUMENT_ROOT'] . '/cont/pmchat/js/insChatConts.js') ?>"></script>

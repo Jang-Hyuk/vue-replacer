@@ -1,4 +1,13 @@
 /**
+ * @typedef {object} replacerConfig Replacer 생성자 옵션
+ * @property {string} filePath file full path (d:/temp/conts/js/*.vue)
+ * @property {boolean} [isEucKr = true] iconv 로 최종 내보낼 파일 인코딩 형식
+ * @property {string} [fileSep = sep] window vs linux file 구분자에 따른 값
+ * @property {string} [isIeMode = false] IE 모드일 경우 output file에 eslint 를 적용하여 저장. 속도가 느린 단점이 있음
+ * @property {string} adminFolder admin 폴더명. IE 모드 동작시 해당 폴더 아래에 존재하는 js만 유효한 걸로 판단
+ */
+
+/**
  * @typedef {object} replaceTargetFileInfo
  * @property {string} filePath 파일 경로
  * @property {boolean} [isTemplate=false] wrapping 여부
@@ -11,7 +20,7 @@
 
 /**
  * @typedef {object} manageInfo
- * @property {boolean} isChangeChild vue 파일과 관련된 파일이 외부에 의해 변경될 경우
+ * @property {number} isReplaceFlag 0: 대기, -1: 디코딩, 1: 인코딩
  * @property {string} [tplPath] template path
  * @property {string} [srcPath] source path
  * @property {string} [cssPath] style path

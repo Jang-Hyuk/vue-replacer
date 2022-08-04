@@ -46,10 +46,13 @@ class VueDecoder extends VueReplacer {
 			this.restoreStyle
 		);
 		const results = restoreVueFile.call(this, this.vuefile);
+		console.log('🚀 ~ file: VueDecoder.js ~ line 49 ~ results', results);
 
 		await this.fileWriter.writeFile(this.vueFilePath, results);
 
-		console.log('decode complete', this.vueFilePath);
+		this.notifyCompleteDecode();
+
+		console.log('✅ decode complete', this.vueFilePath);
 	}
 
 	/**

@@ -9,7 +9,9 @@
     "**/cTest.html",
     "**/cTest.js",
     "**/*.temp.js",
-    "**/*.temp.vue"
+    "**/*.temp.vue",
+    "**/*/*.temp.vue"
+
   ],
   "watch": [
     "."

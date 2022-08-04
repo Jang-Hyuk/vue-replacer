@@ -32,19 +32,19 @@ class FileWriter {
 	 * @param {VueEncoder} caller
 	 */
 	async replaceEachFiles(fileConfigList, caller) {
-		await fileConfigList.reduce((prevTask, currTask, index) => {
+		const resultReplace = await fileConfigList.reduce((prevTask, currTask, index) => {
 			if (index + 1 === fileConfigList.length) {
 				return prevTask
 					.then(results => currTask.task.call(caller, currTask.contents, results))
 					.then(fileTxt => this.writeFile(currTask.filePath, fileTxt))
-					.catch(err => {
-						console.log('🚀 ~ file: fileWriter.js ~ line 41 ~ err', err);
-					});
+					.catch(console.error);
 			}
 			return prevTask.then(results =>
 				currTask.task.call(caller, currTask.contents, results)
 			);
 		}, Promise.resolve());
+
+		return resultReplace;
 	}
 
 	/**
@@ -53,27 +53,32 @@ class FileWriter {
 	 * @param {string} contents
 	 */
 	writeFile(filePath, contents = '') {
-		const ext = filePath.split('.').pop().toLowerCase();
-		const isNeedEslintFix = ['js', 'vue'].includes(ext);
-		// IE 모드이면 bak 파일에 인코딩 과정을 거친 후 저장
-		if (isNeedEslintFix) {
-			const isAdminIeMode = this.isIeMode && filePath.includes(this.adminFolder);
-			// admin ie로 페이지를 수정할 경우 es5 문법에 의한 오류가 생기므로 하지 않음
-			if (isAdminIeMode === false) {
-				this.writePureFile(filePath, contents);
-			}
-			// euc-kr일 경우 eslint --fix 하면 파일 변환이 깨지므로 utf-8로 임시 저장 후 --fix 처리하고 다시 저장
-			if (this.isEucKr) {
-				return this.writeEslintFixFile(filePath, contents, ext);
+		try {
+			const ext = filePath.split('.').pop().toLowerCase();
+			const isNeedEslintFix = ['js', 'vue'].includes(ext);
+			// IE 모드이면 bak 파일에 인코딩 과정을 거친 후 저장
+			if (isNeedEslintFix) {
+				const isAdminIeMode = this.isIeMode && filePath.includes(this.adminFolder);
+				// admin ie로 페이지를 수정할 경우 es5 문법에 의한 오류가 생기므로 하지 않음
+				if (isAdminIeMode === false) {
+					this.writePureFile(filePath, contents);
+				}
+				// euc-kr일 경우 eslint --fix 하면 파일 변환이 깨지므로 utf-8로 임시 저장 후 --fix 처리하고 다시 저장
+				if (this.isEucKr) {
+					const results = this.writeEslintFixFile(filePath, contents, ext);
+					return results;
+				}
+
+				FileWriter.execute(`eslint --fix ${filePath}`);
+
+				return Promise.resolve();
 			}
 
-			FileWriter.execute(`eslint --fix ${filePath}`);
-
-			return Promise.resolve();
+			// 그냥 저장
+			return this.writePureFile(filePath, contents);
+		} catch (error) {
+			console.error(error);
 		}
-
-		// 그냥 저장
-		return this.writePureFile(filePath, contents);
 	}
 
 	/**
@@ -109,7 +114,8 @@ class FileWriter {
 								return reject(rmErr);
 							}
 						});
-						return this.writePureFile(filePath, fileText);
+						const results = this.writePureFile(filePath, fileText);
+						return resolve(results);
 					});
 				});
 			});
