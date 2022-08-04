@@ -2,10 +2,10 @@
 	id="tplCompTemp"
 	isTemplate="1"
 	isSync="1"
-	depth="1"
+	depth="2"
 	fileSrc="../../html/cTest.html"
 >
-	<div>hello CompTemp</div>
+	<div>hello CompTemp!</div>
 </template>
 
 <script
@@ -41,7 +41,7 @@ export default {
 	},
 	data() {
 		return {
-			isShow: 13
+			isShow: 131
 		};
 	},
 	created() {

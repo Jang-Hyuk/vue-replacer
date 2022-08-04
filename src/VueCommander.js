@@ -58,13 +58,6 @@ class VueCommander {
 			vueEncoder.vueParser.styleFileInfo.filePath
 		].filter(str => str);
 
-		// this.replationFiles.template = vueEncoder.vueParser.tplFileInfo.filePath;
-		// this.replationFiles.script = vueEncoder.vueParser.scriptFileInfo.filePath;
-		// this.replationFiles.style = vueEncoder.vueParser.styleFileInfo.filePath;
-		console.log(
-			'🚀 ~ file: VueCommander.js ~ line 56 ~ this.filePath',
-			this.replationFiles
-		);
 		return vueEncoder;
 	}
 

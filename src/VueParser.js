@@ -111,9 +111,15 @@ class VueParser {
 			return false;
 		}
 
-		let realContents = tplBody;
+		const tplBodyArr = _.chain(tplBody)
+			.split(this.NEW_LINE)
+			.dropWhile(v => v === '')
+			.dropRightWhile(v => v === '')
+			.value();
+
 		if (tplHeaderInfo.isTemplate === '1') {
-			realContents = `${this.NEW_LINE}<template v-cloak id="${tplHeaderInfo.id}">${tplBody}${this.NEW_LINE}</template>`;
+			tplBodyArr.unshift(`<template v-cloak id="${tplHeaderInfo.id}">`);
+			tplBodyArr.push('</template>');
 			this.tplFileInfo.isTemplate = true;
 		}
 
@@ -122,12 +128,11 @@ class VueParser {
 			this.tplFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
 		}
 
-		// this.htmlFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
 		this.tplFileInfo.indentDepth = tplHeaderInfo.depth
 			? parseInt(tplHeaderInfo.depth, 10)
 			: 0;
 		this.tplFileInfo.positionId = tplHeaderInfo.id ?? '';
-		return realContents;
+		return tplBodyArr.join(this.NEW_LINE);
 	}
 
 	/**
@@ -254,6 +259,12 @@ class VueParser {
 
 		styleBody = _(styleBody.split(this.NEW_LINE)).initial().join(this.NEW_LINE);
 
+		const styleBodyArr = _.chain(styleBody)
+			.split(this.NEW_LINE)
+			.dropWhile(v => v === '')
+			.dropRightWhile(v => v === '')
+			.value();
+
 		const isSync = styleHeaderInfo.isSync === '1';
 		this.styleFileInfo.isSync = isSync;
 
@@ -261,9 +272,10 @@ class VueParser {
 			return false;
 		}
 
-		let realContents = styleBody;
+		// let realContents = styleBody;
 		if (styleHeaderInfo.isTemplate === '1') {
-			realContents = `${this.NEW_LINE}<style>${styleBody}${this.NEW_LINE}</style>`;
+			styleBodyArr.unshift(`<style>`);
+			styleBodyArr.push('</style>');
 			this.styleFileInfo.isTemplate = true;
 		}
 
@@ -280,7 +292,7 @@ class VueParser {
 			? parseInt(styleHeaderInfo.depth, 10)
 			: 0;
 		this.styleFileInfo.positionId = styleHeaderInfo.id ?? '';
-		return realContents;
+		return styleBodyArr.join(this.NEW_LINE);
 	}
 }
 

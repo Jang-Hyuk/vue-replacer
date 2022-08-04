@@ -38,7 +38,6 @@ class VueEncoder extends VueReplacer {
 	 * @param {string} [file]
 	 */
 	async replaceVueScript(vueScriptInfo, file = '') {
-		// console.log('🚀 ~ file: VueEncoder.js ~ line 41 ~ vueScriptInfo', vueScriptInfo);
 		if (_.isEmpty(vueScriptInfo)) {
 			throw new Error('vueScript가 비어있음');
 		}
@@ -115,25 +114,24 @@ class VueEncoder extends VueReplacer {
 
 		const { indentDepth } = this.vueParser.tplFileInfo;
 		// html indent depth 에 따라 tab 간격 조절
-		const splittedVueTemplate = vueTemplate.split(this.NEW_LINE);
-		let realVueTemplate = _(splittedVueTemplate).initial().join(this.NEW_LINE);
+		let realVueTemplate = '';
 		// 템플릿 모드 일 경우
 		if (this.vueParser.tplFileInfo.isTemplate) {
-			realVueTemplate = this.addTabSpace(realVueTemplate, indentDepth);
+			realVueTemplate = this.addTabSpace(vueTemplate, indentDepth);
 		} else if (indentDepth === 0) {
-			const regExp = new RegExp(this.NEW_LINE + this.TAB, 'g');
-			realVueTemplate = realVueTemplate.replace(regExp, this.NEW_LINE);
-		} else if (indentDepth > 1) {
-			realVueTemplate = this.addTabSpace(realVueTemplate, indentDepth - 1);
+			realVueTemplate = vueTemplate
+				.split(this.NEW_LINE)
+				.map(str => str.replace(this.TAB, ''))
+				.join(this.NEW_LINE);
+		} else {
+			realVueTemplate = this.addTabSpace(vueTemplate, indentDepth - 1);
 		}
-
-		realVueTemplate = realVueTemplate.concat(_.last(splittedVueTemplate));
 
 		// Header + Vue Script + Footer 조합
 		const overwrittenHtml = targetFile
 			.slice(0, headerLastPositionIndex)
 			.concat(
-				realVueTemplate,
+				`${this.NEW_LINE}${realVueTemplate}`,
 				targetFile.slice(targetFile.slice(0, eDelimiterIndex).lastIndexOf(this.NEW_LINE))
 			);
 
@@ -166,23 +164,24 @@ class VueEncoder extends VueReplacer {
 		const headerLastPositionIndex = targetFile.indexOf(this.NEW_LINE, sDelimiterIndex);
 
 		const { indentDepth } = this.vueParser.styleFileInfo;
-		let realVueStyle = vueStyle;
-		// 템플릿 모드 일 경우
-		// html indent depth 에 따라 tab 간격 조절
+		let realVueStyle = '';
+		// 템플릿 모드 일 경우 html indent depth 에 따라 tab 간격 조절
 		if (this.vueParser.styleFileInfo.isTemplate) {
-			realVueStyle = this.addTabSpace(realVueStyle, indentDepth);
+			realVueStyle = this.addTabSpace(vueStyle, indentDepth);
 		} else if (indentDepth === 0) {
-			const regExp = new RegExp(this.NEW_LINE + this.TAB, 'g');
-			realVueStyle = realVueStyle.replace(regExp, this.NEW_LINE);
-		} else if (indentDepth > 1) {
-			realVueStyle = this.addTabSpace(realVueStyle, indentDepth - 1);
+			realVueStyle = vueStyle
+				.split(this.NEW_LINE)
+				.map(str => str.replace(this.TAB, ''))
+				.join(this.NEW_LINE);
+		} else {
+			realVueStyle = this.addTabSpace(vueStyle, indentDepth - 1);
 		}
 
 		// Header + Vue Script + Footer 조합
 		const overwrittenHtml = targetFile
 			.slice(0, headerLastPositionIndex)
 			.concat(
-				realVueStyle,
+				`${this.NEW_LINE}${realVueStyle}`,
 				targetFile.slice(targetFile.slice(0, eDelimiterIndex).lastIndexOf(this.NEW_LINE))
 			);
 

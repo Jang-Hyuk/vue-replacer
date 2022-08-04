@@ -10,27 +10,27 @@ $pmTodayInfo = $row[0][0];
 </style>
 
 <!-- style ### Vue cssPhotoPopup -->
-	<style>
-		table td {
-			word-wrap: break-word !important;
-			word-break: break-word !important;
-		}
-		
-		.cs_inperson {
-			margin: 94px 0 1131;
-		}
-		
-		/* #8072 자주하는질문(FAQ) */
-		.cs_inperson__faq {
-			padding: 0 0 60px 0;
-		}
-		
-		.hello {
-			color: aliceblue;
-		}
-		
-		/* #8072 자주하는질문(FAQ) 끝 */
-	</style>
+<style>
+	table td {
+		word-wrap: break-word !important;
+		word-break: break-word !important;
+	}
+	
+	.cs_inperson {
+		margin: 94px 0 1131;
+	}
+	
+	/* #8072 자주하는질문(FAQ) */
+	.cs_inperson__faq {
+		padding: 0 0 60px 0;
+	}
+	
+	.hello {
+		color: aliceblue;
+	}
+	
+	/* #8072 자주하는질문(FAQ) 끝 */
+</style>
 <!-- style ### !Vue cssPhotoPopup -->
 
 <!-- #7826 -->
@@ -41,40 +41,23 @@ $pmTodayInfo = $row[0][0];
 	}
 </style>
 <!-- ### Vue photoPopup ### -->
-	<template v-cloak id="photoPopup">
-		<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
-			<div class="qmeet_banner">
-				<!-- 배너영역 슬라이드 ㅎㅎ  -->
-				<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
-				<div class="qmeet_banner__wrap">
-					<button class="qMeet_pop_cls" onclick="history.back()">닫기</button>
-					<div class="qmeet_banner__pagination"></div>
-					<!-- 페이지네이션영역 -->
-				</div>
-				<comp-temp></comp-temp>
-				<div class="cs_inperson__mylist_reply_master_wrap">
-					<div class="cs_inperson__mylist_reply_master_title">
-						<span class="cs_inperson__mylist_reply_master_ico_reply">[관리자 답변]</span>
-						<span class="cs_inperson__mylist_reply_master_date">
-							{{ inquiryInfo.re_date }}
-						</span>
-					</div>
-					<div class="cs_inperson__mylist_reply_master_txt_wrap"></div>
-				</div>
+<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
+	<div class="qmeet_banner">
+		<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
+		<comp-temp></comp-temp>
 
-				<template slot="hi">
-					<div>슬롯이당께</div>
-				</template>
-			</div>
-		</div>
-</template>
+		<template slot="hi">
+			<div>슬롯이당께</div>
+		</template>
+	</div>
+</div>
 <!-- ### !Vue photoPopup ### -->
 
 
 <!-- ### Vue tplCompTemp -->
-	<template v-cloak id="tplCompTemp">
-		<div>hello CompTemp</div>
-</template>
+		<template v-cloak id="tplCompTemp">
+			<div>hello CompTemp!</div>
+		</template>
 <!-- ### !Vue tplCompTemp -->
 
 
@@ -143,7 +126,7 @@ $pmTodayInfo = $row[0][0];
 		},
 		data() {
 			return {
-				isShow: 13
+				isShow: 131
 			};
 		},
 		created() {

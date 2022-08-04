@@ -34,9 +34,9 @@ const vuePath = 'D:\\infodev\\company\\vue-converter\\tests\\vue\\sub\\CompTemp.
 
 fileManager.onUpdateVueFile(vuePath);
 
-// setTimeout(() => {
-// 	fileManager.onUpdateVueFile(vuePath);
-// }, 1000);
+setTimeout(() => {
+	fileManager.onUpdateVueFile(vuePath);
+}, 1000);
 
 // const cTestCommander = fileManager.getVueCommander(vuePath);
 
