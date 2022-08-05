@@ -9,6 +9,8 @@
     "start:ie": "node src/index.js ie",
     "dev": "nodemon --trace-warnings src/index.js",
     "dev:ie": "nodemon --trace-warnings src/index.js ie",
+    "dev-encode": "nodemon --trace-warnings src/runEncode.js",
+    "dev-encode:ie": "nodemon --trace-warnings src/runEncode.js ie",
     "main": "node src/tests/replacer.js",
     "test-main": "nodemon --trace-warnings src/tests/replacer.js",
     "test-manage": "nodemon --trace-warnings src/tests/fileManage.js",
