@@ -1,3 +1,91 @@
+
+## Config
+# .env 파일 생성
+  ```bash
+  ADMIN_FOLDER = club5678_admin
+  ```
+  
+# vsCode setting.json 추가
+  - "vetur.experimental.templateInterpolationService": true,
+  - "vetur.validation.templateProps": true,
+
+# global @types 폴더 생성
+  - index.d.ts 생성
+  ``` ts
+  import Vue from 'vue';
+
+  declare module 'vue/types/vue' {
+    interface Vue {
+      $: typeof $;
+      cu: {
+        base: typeof cu.base;
+        date: typeof cu.date;
+        storage: typeof cu.storage;
+        dom: typeof cu.dom;
+        php: typeof cu.php;
+        qs: typeof cu.qs;
+        device: typeof cu.device;
+        str: typeof cu.str;
+        hardware: typeof cu.hardware;
+      }
+    }
+  }
+  ```
+  - jsconfig.json 수정
+  ``` json
+  {
+    "extends": "../jsconfig.json",
+    "include": [
+      "**/*.js",
+      "@types"
+    ]
+  }
+  ```
+
+# Workspace .eslintrc 수정
+``` json
+		// "vue/no-multi-spaces": [
+		//   "error",
+		//   {
+		//     ignoreProperties: false,
+		//   },
+		// ],
+		// "vue/multi-word-component-names": "error",
+		// FIXME
+		"vue/multi-word-component-names": "off",
+```
+
+``` json
+
+"overrides": [
+		{
+			"files": "**/*.vue",
+			"rules": {
+				// ES6
+				"object-shorthand": "error",
+				"es5/no-shorthand-properties": "off",
+				"prettier/prettier": [
+					"error",
+					{
+						"trailingComma": "es5"
+					}
+				]
+			}
+		}
+	]
+```  
+
+
+
+
+# Commands
+| Command | Description |
+|---------|-------------|
+| yarn dev | 즉시 파일 교체 후 eslint fix 결과물 대체 |
+| yarn dev:ie | IE 실시간 체크용. eslint fix 결과물 생성 후 대체 |
+
+
+
 # Roadmap
 
 - [ O ] (Replace) Script - outer replace
@@ -5,11 +93,11 @@
 - [ O ] (Replace) Js Script Outer 영역 Replace
 - [ O ] (Replace) Js import 영역 제거 후 replace
 - [ O ] (Replace) Style - replace
-- [ ] (Init) Watcher
-- [ ] (Restore) Js
-- [ ] (Resotre) Html & Php
+- [ O ] (Init) Watcher
+- [ O ] (Restore) Js
+- [ O ] (Resotre) Html & Php & Css
 
-Auto Watch 조건
+# Auto Watch 조건
 *** Vue Watcher 동작
 
 1. Vue File이 변경될 경우 template 와 script 어트리뷰트 값을 기반으로 Replace 진행
