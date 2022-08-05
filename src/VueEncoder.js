@@ -16,10 +16,10 @@ class VueEncoder extends VueReplacer {
 			this.vueParser.tplFileInfo,
 			this.vueParser.scriptFileInfo,
 			this.vueParser.styleFileInfo
-		];
+		].filter(config => config.filePath.length);
 
 		const promiseList = _.chain(fileConfigs)
-			.filter(config => config.isSync && config.filePath.length)
+			.filter(config => config.isSync)
 			.groupBy('filePath')
 			.map(configList => this.fileWriter.replaceEachFiles(configList, this))
 			.value();

@@ -24,11 +24,9 @@ class VueParser {
 		this.vueFileFolder = _(filePath).split(fileSep).initial().join(fileSep);
 
 		// ↓↓↓ set dynamic instance value
-		const fileName = filePath.slice(0, filePath.lastIndexOf('.'));
-
 		/** @type {replaceTargetFileInfo} vue template 영역을 변환하여 저장할  */
 		this.tplFileInfo = {
-			filePath: `${fileName}.html`,
+			filePath: '',
 			isTemplate: false,
 			isSync: false,
 			contents: '',
@@ -39,7 +37,7 @@ class VueParser {
 
 		/** @type {replaceTargetFileInfo}  */
 		this.scriptFileInfo = {
-			filePath: `${fileName}.js`,
+			filePath: '',
 			/** Template일 경우 Vue.component 아닐 경우 new Vue 를 delimiter 검색 조건으로 함 */
 			isTemplate: false,
 			isSync: false,

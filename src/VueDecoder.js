@@ -18,10 +18,10 @@ class VueDecoder extends VueReplacer {
 			this.vueParser.tplFileInfo,
 			this.vueParser.scriptFileInfo,
 			this.vueParser.styleFileInfo
-		];
+		].filter(config => config.filePath.length);
 
 		const promiseList = _.chain(fileConfigs)
-			.filter(config => config.filePath.length)
+			// .filter(config => config.isSync)
 			.groupBy('filePath')
 			.map((configList, filePath) => {
 				return new Promise(resolve => {
