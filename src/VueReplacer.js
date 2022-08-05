@@ -58,6 +58,14 @@ class VueReplacer {
 		this.vueParser.parseVueFile(vueFile);
 	}
 
+	static delay(ms) {
+		return new Promise(resolve => {
+			setTimeout(() => {
+				resolve();
+			}, ms);
+		});
+	}
+
 	/**
 	 * 소스에 탭을 삽입하여 반환
 	 * @param {string} source

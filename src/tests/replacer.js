@@ -27,30 +27,23 @@ watch(
 	{
 		recursive: true,
 		filter(f, skip) {
-			console.log('🚀 ~ file: replacer.js ~ line 29 ~ f', f);
 			// skip node_modules
 			if (/\/node_modules/.test(f)) return skip;
 			// skip .git folder
 			if (/\.git/.test(f)) return skip;
-			// skip
+			// skip temp file
 			const ignoreDelimiter = _(f.split('.')).nth(-2);
 			if (_.toLower(ignoreDelimiter) === 'temp') return skip;
 
-			// console.log(/\.temp\.\s/.test(f));
-			// if (/\.temp\.vue/.test(f)) return skip;
-			// only watch for js files
 			return /\.vue$|\.js$|\.css|\.html|\.php/.test(f);
 		}
 	},
 	(event, filename) => {
-		console.log(`event is: ${event}`, filename);
-		console.log(filename.split('.').pop().toLocaleLowerCase());
 		const fileExt = filename.split('.').pop().toLocaleLowerCase();
 		console.log(`🐟 filename provided: ${filename}`);
 
 		if (!filename) {
 			console.log('😈 filename not provided');
-
 			return false;
 		}
 
@@ -61,33 +54,6 @@ watch(
 		}
 	}
 );
-
-// 워치 동작
-// watch(
-// 	rootPath,
-// 	{
-// 		recursive: true,
-// 		filter(f, skip) {
-// 			// skip node_modules
-// 			if (/\/node_modules/.test(f)) return skip;
-// 			// skip .git folder
-// 			if (/\.git/.test(f)) return skip;
-// 			// skip
-// 			if (/\.temp\.\s/.test(f)) return skip;
-// 			// only watch for js files
-// 			return /\.js$|\.css|\.html|\.php/.test(f);
-// 		}
-// 	},
-// 	(event, filename) => {
-// 		// console.log(`event is: ${event}`);
-// 		if (filename) {
-// 			console.log(`🐟 filename provided: ${filename}`);
-// 			fileManager.onUpdateOtherFile(filename);
-// 		} else {
-// 			console.log('😈 filename not provided');
-// 		}
-// 	}
-// );
 
 console.info(
 	`✅ start VueReplacer watcher !!! ${config.isIeMode ? '👹👹👹 IE Mode 💩💩💩' : ''}`
