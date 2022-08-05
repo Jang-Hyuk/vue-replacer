@@ -71,7 +71,6 @@ class VueCommander {
 
 	/** Vue File 정보가 갱신되었을 경우 1. 연결 파일 정보 업데이트 2. 인코딩 진행 */
 	async updateVueFile() {
-		console.log('🚀 ~ file: VueCommander.js ~ line 47 ~ updateVueFile');
 		if (this.operationStatus.isDecoding) {
 			return false;
 		}
@@ -89,7 +88,6 @@ class VueCommander {
 
 	/** Vue File과 관련된 파일 정보가 갱신되었을 경우  */
 	async updateOtherFile() {
-		console.log('🚀 ~ file: VueCommander.js ~ line 58 ~ updateOtherFile');
 		if (this.operationStatus.isEncoding) {
 			return false;
 		}
@@ -111,14 +109,9 @@ class VueCommander {
 	 * @param {VueEncoder} vueEncoder
 	 */
 	onCompleteEncode(vueEncoder) {
-		console.log('🚀 ~ file: VueCommander.js ~ line 77 ~ onCompleteEncode');
 		// 인코딩 옵저버 제거
 		vueEncoder.dettachObserver(this);
 		this.encodingList = this.encodingList.filter(encoder => encoder !== vueEncoder);
-		console.log(
-			'🚀 ~ file: VueCommander.js ~ line 87 ~ this.encodingList',
-			this.encodingList.length
-		);
 	}
 
 	/**

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import dotenv from 'dotenv';
-import path, { resolve, join } from 'path';
+import path, { join } from 'path';
 
 import BaseUtil from './BaseUtil.js';
 import VueCommander from './VueCommander.js';
@@ -37,14 +37,12 @@ class FileManager {
 	 * 지정 폴더를 기준으로 app.use 처리. 단 index는 '/'
 	 * @param {string} dirPath dirPath
 	 */
-	init(dirPath = this.rootPath) {
+	init(dirPath = '') {
 		// ignore folder check
-		const dynamicDirPath = resolve(this.rootPath, dirPath);
+		const dynamicDirPath = join(this.rootPath, dirPath);
 		// 디렉토리 목록 추출 (테스트 폴더 제외)
 		const directoryList = BaseUtil.getDirectories(dynamicDirPath);
-		// .filter(
-		// 	dPath => dPath.includes('test') === false
-		// );
+
 		// 파일 명 추출
 		const fileList = BaseUtil.getFiles(dynamicDirPath, ['vue']);
 
@@ -61,7 +59,7 @@ class FileManager {
 			if (this.ignoredFolders.includes(dirName.toLowerCase())) {
 				return;
 			}
-			return this.init(path.resolve(dirPath, dirName));
+			return this.init(path.join(dirPath, dirName));
 		});
 	}
 
@@ -104,26 +102,14 @@ class FileManager {
 	 * @param {string} filePath
 	 */
 	onUpdateOtherFile(filePath) {
-		console.log('🚀 ~ file: FileManager.js ~ line 107 ~ filePath', filePath);
 		const vueCommanderList = _.filter(this.manageStorage, vueCommander => {
-			console.log(
-				'🚀 ~ file: FileManager.js ~ line 110 ~ vueCommander.replationFiles',
-				vueCommander.replationFiles
-			);
 			return vueCommander.replationFiles.includes(filePath);
 		});
 
 		vueCommanderList.forEach(vueCommander => {
 			vueCommander.updateOtherFile();
 		});
-
-		console.log(
-			'🚀 ~ file: FileManager.js ~ line 110 ~ vueCommanderList',
-			vueCommanderList
-		);
 	}
-
-	didMonitoringFile() {}
 }
 
 export default FileManager;

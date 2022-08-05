@@ -1,5 +1,6 @@
 import fs from 'fs';
 import { exec } from 'child_process';
+import { v4 as uuidv4 } from 'uuid';
 
 import _ from 'lodash';
 import iconv from 'iconv-lite';
@@ -88,11 +89,12 @@ class FileWriter {
 	 * @param {string} contents utf-8
 	 */
 	writeEslintFixFile(filePath, contents = '', ext = 'js') {
+		const tempSalt = uuidv4();
 		// 1. IE + js 파일일 경우 UTF-8로 임시 파일 저장.
 		const tempFilePath = _.chain(filePath)
 			.split('.')
 			.initial()
-			.push('temp', ext)
+			.push(`${tempSalt}.temp`, ext)
 			.join('.')
 			.value();
 

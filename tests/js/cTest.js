@@ -10,8 +10,8 @@ Vue.component('TalkConts', {
 	components: { CompTemp: CompTemp },
 	data: function () {
 		return {
-			isShow: 123456,
-			한글: '테스트1'
+			isShow: 1,
+			한글: '테스하15'
 		};
 	},
 	created: function () {
