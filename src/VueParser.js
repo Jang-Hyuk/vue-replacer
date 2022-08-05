@@ -72,7 +72,7 @@ class VueParser {
 		this.vueFileFolder = _(vueFilePath).split(this.fileSep).initial().join(this.fileSep);
 
 		if (!vueFileContents.length) {
-			return false;
+			return '';
 		}
 
 		// ANCHOR Converter
@@ -108,7 +108,7 @@ class VueParser {
 		this.tplFileInfo.isSync = isSync;
 
 		if (!isSync) {
-			return false;
+			return '';
 		}
 
 		const tplBodyArr = _.chain(tplBody)
@@ -165,7 +165,7 @@ class VueParser {
 		this.scriptFileInfo.isSync = isSync;
 
 		if (!isSync) {
-			return false;
+			return '';
 		}
 
 		this.scriptFileInfo.isTemplate = srcHeaderInfo.isTemplate === '1';
@@ -269,7 +269,7 @@ class VueParser {
 		this.styleFileInfo.isSync = isSync;
 
 		if (!isSync) {
-			return false;
+			return '';
 		}
 
 		// let realContents = styleBody;
