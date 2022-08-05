@@ -5,11 +5,40 @@
   ADMIN_FOLDER = club5678_admin
   ```
   
-# vsCode setting.json 추가
+## vsCode Setting
+# setting.json 추가
   - "vetur.experimental.templateInterpolationService": true,
   - "vetur.validation.templateProps": true,
-
-# global @types 폴더 생성
+# snippets extensions 수정
+  - global.code-snippets
+``` json
+ "Vue Replacer Section Start": {
+    "scope": "javascript,vue,php,html",
+    "prefix": ["vds", "ㅍㅇㄴ"],
+    "body": ["$1### Vue $2"],
+    "description": "Vue Delimiter Start"
+  },
+  "Vue Replacer Section End": {
+    "scope": "javascript,vue,php,html",
+    "prefix": ["vde", "ㅍㅇㄷ"],
+    "body": ["$1### !Vue $2"],
+    "description": "Vue Delimiter End"
+  }
+```
+- vue.json
+``` json
+	"VueReplacerTemplate": {
+	  "prefix": ["vrt", "ㅍㄳ"],
+	  "body": ["id=\"$1\" isSync=\"$2\" isTemplate=\"$3\" fileSrc=\"$4\" depth=\"$5\""],
+	  "description": "Vue Replacer를 활성화하기 위한 *.vue template attribute"
+	},
+	"VueReplacerScriptStyle": {
+	  "prefix": ["vrs", "ㅍㄱㄴ"],
+	  "body": ["id=\"$1\" isSync=\"$2\" isTemplate=\"$3\" fileSrc=\"$4\""],
+	  "description": "Vue Replacer를 활성화하기 위한 script or style attribute"
+	}
+```
+## global @types 폴더 생성
   - index.d.ts 생성
   ``` ts
   import Vue from 'vue';
@@ -73,7 +102,8 @@
 			}
 		}
 	]
-```  
+```
+
 
 
 
