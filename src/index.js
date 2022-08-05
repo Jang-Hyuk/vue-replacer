@@ -1,24 +1,25 @@
 import watch from 'node-watch';
 import path, { sep } from 'path';
-import _ from 'lodash';
 import { config as dotConfig } from 'dotenv';
+import _ from 'lodash';
 
-import VueEncoder from './VueEncoder.js';
+import FileManager from './FileManager.js';
 
 dotConfig();
 
-const rootPath = '../';
-
+const rootPath = path.join(process.cwd(), '..');
 const argvValue = process.argv.slice(2)[0];
-const filePath = 'tests/vue/cTest.vue';
 
 const config = {
-	filePath: path.join(process.cwd(), filePath.replace(/\//g, sep)),
 	isEucKr: true,
 	fileSep: sep,
 	isIeMode: argvValue === 'ie',
 	adminFolder: process.env.ADMIN_FOLDER
 };
+
+const fileManager = new FileManager(rootPath, config);
+
+fileManager.init();
 
 // 워치 동작
 watch(
@@ -30,22 +31,26 @@ watch(
 			if (/\/node_modules/.test(f)) return skip;
 			// skip .git folder
 			if (/\.git/.test(f)) return skip;
-			// only watch for js files
-			return /\.vue$/.test(f);
+			// skip temp file
+			const ignoreDelimiter = _(f.split('.')).nth(-2);
+			if (_.toLower(ignoreDelimiter) === 'temp') return skip;
+
+			return /\.vue$|\.js$|\.css|\.html|\.php/.test(f);
 		}
 	},
 	(event, filename) => {
-		// console.log(`event is: ${event}`);
-		if (filename) {
-			console.log(`🐟 filename provided: ${filename}`);
-			const vueReplacer = new VueEncoder(
-				_.chain(config).clone().set('filePath', filename).value()
-			);
-			vueReplacer.init().then(() => {
-				vueReplacer.encodeVueFile();
-			});
-		} else {
+		const fileExt = filename.split('.').pop().toLocaleLowerCase();
+		console.log(`🐟 filename provided: ${filename}`);
+
+		if (!filename) {
 			console.log('😈 filename not provided');
+			return false;
+		}
+
+		if (fileExt === 'vue') {
+			fileManager.onUpdateVueFile(filename);
+		} else {
+			fileManager.onUpdateOtherFile(filename);
 		}
 	}
 );
