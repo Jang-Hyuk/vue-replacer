@@ -27,11 +27,17 @@ class VueDecoder extends VueReplacer {
 				return new Promise(resolve => {
 					this.fileReader.getFile(filePath).then(fileConts => {
 						configList.forEach(config => {
-							config.task.call(this, config, fileConts).then(contents => {
-								config.contents = contents;
-								// 중복해서 resolve가 발생하지만 로직상 문제는 없으므로 그냥 둠
-								resolve(true);
-							});
+							config.task
+								.call(this, config, fileConts)
+								.then(contents => {
+									config.contents = contents;
+									// 중복해서 resolve가 발생하지만 로직상 문제는 없으므로 그냥 둠
+									resolve(true);
+								})
+								.catch(error => {
+									console.error(error);
+									resolve(true);
+								});
 						});
 					});
 				});
@@ -60,41 +66,36 @@ class VueDecoder extends VueReplacer {
 	 * @param {string} fileConts 파일 내용
 	 */
 	async parseScriptFile(config, fileConts) {
-		try {
-			const { targetFile, delimiterFileInfo } = await this.parseDelimiterFile(
-				config,
-				fileConts
-			);
+		const { targetFile, delimiterFileInfo } = await this.parseDelimiterFile(
+			config,
+			fileConts
+		);
 
-			if (!targetFile.length) {
-				return '';
-			}
-			const { contents = '' } = delimiterFileInfo;
-
-			const vueOptDelimiter = this.vueParser.scriptFileInfo.isTemplate
-				? 'Vue.component'
-				: 'new Vue';
-
-			const vueOptDelimiterIndex = targetFile.indexOf(vueOptDelimiter);
-			if (vueOptDelimiterIndex === -1) {
-				throw new Error('유효한 vue delemiter가 존재하지 않습니다.');
-			}
-
-			return _.chain(contents.slice(0, contents.lastIndexOf(')')))
-				.split(this.NEW_LINE)
-				.tail()
-				.map(str => {
-					if (str.indexOf(vueOptDelimiter) !== -1) {
-						return 'export default {';
-					}
-					return str;
-				})
-				.join(this.NEW_LINE)
-				.value();
-		} catch (error) {
-			console.error(error);
+		if (!targetFile.length) {
 			return '';
 		}
+		const { contents = '' } = delimiterFileInfo;
+
+		const vueOptDelimiter = this.vueParser.scriptFileInfo.isTemplate
+			? 'Vue.component'
+			: 'new Vue';
+
+		const vueOptDelimiterIndex = targetFile.indexOf(vueOptDelimiter);
+		if (vueOptDelimiterIndex === -1) {
+			throw new Error('유효한 vue delemiter가 존재하지 않습니다.');
+		}
+
+		return _.chain(contents.slice(0, contents.lastIndexOf(')')))
+			.split(this.NEW_LINE)
+			.tail()
+			.map(str => {
+				if (str.indexOf(vueOptDelimiter) !== -1) {
+					return 'export default {';
+				}
+				return str;
+			})
+			.join(this.NEW_LINE)
+			.value();
 	}
 
 	/**
@@ -103,33 +104,28 @@ class VueDecoder extends VueReplacer {
 	 * @param {string} fileConts 파일 내용
 	 */
 	async parseOtherFile(config, fileConts) {
-		try {
-			const { targetFile, delimiterFileInfo } = await this.parseDelimiterFile(
-				config,
-				fileConts
-			);
+		const { targetFile, delimiterFileInfo } = await this.parseDelimiterFile(
+			config,
+			fileConts
+		);
 
-			if (!targetFile.length) {
-				return '';
-			}
-			const { contents = '' } = delimiterFileInfo;
-
-			return _(contents)
-				.split(this.NEW_LINE)
-				.initial()
-				.tail()
-				.thru(contsArr => {
-					// script or template 태그 제거
-					if (config.isTemplate) {
-						return _(contsArr).initial().tail().value();
-					}
-					return contsArr;
-				})
-				.join(this.NEW_LINE);
-		} catch (error) {
-			console.error(error);
+		if (!targetFile.length) {
 			return '';
 		}
+		const { contents = '' } = delimiterFileInfo;
+
+		return _(contents)
+			.split(this.NEW_LINE)
+			.initial()
+			.tail()
+			.thru(contsArr => {
+				// script or template 태그 제거
+				if (config.isTemplate) {
+					return _(contsArr).initial().tail().value();
+				}
+				return contsArr;
+			})
+			.join(this.NEW_LINE);
 	}
 
 	/**
@@ -142,6 +138,9 @@ class VueDecoder extends VueReplacer {
 	 * @param {string} config.chunkEndDelimiter 잘라낼 청크 끝 구분자
 	 */
 	restore(vueFile, source, config) {
+		if (typeof source !== 'string') {
+			return vueFile;
+		}
 		const { chunkEndDelimiter, chunkStartDelimiter, endDelimiter = '' } = config;
 
 		let nextChunkIndex = vueFile.lastIndexOf(endDelimiter);

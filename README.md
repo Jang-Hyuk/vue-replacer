@@ -84,30 +84,6 @@
 		"vue/multi-word-component-names": "off",
 ```
 
-``` json
-
-"overrides": [
-		{
-			"files": "**/*.vue",
-			"rules": {
-				// ES6
-				"object-shorthand": "error",
-				"es5/no-shorthand-properties": "off",
-				"prettier/prettier": [
-					"error",
-					{
-						"trailingComma": "es5"
-					}
-				]
-			}
-		}
-	]
-```
-
-
-
-
-
 # Commands
 | Command | Description |
 |---------|-------------|
@@ -126,6 +102,7 @@
 - [ O ] (Init) Watcher
 - [ O ] (Restore) Js
 - [ O ] (Resotre) Html & Php & Css
+- [ O ] (Restore) data 객체 존재 시 eslint fix 에러
 
 # Auto Watch 조건
 *** Vue Watcher 동작

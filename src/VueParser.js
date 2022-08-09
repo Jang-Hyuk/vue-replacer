@@ -105,10 +105,6 @@ class VueParser {
 		const isSync = tplHeaderInfo.isSync === '1';
 		this.tplFileInfo.isSync = isSync;
 
-		if (!isSync) {
-			return '';
-		}
-
 		const tplBodyArr = _.chain(tplBody)
 			.split(this.NEW_LINE)
 			.dropWhile(v => v === '')
@@ -161,10 +157,6 @@ class VueParser {
 
 		const isSync = srcHeaderInfo.isSync === '1';
 		this.scriptFileInfo.isSync = isSync;
-
-		if (!isSync) {
-			return '';
-		}
 
 		this.scriptFileInfo.isTemplate = srcHeaderInfo.isTemplate === '1';
 
@@ -265,10 +257,6 @@ class VueParser {
 
 		const isSync = styleHeaderInfo.isSync === '1';
 		this.styleFileInfo.isSync = isSync;
-
-		if (!isSync) {
-			return '';
-		}
 
 		// let realContents = styleBody;
 		if (styleHeaderInfo.isTemplate === '1') {

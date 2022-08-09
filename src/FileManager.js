@@ -98,12 +98,12 @@ class FileManager {
 	}
 
 	/**
-	 * Description
+	 * vue 제외 파일 업데이트 시
 	 * @param {string} filePath
 	 */
 	onUpdateOtherFile(filePath) {
 		const vueCommanderList = _.filter(this.manageStorage, vueCommander => {
-			return vueCommander.replationFiles.includes(filePath);
+			return vueCommander.relationFiles.includes(filePath);
 		});
 
 		vueCommanderList.forEach(vueCommander => {

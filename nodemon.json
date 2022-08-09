@@ -5,6 +5,7 @@
     "node_modules",
     "dist",
     "coverage",
+    "**/tests",
     "**/*.vue",
     "**/cTest.vue",
     "**/cTest.html",

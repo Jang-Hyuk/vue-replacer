@@ -15,15 +15,8 @@ class VueCommander {
 	 */
 	constructor(config) {
 		this.config = config;
-		// this.encoder = new VueEncoder(config);
-		// this.decoder = new VueDecoder(config);
 
-		this.replationFiles = [];
-		// this.replationFiles = {
-		// 	template: '',
-		// 	script: '',
-		// 	style: ''
-		// };
+		this.relationFiles = [];
 
 		/** @type {VueEncoder[]}  */
 		this.encodingList = [];
@@ -52,7 +45,7 @@ class VueCommander {
 		const vueEncoder = new VueEncoder(this.config);
 		await vueEncoder.init();
 
-		this.replationFiles = [
+		this.relationFiles = [
 			vueEncoder.vueParser.tplFileInfo.filePath,
 			vueEncoder.vueParser.scriptFileInfo.filePath,
 			vueEncoder.vueParser.styleFileInfo.filePath
