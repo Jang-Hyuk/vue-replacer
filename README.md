@@ -1,8 +1,9 @@
 
 ## Config
-# .env 파일 생성
+# .env 파일 생성 (예시)
   ```bash
   ADMIN_FOLDER = club5678_admin
+  IGNORE_FOLDER = info-workspace, nuxtExercise, test-nuxt, tongtong
   ```
   
 ## vsCode Setting

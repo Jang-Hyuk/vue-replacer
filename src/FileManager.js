@@ -19,18 +19,28 @@ class FileManager {
 		this.rootPath = rootPath || '';
 		this.config = config;
 
-		this.ignoredFolders = [
+		const staticIgnoredFolders = [
+			'.git',
 			'.idea',
-			'.vscode',
-			'node_modules',
-			'types',
-			'@types',
 			'.nuxt',
-			'.git'
+			'.vscode',
+			'@types',
+			'deploy',
+			'node_modules',
+			'types'
 		];
+
+		this.ignoredFolders = _.chain(process.env.IGNORE_FOLDER)
+			.split(',')
+			.invokeMap('trim')
+			.compact()
+			.concat(staticIgnoredFolders)
+			.value();
 
 		/** @type {Record<string, VueCommander>}  */
 		this.manageStorage = {};
+
+		this.vueCommanderPendingList = [];
 	}
 
 	/**
@@ -40,6 +50,10 @@ class FileManager {
 	init(dirPath = '') {
 		// ignore folder check
 		const dynamicDirPath = join(this.rootPath, dirPath);
+
+		if (this.ignoredFolders.includes(dirPath)) {
+			return;
+		}
 		// 디렉토리 목록 추출 (테스트 폴더 제외)
 		const directoryList = BaseUtil.getDirectories(dynamicDirPath);
 
@@ -50,13 +64,11 @@ class FileManager {
 		fileList.forEach(file => {
 			// 파일 경로
 			const filePath = join(this.rootPath, dirPath, file);
-			const newConfig = _.chain(this.config).clone().set('filePath', filePath).value();
-
-			this.manageStorage[filePath] = new VueCommander(newConfig);
+			this.vueCommanderPendingList.push(this.setVueCommander(filePath));
 		});
 		// 하부 폴더 목록을 기준으로 재귀
 		directoryList.forEach(dirName => {
-			if (this.ignoredFolders.includes(dirName.toLowerCase())) {
+			if (this.ignoredFolders.includes(dirName)) {
 				return;
 			}
 			return this.init(path.join(dirPath, dirName));
@@ -66,11 +78,13 @@ class FileManager {
 	/**
 	 * @param {string} vueFilePath
 	 */
-	setVueCommander(vueFilePath) {
-		this.manageStorage[vueFilePath] = new VueCommander(
+	async setVueCommander(vueFilePath) {
+		const vueCommander = new VueCommander(
 			_.chain(this.config).clone().set('filePath', vueFilePath).value()
 		);
-		return this.manageStorage[vueFilePath];
+		await vueCommander.createVueEncoder();
+		this.manageStorage[vueFilePath] = vueCommander;
+		return vueCommander;
 	}
 
 	/**

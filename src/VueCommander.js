@@ -24,8 +24,6 @@ class VueCommander {
 		this.decodingList = [];
 
 		this.isReplaceFlag = OPER_STATUS.isWait;
-		// 그냥 여기서 비동기 처리함(귀찮...) 정상적으로는 비동기 함수 만들고 호출자에서 promise.all 처리해야함..
-		this.createVueEncoder();
 	}
 
 	get operationStatus() {

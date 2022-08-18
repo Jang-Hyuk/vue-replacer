@@ -61,6 +61,22 @@ class BaseUtil {
 	}
 
 	/**
+	 * JSON.parse 성공 유무 반환
+	 * @param {any} item
+	 * @example
+	 * isJsonParse(123): true
+	 * isJsonParse('[1,2]'): true
+	 */
+	static isJsonParse(item) {
+		try {
+			JSON.parse(item);
+			return true;
+		} catch (e) {
+			return false;
+		}
+	}
+
+	/**
 	 * 지정 폴더를 기준으로 app.use 처리. 단 index는 '/'
 	 * @param {string} rootPath 실 디렉토리 앞에 붙을 경로
 	 * @param {string[]} dirPath 실 디렉토리
