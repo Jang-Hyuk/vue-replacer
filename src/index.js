@@ -7,22 +7,40 @@ import FileManager from './FileManager.js';
 
 dotConfig();
 
-const rootPath = path.join(process.cwd(), '..');
-const argvValue = process.argv.slice(2)[0];
+const rootPath = path.join(process.cwd(), '.');
+const argValue = process.argv.slice(2)[0] ?? '';
+const argList = argValue.split('-');
 
 const config = {
 	isEucKr: true,
 	fileSep: sep,
-	isIeMode: argvValue === 'ie',
+	isIeMode: argList.includes('ie'),
 	adminFolder: process.env.ADMIN_FOLDER
 };
 
 const fileManager = new FileManager(rootPath, config);
 
+console.time('fileManager ready-to-run time');
+
 /**
  * Vue Replacer 구동
  */
-function operationWatch() {
+async function operationWatch() {
+	fileManager.init();
+	console.timeEnd('fileManager ready-to-run time');
+
+	await Promise.all(fileManager.vueCommanderPendingList);
+
+	// 디코딩 모든 파일
+	if (argList.includes('dec')) {
+		await fileManager.decodeAllFile();
+	}
+
+	// 인코딩 모든 파일
+	if (argList.includes('enc')) {
+		await fileManager.encodeAllFile();
+	}
+
 	console.info(
 		`✅ start VueReplacer watcher !!! ${config.isIeMode ? '👹👹👹 IE Mode 💩💩💩' : ''}`
 	);
@@ -62,14 +80,7 @@ function operationWatch() {
 	);
 }
 
-console.time('fileManager ready-to-run time');
-fileManager.init();
-
-Promise.all(fileManager.vueCommanderPendingList)
-	.then(operationWatch)
-	.catch(console.error);
-
-console.timeEnd('fileManager ready-to-run time');
+operationWatch();
 
 process.on('uncaughtException', err => {
 	console.error('uncaughtException', err);

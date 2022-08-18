@@ -115,14 +115,34 @@ class FileManager {
 	 * vue 제외 파일 업데이트 시
 	 * @param {string} filePath
 	 */
-	onUpdateOtherFile(filePath) {
+	async onUpdateOtherFile(filePath) {
 		const vueCommanderList = _.filter(this.manageStorage, vueCommander => {
 			return vueCommander.relationFiles.includes(filePath);
 		});
 
-		vueCommanderList.forEach(vueCommander => {
-			vueCommander.updateOtherFile();
-		});
+		const promiseList = vueCommanderList.map(vueCommander =>
+			vueCommander.updateOtherFile()
+		);
+
+		await Promise.all(promiseList);
+	}
+
+	/** VueFile -> OtherFile */
+	async encodeAllFile() {
+		console.time('💥💥💥 encodeAllFile 💥💥💥');
+		await Promise.all(
+			_.map(this.manageStorage, vueCommander => vueCommander.updateVueFile())
+		);
+		console.timeEnd('💥💥💥 encodeAllFile 💥💥💥');
+	}
+
+	/** OtherFile -> VueFile */
+	async decodeAllFile() {
+		console.time('💨💨💨 decodeAllFile 💨💨💨');
+		await Promise.all(
+			_.map(this.manageStorage, vueCommander => vueCommander.updateOtherFile())
+		);
+		console.timeEnd('💨💨💨 decodeAllFile 💨💨💨');
 	}
 }
 

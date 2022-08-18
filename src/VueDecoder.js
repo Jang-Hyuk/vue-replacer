@@ -53,7 +53,7 @@ class VueDecoder extends VueReplacer {
 		);
 		const results = restoreVueFile.call(this, this.vuefile);
 		await this.fileWriter.writeFile(this.vueFilePath, results);
-		console.log('🟥 decode complete', this.vueFilePath);
+		console.log('💨 decode complete', this.vueFilePath);
 		// node-watch 인식하는데 시간이 걸리니 딜래이를 둠
 		await VueReplacer.delay(1000);
 		// 옵저버가 부착되어있다면 공지

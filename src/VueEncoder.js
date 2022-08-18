@@ -25,7 +25,7 @@ class VueEncoder extends VueReplacer {
 			.value();
 
 		await Promise.all(promiseList);
-		console.log('🟩 encode complete', this.vueFilePath);
+		console.log('💥 encode complete', this.vueFilePath);
 		// node-watch 인식하는데 시간이 걸리니 딜래이를 둠
 		await VueReplacer.delay(1000);
 		// 옵저버가 부착되어있다면 공지
