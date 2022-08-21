@@ -10,6 +10,9 @@
     "**/cTest.vue",
     "**/cTest.html",
     "**/cTest.js",
+    "**/*.temp.php",
+    "**/*.temp.html",
+    "**/*.temp.css",
     "**/*.temp.js",
     "**/*.temp.vue",
     "**/*/*.temp.vue"

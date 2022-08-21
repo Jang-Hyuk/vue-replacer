@@ -7,7 +7,7 @@ import FileManager from './FileManager.js';
 
 dotConfig();
 
-const rootPath = path.join(process.cwd(), '.');
+const rootPath = path.join(process.cwd(), '..');
 const argValue = process.argv.slice(2)[0] ?? '';
 const argList = argValue.split('-');
 

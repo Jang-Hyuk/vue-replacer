@@ -16,7 +16,7 @@ class VueEncoder extends VueReplacer {
 			this.vueParser.tplFileInfo,
 			this.vueParser.scriptFileInfo,
 			this.vueParser.styleFileInfo
-		].filter(config => config.filePath.length);
+		].filter(config => config.isExistFile);
 
 		const promiseList = _.chain(fileConfigs)
 			.filter(config => config.isSync)

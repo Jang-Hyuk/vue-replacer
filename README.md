@@ -1,5 +1,9 @@
 
 ## Config
+
+# 파일 작성 규칙
+  - {fileName}.temp.{ext} => 확장자 이전 'temp'가 들어가지 말 것
+
 # .env 파일 생성 (예시)
   ```bash
   ADMIN_FOLDER = club5678_admin

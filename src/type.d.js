@@ -10,6 +10,7 @@
 /**
  * @typedef {object} replaceTargetFileInfo
  * @property {string} filePath 파일 경로
+ * @property {boolean} [isExistFile=false] 해당경로 파일 존재 여부
  * @property {boolean} [isTemplate=false] wrapping 여부
  * @property {boolean} [isSync=false] 덮어쓰기 여부
  * @property {string|object} contents 파일 내용 여부

@@ -10,54 +10,64 @@ class VueDecoder extends VueReplacer {
 	 * @param {string} path fileFullPath
 	 */
 	async decodeVueFile() {
-		this.vueParser.tplFileInfo.task = this.parseOtherFile;
-		this.vueParser.scriptFileInfo.task = this.parseScriptFile;
-		this.vueParser.styleFileInfo.task = this.parseOtherFile;
+		try {
+			this.vueParser.tplFileInfo.task = this.parseOtherFile;
+			this.vueParser.scriptFileInfo.task = this.parseScriptFile;
+			this.vueParser.styleFileInfo.task = this.parseOtherFile;
 
-		const fileConfigs = [
-			this.vueParser.tplFileInfo,
-			this.vueParser.scriptFileInfo,
-			this.vueParser.styleFileInfo
-		].filter(config => config.filePath.length);
+			const fileConfigs = [
+				this.vueParser.tplFileInfo,
+				this.vueParser.scriptFileInfo,
+				this.vueParser.styleFileInfo
+			].filter(config => config.isExistFile);
 
-		const promiseList = _.chain(fileConfigs)
-			// .filter(config => config.isSync)
-			.groupBy('filePath')
-			.map((configList, filePath) => {
-				return new Promise(resolve => {
-					this.fileReader.getFile(filePath).then(fileConts => {
-						configList.forEach(config => {
-							config.task
-								.call(this, config, fileConts)
-								.then(contents => {
-									config.contents = contents;
-									// 중복해서 resolve가 발생하지만 로직상 문제는 없으므로 그냥 둠
-									resolve(true);
-								})
-								.catch(error => {
-									console.error(error);
-									resolve(true);
+			const promiseList = _.chain(fileConfigs)
+				// .filter(config => config.isSync)
+				.groupBy('filePath')
+				.map((configList, filePath) => {
+					return new Promise(resolve => {
+						this.fileReader
+							.getFile(filePath)
+							.then(fileConts => {
+								configList.forEach(config => {
+									config.task
+										.call(this, config, fileConts)
+										.then(contents => {
+											config.contents = contents;
+											// 중복해서 resolve가 발생하지만 로직상 문제는 없으므로 그냥 둠
+											resolve(true);
+										})
+										.catch(error => {
+											console.error(error);
+											resolve(true);
+										});
 								});
-						});
+							})
+							.catch(err => {
+								console.error(err);
+								resolve(true);
+							});
 					});
-				});
-			})
-			.value();
+				})
+				.value();
 
-		await Promise.all(promiseList);
+			await Promise.all(promiseList);
 
-		const restoreVueFile = _.flow(
-			this.restoreTemplate,
-			this.restoreScript,
-			this.restoreStyle
-		);
-		const results = restoreVueFile.call(this, this.vuefile);
-		await this.fileWriter.writeFile(this.vueFilePath, results);
-		console.log('💨 decode complete', this.vueFilePath);
-		// node-watch 인식하는데 시간이 걸리니 딜래이를 둠
-		await VueReplacer.delay(1000);
-		// 옵저버가 부착되어있다면 공지
-		this.notifyCompleteDecode();
+			const restoreVueFile = _.flow(
+				this.restoreTemplate,
+				this.restoreScript,
+				this.restoreStyle
+			);
+			const results = restoreVueFile.call(this, this.vuefile);
+			await this.fileWriter.writeFile(this.vueFilePath, results);
+			console.log('💦 decode complete', this.vueFilePath);
+			// node-watch 인식하는데 시간이 걸리니 딜래이를 둠
+			await VueReplacer.delay(1000);
+			// 옵저버가 부착되어있다면 공지
+			this.notifyCompleteDecode();
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
 	/**
@@ -164,6 +174,9 @@ class VueDecoder extends VueReplacer {
 	 * @param {string} vueFile
 	 */
 	restoreTemplate(vueFile) {
+		if (!this.vueParser.tplFileInfo.isExistFile) {
+			return vueFile;
+		}
 		const chunkStartDelimiter = '<template';
 		const chunkEndDelimiter = '</template>';
 		const endDelimiter = '<script';
@@ -180,6 +193,9 @@ class VueDecoder extends VueReplacer {
 	 * @param {string} vueFile
 	 */
 	restoreScript(vueFile) {
+		if (!this.vueParser.scriptFileInfo.isExistFile) {
+			return vueFile;
+		}
 		const chunkStartDelimiter = '<script';
 		const chunkEndDelimiter = '</script>';
 		const endDelimiter = '<style';
@@ -196,6 +212,9 @@ class VueDecoder extends VueReplacer {
 	 * @param {string} vueFile
 	 */
 	restoreStyle(vueFile) {
+		if (!this.vueParser.styleFileInfo.isExistFile) {
+			return vueFile;
+		}
 		const chunkStartDelimiter = '<style';
 		const chunkEndDelimiter = '</style>';
 

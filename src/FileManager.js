@@ -57,8 +57,11 @@ class FileManager {
 		// 디렉토리 목록 추출 (테스트 폴더 제외)
 		const directoryList = BaseUtil.getDirectories(dynamicDirPath);
 
-		// 파일 명 추출
-		const fileList = BaseUtil.getFiles(dynamicDirPath, ['vue']);
+		// 파일 명 추출 (temp 파일 제외)
+		const fileList = BaseUtil.getFiles(dynamicDirPath, ['vue']).filter(filePath => {
+			const ignoreDelimiter = _(filePath.split('.')).nth(-2);
+			return _.toLower(ignoreDelimiter) !== 'temp';
+		});
 
 		// 파일 명 순회
 		fileList.forEach(file => {
@@ -138,11 +141,11 @@ class FileManager {
 
 	/** OtherFile -> VueFile */
 	async decodeAllFile() {
-		console.time('💨💨💨 decodeAllFile 💨💨💨');
+		console.time('💦💦💦 decodeAllFile 💦💦💦');
 		await Promise.all(
 			_.map(this.manageStorage, vueCommander => vueCommander.updateOtherFile())
 		);
-		console.timeEnd('💨💨💨 decodeAllFile 💨💨💨');
+		console.timeEnd('💦💦💦 decodeAllFile 💦💦💦');
 	}
 }
 

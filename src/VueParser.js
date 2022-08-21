@@ -1,6 +1,8 @@
-import _ from 'lodash';
 import path, { sep } from 'path';
 
+import _ from 'lodash';
+
+import FileReader from './FileReader.js';
 import BaseUtil from './BaseUtil.js';
 
 import './type.d.js';
@@ -27,6 +29,7 @@ class VueParser {
 		/** @type {replaceTargetFileInfo} vue template 영역을 변환하여 저장할  */
 		this.tplFileInfo = {
 			filePath: '',
+			isExistFile: false,
 			isTemplate: false,
 			isSync: false,
 			contents: '',
@@ -38,6 +41,7 @@ class VueParser {
 		/** @type {replaceTargetFileInfo}  */
 		this.scriptFileInfo = {
 			filePath: '',
+			isExistFile: false,
 			/** Template일 경우 Vue.component 아닐 경우 new Vue 를 delimiter 검색 조건으로 함 */
 			isTemplate: false,
 			isSync: false,
@@ -51,6 +55,7 @@ class VueParser {
 		/** @type {replaceTargetFileInfo} vue script 영역을 변환하여 저장할 파일 */
 		this.styleFileInfo = {
 			filePath: '',
+			isExistFile: false,
 			/** style tag wrapping 여부 */
 			isTemplate: false,
 			isSync: false,
@@ -120,6 +125,9 @@ class VueParser {
 		// 파일 경로가 있다면 경로 수정
 		if (tplHeaderInfo.fileSrc) {
 			this.tplFileInfo.filePath = path.join(this.vueFileFolder, tplHeaderInfo.fileSrc);
+			this.tplFileInfo.isExistFile = FileReader.isExistFilePath(
+				this.tplFileInfo.filePath
+			);
 		}
 
 		this.tplFileInfo.indentDepth = tplHeaderInfo.depth
@@ -163,6 +171,9 @@ class VueParser {
 		// 파일 경로가 있다면 경로 수정
 		if (srcHeaderInfo.fileSrc) {
 			this.scriptFileInfo.filePath = path.join(this.vueFileFolder, srcHeaderInfo.fileSrc);
+			this.scriptFileInfo.isExistFile = FileReader.isExistFilePath(
+				this.scriptFileInfo.filePath
+			);
 		}
 
 		this.scriptFileInfo.indentDepth = srcHeaderInfo.depth
@@ -270,6 +281,9 @@ class VueParser {
 			this.styleFileInfo.filePath = path.join(
 				this.vueFileFolder,
 				styleHeaderInfo.fileSrc
+			);
+			this.styleFileInfo.isExistFile = FileReader.isExistFilePath(
+				this.styleFileInfo.filePath
 			);
 		}
 

@@ -111,8 +111,7 @@ class VueReplacer {
 			targetFile = await this.fileReader.getFile(filePath);
 		}
 
-		// return;
-		if (!targetFile.length) {
+		if (!targetFile || !targetFile.length) {
 			throw new Error(`${filePath}이 존재하지 않음`);
 		}
 		// Vue Deleimiter Range 에 해당하는 부분을 추출
