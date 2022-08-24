@@ -85,7 +85,6 @@ class VueDecoder extends VueReplacer {
 			return '';
 		}
 		const { contents = '' } = delimiterFileInfo;
-
 		const vueOptDelimiter = this.vueParser.scriptFileInfo.isTemplate
 			? 'Vue.component'
 			: 'new Vue';
@@ -95,7 +94,7 @@ class VueDecoder extends VueReplacer {
 			throw new Error('유효한 vue delemiter가 존재하지 않습니다.');
 		}
 
-		return _.chain(contents.slice(0, contents.lastIndexOf(')')))
+		const results = _.chain(contents.slice(0, contents.lastIndexOf(')')))
 			.split(this.NEW_LINE)
 			.tail()
 			.map(str => {
@@ -104,8 +103,12 @@ class VueDecoder extends VueReplacer {
 				}
 				return str;
 			})
+			// 초기 설정이 한줄일 경우대비 new Vue({});
+			.tap(arr => _.last(arr).includes('}') === false && arr.push('}'))
 			.join(this.NEW_LINE)
 			.value();
+
+		return results;
 	}
 
 	/**
