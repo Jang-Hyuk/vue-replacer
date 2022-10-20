@@ -6,6 +6,7 @@
     "dist",
     "coverage",
     "**/tests",
+    "**/demo",
     "**/*.vue",
     "**/cTest.vue",
     "**/cTest.html",

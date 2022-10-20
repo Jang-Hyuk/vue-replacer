@@ -43,6 +43,8 @@ class VueCommander {
 		const vueEncoder = new VueEncoder(this.config);
 		await vueEncoder.init();
 
+		this.config.isEucKr = vueEncoder.isEucKr;
+
 		this.relationFiles = [
 			vueEncoder.vueParser.tplFileInfo.filePath,
 			vueEncoder.vueParser.scriptFileInfo.filePath,

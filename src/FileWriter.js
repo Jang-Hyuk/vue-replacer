@@ -70,9 +70,14 @@ class FileWriter {
 					return results;
 				}
 
-				FileWriter.execute(`eslint --fix ${filePath}`);
-
-				return Promise.resolve();
+				return new Promise((resolve, reject) => {
+					FileWriter.execute(`eslint --fix ${filePath}`, (error, result, stderr) => {
+						if (stderr) {
+							return reject(stderr);
+						}
+						return resolve();
+					});
+				});
 			}
 
 			// 그냥 저장

@@ -32,6 +32,7 @@ class VueParser {
 			isExistFile: false,
 			isTemplate: false,
 			isSync: false,
+			isUtf8: false,
 			contents: '',
 			positionId: '',
 			indentDepth: 0,
@@ -45,6 +46,7 @@ class VueParser {
 			/** Template일 경우 Vue.component 아닐 경우 new Vue 를 delimiter 검색 조건으로 함 */
 			isTemplate: false,
 			isSync: false,
+			isUtf8: false,
 			contents: {},
 			positionId: '',
 			indentDepth: 0,
@@ -59,6 +61,7 @@ class VueParser {
 			/** style tag wrapping 여부 */
 			isTemplate: false,
 			isSync: false,
+			isUtf8: false,
 			contents: '',
 			indentDepth: 0,
 			positionId: '',
@@ -116,6 +119,10 @@ class VueParser {
 			.dropRightWhile(v => v === '')
 			.value();
 
+		if (tplHeaderInfo.isUtf8 === '1') {
+			this.tplFileInfo.isUtf8 = true;
+		}
+
 		if (tplHeaderInfo.isTemplate === '1') {
 			tplBodyArr.unshift(`<template v-cloak id="${tplHeaderInfo.id}">`);
 			tplBodyArr.push('</template>');
@@ -165,6 +172,10 @@ class VueParser {
 
 		const isSync = srcHeaderInfo.isSync === '1';
 		this.scriptFileInfo.isSync = isSync;
+
+		if (srcHeaderInfo.isUtf8 === '1') {
+			this.scriptFileInfo.isUtf8 = true;
+		}
 
 		this.scriptFileInfo.isTemplate = srcHeaderInfo.isTemplate === '1';
 
@@ -269,6 +280,10 @@ class VueParser {
 		const isSync = styleHeaderInfo.isSync === '1';
 		this.styleFileInfo.isSync = isSync;
 
+		if (styleHeaderInfo.isUtf8 === '1') {
+			this.styleFileInfo.isUtf8 = true;
+		}
+
 		// let realContents = styleBody;
 		if (styleHeaderInfo.isTemplate === '1') {
 			styleBodyArr.unshift(`<style>`);
@@ -293,6 +308,13 @@ class VueParser {
 			: 0;
 		this.styleFileInfo.positionId = styleHeaderInfo.id ?? '';
 		return styleBodyArr.join(this.NEW_LINE);
+	}
+
+	/** utf8 캐릭터셋 사용 여부 */
+	isUseUtf8Chartset() {
+		return (
+			this.tplFileInfo.isUtf8 || this.scriptFileInfo.isUtf8 || this.styleFileInfo.isUtf8
+		);
 	}
 }
 

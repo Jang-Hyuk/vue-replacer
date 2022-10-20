@@ -1,143 +1,16 @@
 <?php
-$row = $dbC_FASTCONTS->proExecuteSQL("CALL c_fast_conts.p_pm_chat_mem_today_login_chk ('$memNo')");
-$pmTodayInfo = $row[0][0];
+include_once("{$_SERVER['DOCUMENT_ROOT']}/inc/inc.admin.edge.head.php");
 ?>
-<style>
-	#Toast {
-		top: auto !important;
-		bottom: 15%;
-	}
-</style>
 
-<!-- style ### Vue cssPhotoPopup -->
-<style>
-	table td {
-		word-wrap: break-word !important;
-		word-break: break-word !important;
-	}
-	
-	.cs_inperson {
-		margin: 94px 0 1;
-	}
-	
-	/* #8072 자주하는질문(FAQ) */
-	.cs_inperson__faq {
-		padding: 0 0 60px 0;
-	}
-	
-	.hello {
-		color: aliceblue;
-	}
-	
-	/* #8072 자주하는질문(FAQ) 끝 */
-</style>
-<!-- style ### !Vue cssPhotoPopup -->
-
-<!-- #7826 -->
-<style>
-	.qmeet_banner {
-		position: relative;
-		z-index: 1110;
-	}
-</style>
-<!-- ### Vue photoPopup ### -->
-<div v-if="isShow" id="photoPopup11" class="qmeet_pop_wrap qMeet_pop_wrap">
-	<div class="qmeet_banner">
-		<div class="qMeet_pop_evnt_bg" onclick="history.back()"></div>
-		<comp-temp></comp-temp>
-
-		<template slot="hi">
-			<div>슬롯이</div>
-		</template>
-	</div>
-</div>
-<!-- ### !Vue photoPopup ### -->
-
-
-<!-- ### Vue tplCompTemp -->
-		<template v-cloak id="tplCompTemp">
-			<div>hello CompTemp!</div>
-		</template>
-<!-- ### !Vue tplCompTemp -->
-
-
-<script>
-	var __varsInsChat = {
-		hasIntro: "<?= $pmTodayInfo['chk_data'] ?>" === 'y',
-		chatConts: "<?= preg_replace('/\r\n|\r|\n/', '', $pmTodayInfo['chat_conts']) ?>"
-	}
-
-
-		/* ### Vue JsPhotoPopup */
-	var defaultLabels = {
-		first: 'First',
-		last: 'Last',
-		previous: 'Previous',
-		next: 'Next'
-	};
-
-	Vue.component('TalkConts', {
-		
-		data() {
-			return {
-				isShow: 12345,
-				한글: '테스트1'
-			};
-		},
-		created() {
-			var vm = this;
-			vm.on();
-			vm.job();
-		},
-
-		template: '#c-talk-conts'
-	});
-		/* ### !Vue JsPhotoPopup */
+<!-- <link rel="stylesheet" href="/css/bootstrap.min-5.1.3.css" /> -->
+<script src="/bootstrap-vue.min"></script>
 
 
 
-</script>
+<!-- ### Vue tplTestCharts -->
+<div>안녕</div>
+<!-- ### !Vue tplTestCharts -->
 
-<script>
-	// ### Vue jsCompTemp 
-	/**
-	 * @typedef {Object} tableSchema
-	 * @property {string} [id=''] column id
-	 */
-	var defaultLabels = {
-		first: 'First',
-		last: 'Last',
-		previous: 'Previous',
-		next: 'Next'
-	};
-
-	Vue.component('TalkConts', {
-		props: {
-			info: {
-				type: Object,
-				default() {
-					return {};
-				}
-			},
-			num: {
-				type: Number,
-				default: 0
-			}
-		},
-		data() {
-			return {
-				isShow: 131
-			};
-		},
-		created() {
-			var vm = this;
-			vm.on();
-			vm.job();
-		},
-
-		template: '#c-talk-conts'
-	});
-	/* ### !Vue jsCompTemp  */
-</script>
-
-<script src="/cont/pmchat/js/insChatConts.js?ver=<?= $csMbBase->fileToDate($_SERVER['DOCUMENT_ROOT'] . '/cont/pmchat/js/insChatConts.js') ?>"></script>
+<?php
+include_once("{$_SERVER['DOCUMENT_ROOT']}/inc/inc.admin.edge.foot.php");
+?>

@@ -56,6 +56,11 @@ class VueReplacer {
 		// vue file 정보 읽어들임
 		this.vueParser.NEW_LINE = this.NEW_LINE;
 		this.vueParser.parseVueFile(vueFile);
+
+		this.isEucKr = !this.vueParser.isUseUtf8Chartset();
+
+		this.fileReader.isEucKr = this.isEucKr;
+		this.fileWriter.isEucKr = this.isEucKr;
 	}
 
 	static delay(ms) {
