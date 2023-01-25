@@ -19,7 +19,8 @@
     "test-encode": "nodemon  --trace-warnings src/tests/encode.js",
     "test-encode:ie": "nodemon  --trace-warnings src/tests/encode.js ie",
     "test-decode": "nodemon  --trace-warnings src/tests/decode.js",
-    "test-decode:ie": "nodemon  --trace-warnings src/tests/decode.js ie"
+    "test-decode:ie": "nodemon  --trace-warnings src/tests/decode.js ie",
+    "test-procedure": "nodemon  --trace-warnings source/index.js"
   },
   "keywords": [],
   "author": "",

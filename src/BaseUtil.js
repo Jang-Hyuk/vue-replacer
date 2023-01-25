@@ -5,6 +5,19 @@ import _ from 'lodash';
 
 class BaseUtil {
 	/**
+	 * 현재 값이 숫자형으로 변환 가능한지 여부
+	 * @param {*} n 체크할려는 값
+	 * @example
+	 * isNumberic('123'): true
+	 * isNumberic('1.23'): true
+	 * isNumberic('1.2.3'): false
+	 */
+	static isNumberic(n) {
+		const parsedValue = parseFloat(n);
+		return !Number.isNaN(parsedValue) && Number.isFinite(parsedValue);
+	}
+
+	/**
 	 * 특정 문자열 사이의 문자열 추출
 	 * @param {string} str 추출할 대상이 되는 문자열
 	 * @param {string} sDelimiter 특정 문자열 시작 구분자
@@ -17,21 +30,32 @@ class BaseUtil {
 	 */
 	static extractBetweenStrings(str, sDelimiter, eDelimiter, option = {}) {
 		const startRegex = new RegExp(`(${sDelimiter}).*?(${eDelimiter})`, 'g');
+		const startReplacer = new RegExp(sDelimiter);
+		const endReplacer = new RegExp(eDelimiter);
 
-		let results = str
-			.match(startRegex)
-			.map(s => s.replace(sDelimiter, '').replace(eDelimiter, ''));
+		const {
+			shouldTrim = true,
+			shouldLowerCase = false,
+			shouldUppercase = false
+		} = option;
+
+		let results = str.match(startRegex);
+		results =
+			results === null
+				? []
+				: results.map(s => s.replace(startReplacer, '').replace(endReplacer, ''));
 
 		const commnadList = [];
 
-		option.shouldTrim && commnadList.push(_.trim);
-		option.shouldLowerCase && commnadList.push(_.toLower);
-		option.shouldUppercase && commnadList.push(_.toUpper);
+		shouldTrim && commnadList.push(_.trim);
+		shouldLowerCase && commnadList.push(_.toLower);
+		shouldUppercase && commnadList.push(_.toUpper);
 
 		if (commnadList.length) {
 			const flowCommand = _.flow(commnadList);
 			results = results.map(flowCommand);
 		}
+		// console.log('🚀 ~ file: BaseUtil.js:41 ~ results', results);
 		return results;
 	}
 

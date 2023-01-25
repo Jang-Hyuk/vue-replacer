@@ -59,7 +59,7 @@ async function operationWatch() {
 				const ignoreDelimiter = _(f.split('.')).nth(-2);
 				if (_.toLower(ignoreDelimiter) === 'temp') return skip;
 
-				return /\.vue$|\.js$|\.css|\.html|\.php/.test(f);
+				return /\.vue$|\.js$|\.css|\.html|\.php|\.twig/.test(f);
 			}
 		},
 		(event, filename) => {

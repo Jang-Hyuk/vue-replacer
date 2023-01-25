@@ -10,3 +10,6 @@ yarn*
 
 jsconfig.json
 @types/
+
+build
+out
