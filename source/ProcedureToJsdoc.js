@@ -6,13 +6,26 @@ import FileReader from './FileReader.js';
 /**
  * @typedef {object} tempStorageOption 프로시저 별 파싱 결과를 임시로 저장할 저장소
  * @property {number} level 프로시저를 파싱하는 단계
- * @property {string} procedureName 프로시저명
+ * @property {string} db db명. ex) c_payment
+ * @property {string} procedure 프로시저명. ex) p_adm_payment_day_stats_list
+ * @property {string} procedureName 프로시저명 풀 네임 ex) c_payment.p_adm_payment_day_stats_list
  * @property {string} dataType DB 데이터 타입
  * @property {string[]} comments 프로시저 설명
  * @property {string[]} nextComment 다음 프로시저 설명. 현 프로시저와 다음 프로시저 CALL 이 수행되기 전까지의 설명을 임시로 담고 있음
  * @property {procedureOption[]} params 프로시저 파라메터 절
  * @property {number} returnIndex (default 0)프로시저 결과 row index.
  * @property {procedureOption[]} returns 프로시저 결과 Rows
+ */
+
+/**
+ * @typedef {object} procedureChunk 프로시저 저장 단위
+ * @property {string} db db명. ex) c_payment
+ * @property {string} procedure 프로시저명. ex) p_adm_payment_day_stats_list
+ * @property {string} procedureName 프로시저명
+ * @property {string[]} comments 프로시저 설명
+ * @property {string} fileName 파일명
+ * @property {procedureOption[]} params 프로시저 파라메터 절
+ * @property {procedureOption[][]} returns 프로시저 결과 Rows
  */
 
 /**
@@ -27,10 +40,10 @@ class ProcedureToJsdoc {
 	constructor(filePath = '') {
 		this.filePath = filePath;
 		this.procedureFile = '';
-		this.fileReader = new FileReader(filePath);
 
 		this.NEW_LINE = '\r\n';
 		this.TAB = '\t';
+		this.workNumber = FileReader.getWorkNumber(filePath);
 
 		this.LEVEL = {
 			WAIT: 0,
@@ -93,11 +106,12 @@ class ProcedureToJsdoc {
 			returns: []
 		};
 
+		/** @type {procedureChunk[]}  */
 		this.procedureChunkList = [];
 	}
 
 	async init() {
-		const procedureFile = await this.fileReader.getFile(this.filePath);
+		const procedureFile = await FileReader.getFile(this.filePath);
 		// console.log('🚀 ~ file: ProcedureToJsdoc.js:15 ~ procedureFile', procedureFile);
 		this.procedureFile = procedureFile;
 
@@ -108,6 +122,8 @@ class ProcedureToJsdoc {
 		}
 		// file 정보 읽어들임
 		this.splitChunkProcedure(procedureFile);
+		// 프린트 Jsdoc
+		this.printJsdoc();
 	}
 
 	/**
@@ -186,7 +202,7 @@ class ProcedureToJsdoc {
 
 		// ANCHOR 최종 결과
 		// console.log('🚀 ~ 최종 168 ~', inspect(this.procedureChunkList, false, 5));
-		console.log('🚀 ~ 종종 .js:206 ~ this.procedureChunkList', this.procedureChunkList);
+		// console.log('🚀 ~ 종종 .js:206 ~ this.procedureChunkList', this.procedureChunkList);
 	}
 
 	static createProcedureName(rowText = '') {
@@ -331,7 +347,6 @@ class ProcedureToJsdoc {
 			// 	return false;
 			// }
 			if (upperRowText && hasKeyword) {
-				console.log('🚀 ~ file: ProcedureToJsdoc.js:360 ~ hasKeyword', hasKeyword);
 				this.saveChunkProcedure();
 				return false;
 			}
@@ -367,8 +382,13 @@ class ProcedureToJsdoc {
 			this.saveChunkProcedure();
 		}
 
+		const procedureName = ProcedureToJsdoc.createProcedureName(rowText);
+		const [db, procedure] = procedureName.split('.');
+
 		this.tempStorage.level = this.LEVEL.PARAM;
-		this.tempStorage.procedureName = ProcedureToJsdoc.createProcedureName(rowText);
+		this.tempStorage.db = db;
+		this.tempStorage.procedure = procedure;
+		this.tempStorage.procedureName = procedureName;
 		this.tempStorage.params = [];
 		this.tempStorage.returns = [];
 	}
@@ -385,6 +405,9 @@ class ProcedureToJsdoc {
 
 		const [keyName, ...dataType] = dataChunk.split(' ');
 		const enumTypes = ProcedureToJsdoc.getEnumType(dataType, commentChunk);
+		if (!keyName) {
+			return false;
+		}
 		this.tempStorage.params.push({
 			type: enumTypes.length ? enumTypes : this.getDataType(dataType, commentChunk),
 			key: keyName,
@@ -392,6 +415,7 @@ class ProcedureToJsdoc {
 			comment: commentChunk.join(' ').trim()
 		});
 		// ANCHOR Param
+		// this.tempStorage.params.forEach(v => console.table(v));
 		// console.table(this.tempStorage.params);
 	}
 
@@ -431,6 +455,8 @@ class ProcedureToJsdoc {
 	/** 프로시저 1개가 끝날때마다 결과를 저장 */
 	saveChunkProcedure() {
 		this.procedureChunkList.push({
+			db: this.tempStorage.db,
+			procedure: this.tempStorage.procedure,
 			procedureName: this.tempStorage.procedureName,
 			comments: this.tempStorage.comments,
 			fileName: '',
@@ -440,6 +466,8 @@ class ProcedureToJsdoc {
 
 		this.tempStorage = {
 			level: this.LEVEL.WAIT,
+			db: '',
+			procedure: '',
 			procedureName: '',
 			comments: this.tempStorage.nextComment,
 			nextComment: [],
@@ -448,6 +476,86 @@ class ProcedureToJsdoc {
 			returnIndex: 0,
 			returns: []
 		};
+	}
+
+	printJsdoc() {
+		this.procedureChunkList.forEach(ProcedureToJsdoc.printJsdocUnit);
+	}
+
+	/**
+	 * 프로시저 출력
+	 * @param {procedureChunk} procedureChunk
+	 */
+	static printJsdocUnit(procedureChunk) {
+		// 프로시저 랩핑
+		const wrapping = ProcedureToJsdoc.createJsdocSection(procedureChunk);
+		// console.log(wrapping.start);
+		// Param 절
+		const jsdocParam = ProcedureToJsdoc.createJsdocTypeDef(procedureChunk);
+		// console.log(jsdocParam);
+		// Row 절
+		const jsdocReturns = procedureChunk.returns.map((option, index) =>
+			ProcedureToJsdoc.createJsdocTypeDef(procedureChunk, index)
+		);
+		// jsdocReturns.forEach(v => console.log(v));
+		// console.log(wrapping.end);
+		// console.log('🚀 ~ file: ProcedureToJsdoc.js:501 ~ jsdocReturns', jsdocReturns);
+	}
+
+	/**
+	 * 프로시저 Section Wrapping
+	 * @summary Jsdoc
+	 * @param {procedureChunk} procedureChunk
+	 */
+	static createJsdocSection(procedureChunk) {
+		const description = procedureChunk.procedure || '';
+		const compiled = _.template('\n/* <%= endTag %>SECTION <%= title %> */');
+		return {
+			start: compiled({ title: description, endTag: '' }),
+			end: compiled({ title: description, endTag: '!' })
+		};
+	}
+
+	/**
+	 * 프로시저 Section Wrapping
+	 * @summary Jsdoc
+	 * @param {procedureChunk} procedureChunk
+	 * @param {number} [rowIndex] 없으면 파람. 있으면 Row
+	 */
+	static createJsdocTypeDef(procedureChunk, rowIndex) {
+		// const description = procedureChunk.procedure || '';
+		let procedureOptions = procedureChunk.params;
+
+		let descriptionName = 'Param';
+		if (typeof rowIndex === 'number') {
+			descriptionName = `ROW_${rowIndex}`;
+			procedureOptions = procedureChunk.returns[rowIndex];
+		}
+		// console.log('procedureOptions: ', procedureOptions);
+
+		const compiled = _.template(`
+/**
+ * LINK <%= descriptionName %> <%= comments %>
+ * @typedef {object} <%= procedureName %>.<%= descriptionName %>
+ <%= body.join('\\n ') %>
+ */`);
+		const compiledProperty = _.template(
+			`* @property {<%= propertyType %>} <%= key %> <%= comment %> <%= dataType %>`
+		);
+		const body = procedureOptions.map(option => {
+			const propertyType = Array.isArray(option.type)
+				? option.type.map(v => `'${v}'`).join('|')
+				: option.type;
+			return compiledProperty({
+				propertyType,
+				...option
+			});
+		});
+		return compiled({
+			body,
+			descriptionName,
+			...procedureChunk
+		});
 	}
 }
 

@@ -1,4 +1,6 @@
+import { sep } from 'path';
 import fs from 'fs';
+import _ from 'lodash';
 import iconv from 'iconv-lite';
 
 class FileReader {
@@ -47,7 +49,7 @@ class FileReader {
 		});
 	}
 
-	async getFile(filePath = '') {
+	static async getFile(filePath = '') {
 		try {
 			const file = await FileReader.readUtfFile(filePath);
 
@@ -55,6 +57,14 @@ class FileReader {
 		} catch (error) {
 			console.log('🚀 ~ file: FileReader.js ~ line 65 ~ error', error.message);
 		}
+	}
+
+	/**
+	 * 일감번호 추출
+	 * @param {string} filePath
+	 */
+	static getWorkNumber(filePath) {
+		return _.chain(filePath).split(sep).last().split(' ').head().value();
 	}
 }
 
