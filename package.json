@@ -5,6 +5,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
+    "jsdoc": "nodemon  --trace-warnings source/index.js",
     "dev": "nodemon --trace-warnings src/index.js",
     "dev-d": "nodemon --trace-warnings src/index.js dec",
     "dev-e": "nodemon --trace-warnings src/index.js enc",
@@ -19,8 +20,7 @@
     "test-encode": "nodemon  --trace-warnings src/tests/encode.js",
     "test-encode:ie": "nodemon  --trace-warnings src/tests/encode.js ie",
     "test-decode": "nodemon  --trace-warnings src/tests/decode.js",
-    "test-decode:ie": "nodemon  --trace-warnings src/tests/decode.js ie",
-    "test-procedure": "nodemon  --trace-warnings source/index.js"
+    "test-decode:ie": "nodemon  --trace-warnings src/tests/decode.js ie"
   },
   "keywords": [],
   "author": "",

@@ -1,4 +1,3 @@
-import { inspect } from 'util';
 import _ from 'lodash';
 import BaseUtil from '../src/BaseUtil.js';
 import FileReader from './FileReader.js';
@@ -11,21 +10,21 @@ import FileReader from './FileReader.js';
  * @property {string} procedureName 프로시저명 풀 네임 ex) c_payment.p_adm_payment_day_stats_list
  * @property {string} dataType DB 데이터 타입
  * @property {string[]} comments 프로시저 설명
- * @property {string[]} nextComment 다음 프로시저 설명. 현 프로시저와 다음 프로시저 CALL 이 수행되기 전까지의 설명을 임시로 담고 있음
+ * @property {string[]} nextComments 다음 프로시저 설명. 현 프로시저와 다음 프로시저 CALL 이 수행되기 전까지의 설명을 임시로 담고 있음
  * @property {procedureOption[]} params 프로시저 파라메터 절
- * @property {number} returnIndex (default 0)프로시저 결과 row index.
- * @property {procedureOption[]} returns 프로시저 결과 Rows
+ * @property {number} rowIndex (default 0)프로시저 결과 row index.
+ * @property {procedureOption[]} rows 프로시저 결과 Rows
  */
 
 /**
  * @typedef {object} procedureChunk 프로시저 저장 단위
+ * @property {number[]} workNumbers 일감 번호 ex) #5687, #8657
  * @property {string} db db명. ex) c_payment
  * @property {string} procedure 프로시저명. ex) p_adm_payment_day_stats_list
- * @property {string} procedureName 프로시저명
+ * @property {string} procedureName 프로시저명 풀 네임 ex) c_payment.p_adm_payment_day_stats_list
  * @property {string[]} comments 프로시저 설명
- * @property {string} fileName 파일명
  * @property {procedureOption[]} params 프로시저 파라메터 절
- * @property {procedureOption[][]} returns 프로시저 결과 Rows
+ * @property {procedureOption[][]} rows 프로시저 결과 Rows
  */
 
 /**
@@ -37,7 +36,11 @@ import FileReader from './FileReader.js';
  */
 
 class ProcedureToJsdoc {
-	constructor(filePath = '') {
+	/**
+	 * @param {string} filePath
+	 * @param {procedureChunk[]} procedureChunks
+	 */
+	constructor(filePath, procedureChunks = []) {
 		this.filePath = filePath;
 		this.procedureFile = '';
 
@@ -100,14 +103,14 @@ class ProcedureToJsdoc {
 			level: 0,
 			procedureName: '',
 			comments: [],
-			nextComment: [],
+			nextComments: [],
 			params: [],
-			returnIndex: 0,
-			returns: []
+			rowIndex: 0,
+			rows: []
 		};
 
 		/** @type {procedureChunk[]}  */
-		this.procedureChunkList = [];
+		this.procedureChunkList = procedureChunks;
 	}
 
 	async init() {
@@ -123,7 +126,8 @@ class ProcedureToJsdoc {
 		// file 정보 읽어들임
 		this.splitChunkProcedure(procedureFile);
 		// 프린트 Jsdoc
-		this.printJsdoc();
+		// this.printJsdoc();
+		return this.procedureChunkList;
 	}
 
 	/**
@@ -154,24 +158,20 @@ class ProcedureToJsdoc {
 			level: this.LEVEL.WAIT,
 			procedureName: '',
 			comments: [],
-			nextComment: [],
-			fileName: '',
+			nextComments: [],
 			params: [],
-			returnIndex: 0,
-			returns: []
+			rowIndex: 0,
+			rows: []
 		};
 	}
 
 	splitChunkProcedure(file = '') {
 		file.split(this.NEW_LINE).forEach(rowText => {
-			const isValid = this.isValidRow(rowText);
+			const isValid = this.isValidRowText(rowText);
 			if (!isValid) {
 				return false;
 			}
 			// ANCHOR rowText
-			if (rowText.toUpperCase().includes('RETURN')) {
-				return false;
-			}
 			const shouldComments = ProcedureToJsdoc.isComment(rowText);
 			if (shouldComments) {
 				this.createComments(rowText);
@@ -189,9 +189,9 @@ class ProcedureToJsdoc {
 				return this.createParams(rowText);
 			}
 
-			const shouldReturns = this.checkReturns(rowText);
+			const shouldReturns = this.checkRows(rowText);
 			if (shouldReturns) {
-				return this.createReturns(rowText);
+				return this.createRows(rowText);
 			}
 		});
 
@@ -205,9 +205,8 @@ class ProcedureToJsdoc {
 		// console.log('🚀 ~ 종종 .js:206 ~ this.procedureChunkList', this.procedureChunkList);
 	}
 
-	static createProcedureName(rowText = '') {
-		// console.log('🚀 ~ file: ProcedureToJsdoc.js:105 ~ rowText', rowText);
-		return rowText.toLowerCase().slice(4).split('(')[0].trim().replace(/\\`/, '');
+	static parseProcedureName(rowText = '') {
+		return rowText.toLowerCase().slice(4).split('(')[0].trim().replace(/`/g, '');
 	}
 
 	createComments(rowText = '') {
@@ -221,7 +220,7 @@ class ProcedureToJsdoc {
 				break;
 			default:
 				comment
-					? this.tempStorage.nextComment.push(comment)
+					? this.tempStorage.nextComments.push(comment)
 					: _.set(this.tempStorage, 'nextComment', []);
 				break;
 		}
@@ -252,7 +251,7 @@ class ProcedureToJsdoc {
 				.reject(str => /[^a-z|A-Z|0-9|\\-]/.test(str))
 				.value();
 		}
-		if (dataTypes.some(type => type.includes('ENUM'))) {
+		if (dataTypes.some(type => type.toUpperCase().includes('ENUM'))) {
 			return BaseUtil.extractBetweenStrings(dataTypes.join(' '), '\\(', '\\)')
 				.join('')
 				.replace(/'/g, '')
@@ -269,7 +268,13 @@ class ProcedureToJsdoc {
 	getDataType(dataType) {
 		const dataTypes = Array.isArray(dataType) ? _.compact(dataType) : [dataType];
 
-		const realType = _.chain(dataTypes).compact().head().split('(').head().value();
+		const realType = _.chain(dataTypes)
+			.compact()
+			.head()
+			.split('(')
+			.head()
+			.toUpper()
+			.value();
 		if (!realType) {
 			return undefined;
 		}
@@ -286,7 +291,10 @@ class ProcedureToJsdoc {
 
 	/** @param {string} rowText 프로시저절이 존재하는지 확인 */
 	checkProcedureCall(rowText = '') {
-		return rowText.trim().replace(this.TAB, '').toUpperCase().indexOf('CALL') === 0;
+		const hasCall =
+			rowText.trim().replace(this.TAB, '').toUpperCase().indexOf('CALL') === 0;
+
+		return hasCall;
 	}
 
 	/** @param {string} rowText 파람절을 생성해도 되는지 */
@@ -302,11 +310,11 @@ class ProcedureToJsdoc {
 	}
 
 	/** @param {string} rowText 리턴절을 생성해도 되는지 */
-	checkReturns(rowText = '') {
+	checkRows(rowText = '') {
 		// 데이터 리턴 index가 변경되었는지 판별
 		if (rowText.trim().indexOf('[') === 0) {
 			const returnNums = BaseUtil.extractBetweenStrings(rowText, '\\[', '\\]');
-			this.tempStorage.returnIndex = parseInt(_.head(returnNums), 10);
+			this.tempStorage.rowIndex = parseInt(_.head(returnNums), 10);
 			this.tempStorage.level = this.LEVEL.ROW;
 			return false;
 		}
@@ -323,8 +331,22 @@ class ProcedureToJsdoc {
 	}
 
 	/** @param {string} rowText row parser 가 동작해도 괜찮은지 여부 */
-	isValidRow(rowText = '') {
+	isValidRowText(rowText = '') {
 		let isValid = true;
+
+		// ### 이 연속으로 등장시 무시
+		if (rowText.trim().includes('###')) {
+			this.saveChunkProcedure();
+			return false;
+		}
+
+		const hasProcedureCall = this.checkProcedureCall(rowText);
+		const hasOpen = rowText.indexOf('(') > 0;
+		if (hasProcedureCall && !hasOpen) {
+			this.tempStorage.comments = [];
+			this.tempStorage.nextComments = [];
+			return false;
+		}
 
 		// 시작 text가 프로시저 예약어일 경우 리셋
 		const keywords = [
@@ -341,18 +363,13 @@ class ProcedureToJsdoc {
 		const upperRowText = rowText.toUpperCase().trim().split(' ')[0].trim();
 		const hasKeyword = keywords.some(keyword => keyword.indexOf(upperRowText) === 0);
 
-		if (this.tempStorage.level > this.LEVEL.WAIT) {
-			// if (!upperRowText) {
-			// 	this.saveChunkProcedure();
-			// 	return false;
-			// }
-			if (upperRowText && hasKeyword) {
-				this.saveChunkProcedure();
-				return false;
-			}
+		if (upperRowText && hasKeyword) {
+			this.saveChunkProcedure();
+			return false;
 		}
 
 		switch (this.tempStorage.level) {
+			case this.LEVEL.PARAM:
 			case this.LEVEL.PARAM_END:
 				isValid = this.validRowParamEnd(rowText);
 				break;
@@ -368,7 +385,14 @@ class ProcedureToJsdoc {
 	 */
 	validRowParamEnd(rowText) {
 		// 파람절이 끝나고 Return이 등장하면 Row절이 시작됨을 알림
-		if (rowText.toUpperCase().includes('RETURN')) {
+		const hasReturn = _.chain(rowText)
+			.toUpper()
+			.split(' ')
+			.intersection(['RETURN', '#RETURN', '>RETURN'])
+			.size()
+			.gt(0)
+			.value();
+		if (hasReturn) {
 			this.tempStorage.level = this.LEVEL.ROW;
 			return false;
 		}
@@ -382,7 +406,7 @@ class ProcedureToJsdoc {
 			this.saveChunkProcedure();
 		}
 
-		const procedureName = ProcedureToJsdoc.createProcedureName(rowText);
+		const procedureName = ProcedureToJsdoc.parseProcedureName(rowText);
 		const [db, procedure] = procedureName.split('.');
 
 		this.tempStorage.level = this.LEVEL.PARAM;
@@ -390,40 +414,44 @@ class ProcedureToJsdoc {
 		this.tempStorage.procedure = procedure;
 		this.tempStorage.procedureName = procedureName;
 		this.tempStorage.params = [];
-		this.tempStorage.returns = [];
+		this.tempStorage.rows = [];
 	}
 
 	/** @param {string} [rowText=''] 파라메터 절 생성 */
 	createParams(rowText = '') {
 		const splitDelimiter = rowText.indexOf('--') > 0 ? '--' : '#';
+		// 파라미터 첫 등장이 ',' 일 경우 제거
+		rowText = rowText.replaceAll(this.TAB, ' ').trim();
+		if (rowText.charAt(0) === ',') {
+			rowText = rowText.slice(1);
+		}
 		/** @type {string[]}  */
-		const [dataChunk, ...commentChunk] = rowText
-			.replace(',', '')
-			.trim()
-			.replaceAll(this.TAB, ' ')
-			.split(splitDelimiter);
+		const [dataChunk, ...commentChunk] = rowText.trim().split(splitDelimiter);
 
 		const [keyName, ...dataType] = dataChunk.split(' ');
 		const enumTypes = ProcedureToJsdoc.getEnumType(dataType, commentChunk);
-		if (!keyName) {
+		if (!keyName || !dataType.length) {
 			return false;
 		}
+		let type = this.getDataType(dataType);
+
+		if (enumTypes.length) {
+			type = type === 'number' ? enumTypes.map(_.toNumber) : enumTypes;
+		}
+
 		this.tempStorage.params.push({
-			type: enumTypes.length ? enumTypes : this.getDataType(dataType, commentChunk),
+			type,
 			key: keyName,
 			dataType: _.compact(dataType).join(' '),
 			comment: commentChunk.join(' ').trim()
 		});
-		// ANCHOR Param
-		// this.tempStorage.params.forEach(v => console.table(v));
-		// console.table(this.tempStorage.params);
 	}
 
 	/** @param {string} [rowText = ''] 리턴 절 생성 */
-	createReturns(rowText = '') {
-		const index = this.tempStorage.returnIndex;
-		if (!Array.isArray(this.tempStorage.returns[index])) {
-			this.tempStorage.returns[index] = [];
+	createRows(rowText = '') {
+		const index = this.tempStorage.rowIndex;
+		if (!Array.isArray(this.tempStorage.rows[index])) {
+			this.tempStorage.rows[index] = [];
 		}
 
 		const splitDelimiter = rowText.indexOf('--') > 0 ? '--' : '#';
@@ -441,65 +469,110 @@ class ProcedureToJsdoc {
 		}
 
 		const enumTypes = ProcedureToJsdoc.getEnumType(dataType, commentChunk);
-		this.tempStorage.returns[index].push({
+		this.tempStorage.rows[index].push({
 			type: enumTypes.length ? enumTypes : 'string',
 			key: keyName,
 			dataType: _.compact(dataType).join(' '),
 			comment: commentChunk.join(' ').trim()
 		});
-
-		// ANCHOR Returns
-		// this.tempStorage.returns.forEach(v => console.table(v));
 	}
 
 	/** 프로시저 1개가 끝날때마다 결과를 저장 */
 	saveChunkProcedure() {
-		this.procedureChunkList.push({
-			db: this.tempStorage.db,
-			procedure: this.tempStorage.procedure,
-			procedureName: this.tempStorage.procedureName,
-			comments: this.tempStorage.comments,
-			fileName: '',
-			params: this.tempStorage.params,
-			returns: this.tempStorage.returns
+		if (this.tempStorage.level === this.LEVEL.WAIT) {
+			this.tempStorage.comments = [];
+			this.tempStorage.nextComments = [];
+			return false;
+		}
+
+		// ANCHOR Param
+		// this.tempStorage.params.forEach(v => console.table(v));
+		// console.table(this.tempStorage.params);
+
+		// ANCHOR Returns
+		// this.tempStorage.rows.forEach(v => console.table(v));
+
+		// 프로시저 청크 목록중에 일감번호가 더 높은 프로시저가 기존재한다면 일감번호 추가 후 패스
+		const procedureChunk = _.find(this.procedureChunkList, {
+			procedureName: this.tempStorage.procedureName
 		});
+
+		let realWorkNumbers = Number.isNaN(this.workNumber) ? [] : [this.workNumber];
+		let shouldOverride = true;
+
+		if (procedureChunk) {
+			shouldOverride = _.chain(procedureChunk.workNumbers)
+				.last()
+				.lt(realWorkNumbers)
+				.value();
+
+			realWorkNumbers = _.chain(procedureChunk.workNumbers)
+				.concat(realWorkNumbers)
+				.union()
+				.sort()
+				.value();
+
+			// 일감 번호가 낮을 경우 덮어쓰기. 일감번호는 계승
+			procedureChunk.workNumbers = realWorkNumbers;
+			if (shouldOverride) {
+				procedureChunk.comments = this.tempStorage.comments;
+				procedureChunk.params = this.tempStorage.params;
+				procedureChunk.rows = this.tempStorage.rows;
+			}
+		} else {
+			// 일감번호가 존재하지 않을 경우 Push
+			this.procedureChunkList.push({
+				workNumbers: realWorkNumbers,
+				db: this.tempStorage.db,
+				procedure: this.tempStorage.procedure,
+				procedureName: this.tempStorage.procedureName,
+				comments: this.tempStorage.comments,
+				params: this.tempStorage.params,
+				rows: this.tempStorage.rows
+			});
+		}
 
 		this.tempStorage = {
 			level: this.LEVEL.WAIT,
 			db: '',
 			procedure: '',
 			procedureName: '',
-			comments: this.tempStorage.nextComment,
-			nextComment: [],
-			fileName: '',
+			comments: this.tempStorage.nextComments,
+			nextComments: [],
 			params: [],
-			returnIndex: 0,
-			returns: []
+			rowIndex: 0,
+			rows: []
 		};
 	}
 
-	printJsdoc() {
-		this.procedureChunkList.forEach(ProcedureToJsdoc.printJsdocUnit);
+	// SECTION GroupBy
+	/**
+	 * 출력
+	 * @param {procedureChunk[]} chunkList
+	 */
+	static groupByDb(chunkList) {
+		const results = _.chain(chunkList).sortBy('procedure').groupBy('db').value();
+		return results;
 	}
+
+	// !SECTION
 
 	/**
 	 * 프로시저 출력
 	 * @param {procedureChunk} procedureChunk
 	 */
 	static printJsdocUnit(procedureChunk) {
+		// LINK printJsdocUnit
 		// 프로시저 랩핑
 		const wrapping = ProcedureToJsdoc.createJsdocSection(procedureChunk);
-		// console.log(wrapping.start);
 		// Param 절
 		const jsdocParam = ProcedureToJsdoc.createJsdocTypeDef(procedureChunk);
-		// console.log(jsdocParam);
 		// Row 절
-		const jsdocReturns = procedureChunk.returns.map((option, index) =>
-			ProcedureToJsdoc.createJsdocTypeDef(procedureChunk, index)
-		);
-		// jsdocReturns.forEach(v => console.log(v));
-		// console.log(wrapping.end);
-		// console.log('🚀 ~ file: ProcedureToJsdoc.js:501 ~ jsdocReturns', jsdocReturns);
+		const jsdocReturns = procedureChunk.rows
+			.map((option, index) => ProcedureToJsdoc.createJsdocTypeDef(procedureChunk, index))
+			.join('\n');
+
+		return `${wrapping.start}\n${jsdocParam}\n${jsdocReturns}\n${wrapping.end}\n`;
 	}
 
 	/**
@@ -509,10 +582,13 @@ class ProcedureToJsdoc {
 	 */
 	static createJsdocSection(procedureChunk) {
 		const description = procedureChunk.procedure || '';
-		const compiled = _.template('\n/* <%= endTag %>SECTION <%= title %> */');
+		const workNumbers = procedureChunk.workNumbers.map(number => `#${number}`).join(', ');
+		const compiled = _.template(
+			'\n/* <%= endTag %>SECTION <%= title %> <%= workNumbers  %> */'
+		);
 		return {
-			start: compiled({ title: description, endTag: '' }),
-			end: compiled({ title: description, endTag: '!' })
+			start: compiled({ title: description, endTag: '', workNumbers }),
+			end: compiled({ title: description, endTag: '!', workNumbers })
 		};
 	}
 
@@ -523,15 +599,13 @@ class ProcedureToJsdoc {
 	 * @param {number} [rowIndex] 없으면 파람. 있으면 Row
 	 */
 	static createJsdocTypeDef(procedureChunk, rowIndex) {
-		// const description = procedureChunk.procedure || '';
 		let procedureOptions = procedureChunk.params;
 
 		let descriptionName = 'Param';
 		if (typeof rowIndex === 'number') {
-			descriptionName = `ROW_${rowIndex}`;
-			procedureOptions = procedureChunk.returns[rowIndex];
+			descriptionName = `Row${rowIndex}`;
+			procedureOptions = procedureChunk.rows[rowIndex];
 		}
-		// console.log('procedureOptions: ', procedureOptions);
 
 		const compiled = _.template(`
 /**

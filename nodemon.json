@@ -4,6 +4,7 @@
     ".git",
     "node_modules",
     "dist",
+    "out",
     "coverage",
     "**/tests",
     "**/demo",
@@ -16,7 +17,8 @@
     "**/*.temp.css",
     "**/*.temp.js",
     "**/*.temp.vue",
-    "**/*/*.temp.vue"
+    "**/*/*.temp.vue",
+    "**/*/*.d.js"
 
   ],
   "watch": [

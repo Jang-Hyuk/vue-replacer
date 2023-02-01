@@ -64,7 +64,14 @@ class FileReader {
 	 * @param {string} filePath
 	 */
 	static getWorkNumber(filePath) {
-		return _.chain(filePath).split(sep).last().split(' ').head().value();
+		return _.chain(filePath)
+			.split(sep)
+			.last()
+			.split(' ')
+			.head()
+			.replace('#', '')
+			.toNumber()
+			.value();
 	}
 }
 
