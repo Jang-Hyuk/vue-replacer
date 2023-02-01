@@ -35,11 +35,16 @@ const jsdocPath = path.join(process.cwd(), process.env.JSDOC_OUT_FOLTER ?? 'out'
  *
  */
 function writeFile(chunkList, fileName, isCurrentPath = false) {
-	const realPath = isCurrentPath
-		? path.join(process.cwd(), 'out', fileName)
-		: path.join(jsdocPath, fileName);
-	const jsdoc = chunkList.map(ProcedureToJsdoc.printJsdocUnit).join('');
-	FileWriter.writeFile(realPath, jsdoc).then(FileWriter.fixEslint).catch(console.error);
+	return new Promise((resolve, reject) => {
+		const realPath = isCurrentPath
+			? path.join(process.cwd(), 'out', fileName)
+			: path.join(jsdocPath, fileName);
+		const jsdoc = chunkList.map(ProcedureToJsdoc.printJsdocUnit).join('');
+		FileWriter.writeFile(realPath, jsdoc)
+			.then(FileWriter.fixEslint)
+			.then(resolve)
+			.catch(reject);
+	});
 }
 
 /**
@@ -54,11 +59,11 @@ async function createProcedureChunk() {
 			const procedureToJsdoc = new ProcedureToJsdoc(realFilePath, chunks);
 			await procedureToJsdoc.init();
 
-			writeFile(
-				procedureToJsdoc.procedureChunkList,
-				`${filePath.replace(/ /g, '-')}.js`,
-				true
-			);
+			const replacedFileName = filePath
+				.replace(/ /g, '-')
+				.replace(/\(/g, '[')
+				.replace(/\)/g, ']');
+			writeFile(procedureToJsdoc.procedureChunkList, `${replacedFileName}.js`, true);
 
 			return procedureToJsdoc.procedureChunkList;
 		});
@@ -80,3 +85,11 @@ function writeJsdocFile() {
 }
 
 writeJsdocFile();
+
+process.on('uncaughtException', err => {
+	console.error('uncaughtException', err);
+});
+
+process.on('unhandledRejection', err => {
+	console.error('unhandledRejection', err);
+});
