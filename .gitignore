@@ -12,4 +12,4 @@ jsconfig.json
 @types/
 
 build
-out
+# out
