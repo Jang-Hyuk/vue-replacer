@@ -61,9 +61,17 @@ async function createProcedureChunk() {
 
 			const replacedFileName = filePath
 				.replace(/ /g, '-')
+				.replace(/&/g, '_')
 				.replace(/\(/g, '[')
 				.replace(/\)/g, ']');
-			writeFile(procedureToJsdoc.procedureChunkList, `${replacedFileName}.js`, true);
+
+			writeFile(
+				_.filter(procedureToJsdoc.procedureChunkList, chunk =>
+					chunk.workNumbers.includes(procedureToJsdoc.workNumber)
+				),
+				`${replacedFileName}.js`,
+				true
+			);
 
 			return procedureToJsdoc.procedureChunkList;
 		});
