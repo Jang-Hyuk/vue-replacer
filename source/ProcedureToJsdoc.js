@@ -13,7 +13,7 @@ import FileReader from './FileReader.js';
  * @property {string[]} nextComments 다음 프로시저 설명. 현 프로시저와 다음 프로시저 CALL 이 수행되기 전까지의 설명을 임시로 담고 있음
  * @property {procedureOption[]} params 프로시저 파라메터 절
  * @property {number} rowIndex (default 0)프로시저 결과 row index.
- * @property {procedureOption[]} rows 프로시저 결과 Rows
+ * @property {procedureOption[][]} rows 프로시저 결과 Rows
  */
 
 /**
@@ -206,7 +206,7 @@ class ProcedureToJsdoc {
 	}
 
 	static parseProcedureName(rowText = '') {
-		return rowText.toLowerCase().slice(4).split('(')[0].trim().replace(/`/g, '');
+		return rowText.toLowerCase().trim().slice(4).split('(')[0].trim().replace(/`/g, '');
 	}
 
 	createComments(rowText = '') {

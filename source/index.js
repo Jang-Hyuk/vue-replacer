@@ -10,26 +10,6 @@ import ProcedureToJsdoc from './ProcedureToJsdoc.js';
 dotenv.config();
 const docPath = path.join(process.cwd(), process.env.JSDOC_DOC_FOLTER ?? 'build');
 const jsdocPath = path.join(process.cwd(), process.env.JSDOC_OUT_FOLTER ?? 'out');
-// const argvValue = process.argv.slice(2)[0];
-
-// const filePath = 'build/#9213 20221115_클럽_용_쿠폰_설명.txt';
-// const filePath = 'build/#8670 20220714_클럽5678_임_무제한정지자 data삭제 관련_설명.txt';
-// const filePath = 'build/#6666 sample3.txt';
-// const filePath = 'build/#6866 20211201_클럽5678_다중채팅_스타샷_설명.txt';
-
-// const filePaths = [
-// 	// 'build/#9213 20221115_클럽_용_쿠폰_설명.txt',
-// 	// 'build/#8670 20220714_클럽5678_임_무제한정지자 data삭제 관련_설명.txt',
-// 	'#6666 sample3.txt',
-// 	'sample3 copy.txt'
-// 	// 'build/#6866 20211201_클럽5678_다중채팅_스타샷_설명.txt'
-// ];
-// const realFilePath = path.join(process.cwd(), filePaths[0].replace(/\//g, sep));
-// console.log('🚀 ~ file: index.js:9 ~ realFilePath', realFilePath);
-
-// const procedureToJsdoc = new ProcedureToJsdoc(realFilePath);
-
-// await procedureToJsdoc.init();
 
 /**
  *
@@ -42,7 +22,11 @@ function writeFile(chunkList, fileName, isCurrentPath = false) {
 		const jsdoc = chunkList.map(ProcedureToJsdoc.printJsdocUnit).join('');
 		FileWriter.writeFile(realPath, jsdoc)
 			.then(FileWriter.fixEslint)
-			.then(resolve)
+			.then(res => {
+				console.log(`✅ complete fix ESLint - ${realPath}`);
+
+				return resolve(res);
+			})
 			.catch(reject);
 	});
 }
