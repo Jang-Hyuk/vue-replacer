@@ -1,3 +1,4 @@
+import { inspect } from 'util';
 import _ from 'lodash';
 import BaseUtil from '../src/BaseUtil.js';
 import FileReader from './FileReader.js';
@@ -12,19 +13,20 @@ import FileReader from './FileReader.js';
  * @property {string[]} comments 프로시저 설명
  * @property {string[]} nextComments 다음 프로시저 설명. 현 프로시저와 다음 프로시저 CALL 이 수행되기 전까지의 설명을 임시로 담고 있음
  * @property {procedureOption[]} params 프로시저 파라메터 절
- * @property {number} rowIndex (default 0)프로시저 결과 row index.
- * @property {procedureOption[][]} rows 프로시저 결과 Rows
+ * @property {number} [rowDataPacketIndex=0] (default 0) 프로시저 결과 row 중분류 index. 기본적인 프로시저 결과를 담을 인덱스
+ * @property {number} [rowDuplicationIndex=0] (default 0)프로시저 결과 row 대분류 index. 한 프로시저로 각기 다른 결과를 주는 프로시저를 담을 인덱스
+ * @property {procedureOption[][][]} rows 프로시저 결과 Rows
  */
 
 /**
  * @typedef {object} procedureChunk 프로시저 저장 단위
- * @property {number[]} workNumbers 일감 번호 ex) #5687, #8657
+ * @property {number[]} workNumbers 일감 번호 ex) #5687, #8657 -> number
  * @property {string} db db명. ex) c_payment
  * @property {string} procedure 프로시저명. ex) p_adm_payment_day_stats_list
  * @property {string} procedureName 프로시저명 풀 네임 ex) c_payment.p_adm_payment_day_stats_list
  * @property {string[]} comments 프로시저 설명
  * @property {procedureOption[]} params 프로시저 파라메터 절
- * @property {procedureOption[][]} rows 프로시저 결과 Rows
+ * @property {rowOption[][][]} rows 프로시저 결과 Rows
  */
 
 /**
@@ -33,6 +35,15 @@ import FileReader from './FileReader.js';
  * @property {string} key column or row key
  * @property {string} comment 설명
  * @property {string} dataType DB 데이터 타입
+ */
+
+/**
+ * @typedef {object} rowOption
+ * @property {string} type param 절일 경우 (ENUM, number, string), row 절일 경우 (ENUM, string)
+ * @property {string} key column or row key
+ * @property {string} desc 설명
+ * @property {string} dataType DB 데이터 타입
+ * @property {string} [rowDesciption] row 절 설명
  */
 
 class ProcedureToJsdoc {
@@ -105,7 +116,7 @@ class ProcedureToJsdoc {
 			comments: [],
 			nextComments: [],
 			params: [],
-			rowIndex: 0,
+			rowDataPacketIndex: 0,
 			rows: []
 		};
 
@@ -140,7 +151,7 @@ class ProcedureToJsdoc {
 		return index !== -1 ? text.slice(index).replaceAll('##', '#') : '';
 	}
 
-	// TODO 데이터 정제. 스페이스 제거
+	/** 주석 시작인지 체크 */
 	static isComment(rowText = '') {
 		return rowText.trim().indexOf('#') === 0;
 	}
@@ -160,7 +171,7 @@ class ProcedureToJsdoc {
 			comments: [],
 			nextComments: [],
 			params: [],
-			rowIndex: 0,
+			rowDataPacketIndex: 0,
 			rows: []
 		};
 	}
@@ -217,6 +228,9 @@ class ProcedureToJsdoc {
 				comment
 					? this.tempStorage.comments.push(comment)
 					: _.set(this.tempStorage, 'comments', []);
+				break;
+			// TODO createComments Row Pattern
+			case this.LEVEL.ROW:
 				break;
 			default:
 				comment
@@ -312,9 +326,12 @@ class ProcedureToJsdoc {
 	/** @param {string} rowText 리턴절을 생성해도 되는지 */
 	checkRows(rowText = '') {
 		// 데이터 리턴 index가 변경되었는지 판별
+		// TODO Return index 옆에 코멘트가 왔을 경우 저장 로직 추가
+
+		// TODO [0]이 중복으로 등장했을 경우 tempStorage.rowDuplicationIndex 증가
 		if (rowText.trim().indexOf('[') === 0) {
 			const returnNums = BaseUtil.extractBetweenStrings(rowText, '\\[', '\\]');
-			this.tempStorage.rowIndex = parseInt(_.head(returnNums), 10);
+			this.tempStorage.rowDataPacketIndex = parseInt(_.head(returnNums), 10);
 			this.tempStorage.level = this.LEVEL.ROW;
 			return false;
 		}
@@ -447,9 +464,20 @@ class ProcedureToJsdoc {
 		});
 	}
 
+	// TODO currentTempStorageRow 구현
+	// get currentTempStorageRow() {
+	// 	const index = this.tempStorage.rowDataPacketIndex;
+
+	// 	// this.tempStorage.rowDuplicationIndex ?? 0;
+	// 	if (!Array.isArray(this.tempStorage.rows[index])) {
+	// 		this.tempStorage.rows[index] = [];
+	// 	}
+
+	// },
+
 	/** @param {string} [rowText = ''] 리턴 절 생성 */
 	createRows(rowText = '') {
-		const index = this.tempStorage.rowIndex;
+		const index = this.tempStorage.rowDataPacketIndex;
 		if (!Array.isArray(this.tempStorage.rows[index])) {
 			this.tempStorage.rows[index] = [];
 		}
@@ -540,7 +568,7 @@ class ProcedureToJsdoc {
 			comments: this.tempStorage.nextComments,
 			nextComments: [],
 			params: [],
-			rowIndex: 0,
+			rowDataPacketIndex: 0,
 			rows: []
 		};
 	}

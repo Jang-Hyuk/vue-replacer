@@ -7,7 +7,6 @@
     "out",
     "build",
     "coverage",
-    "**/tests",
     "**/demo",
     "**/*.vue",
     "**/cTest.vue",
