@@ -12,9 +12,10 @@ import FileReader from './FileReader.js';
  * @property {string} dataType DB 데이터 타입
  * @property {string[]} comments 프로시저 설명
  * @property {string[]} nextComments 다음 프로시저 설명. 현 프로시저와 다음 프로시저 CALL 이 수행되기 전까지의 설명을 임시로 담고 있음
+ * @property {string[][]} rowChunkDesciptions Row Data Packet[] 청크 단위 설명.
  * @property {procedureOption[]} params 프로시저 파라메터 절
- * @property {number} [rowDataPacketIndex=0] (default 0) 프로시저 결과 row 중분류 index. 기본적인 프로시저 결과를 담을 인덱스
- * @property {number} [rowDuplicationIndex=0] (default 0)프로시저 결과 row 대분류 index. 한 프로시저로 각기 다른 결과를 주는 프로시저를 담을 인덱스
+ * @property {number} [rowChunkIndex] (default 0)프로시저 결과 row 대분류 index. 한 프로시저로 각기 다른 결과를 주는 프로시저를 담을 인덱스
+ * @property {number} rowDataPacketIndex (default 0) 프로시저 결과 row 중분류 index. 기본적인 프로시저 결과를 담을 인덱스
  * @property {procedureOption[][][]} rows 프로시저 결과 Rows
  */
 
@@ -25,8 +26,9 @@ import FileReader from './FileReader.js';
  * @property {string} procedure 프로시저명. ex) p_adm_payment_day_stats_list
  * @property {string} procedureName 프로시저명 풀 네임 ex) c_payment.p_adm_payment_day_stats_list
  * @property {string[]} comments 프로시저 설명
+ * @property {string[][]} rowChunkDesciptions Row Data Packet[] 청크 단위 설명.
  * @property {procedureOption[]} params 프로시저 파라메터 절
- * @property {rowOption[][][]} rows 프로시저 결과 Rows
+ * @property {procedureOption[][][]} rows 프로시저 결과 Rows
  */
 
 /**
@@ -35,15 +37,6 @@ import FileReader from './FileReader.js';
  * @property {string} key column or row key
  * @property {string} comment 설명
  * @property {string} dataType DB 데이터 타입
- */
-
-/**
- * @typedef {object} rowOption
- * @property {string} type param 절일 경우 (ENUM, number, string), row 절일 경우 (ENUM, string)
- * @property {string} key column or row key
- * @property {string} desc 설명
- * @property {string} dataType DB 데이터 타입
- * @property {string} [rowDesciption] row 절 설명
  */
 
 class ProcedureToJsdoc {
@@ -110,15 +103,7 @@ class ProcedureToJsdoc {
 		this.DATA_TYPE.all = _.chain(this.DATA_TYPE).values().flatten().value();
 
 		/** @type {tempStorageOption}  */
-		this.tempStorage = {
-			level: 0,
-			procedureName: '',
-			comments: [],
-			nextComments: [],
-			params: [],
-			rowDataPacketIndex: 0,
-			rows: []
-		};
+		this.tempStorage = this.initTempStorage();
 
 		/** @type {procedureChunk[]}  */
 		this.procedureChunkList = procedureChunks;
@@ -126,7 +111,6 @@ class ProcedureToJsdoc {
 
 	async init() {
 		const procedureFile = await FileReader.getFile(this.filePath);
-		// console.log('🚀 ~ file: ProcedureToJsdoc.js:15 ~ procedureFile', procedureFile);
 		this.procedureFile = procedureFile;
 
 		this.NEW_LINE = procedureFile.indexOf(this.NEW_LINE) >= 0 ? this.NEW_LINE : '\n';
@@ -164,16 +148,22 @@ class ProcedureToJsdoc {
 		return this.DATA_TYPE.all.some(type => rowText.toUpperCase().includes(type));
 	}
 
-	initTempStorage() {
+	initTempStorage(comments = []) {
+		/** @type {tempStorageOption}  */
 		this.tempStorage = {
 			level: this.LEVEL.WAIT,
+			db: '',
+			procedure: '',
 			procedureName: '',
-			comments: [],
+			comments,
 			nextComments: [],
+			rowChunkDesciptions: [],
 			params: [],
 			rowDataPacketIndex: 0,
+			rowChunkIndex: null,
 			rows: []
 		};
+		return this.tempStorage;
 	}
 
 	splitChunkProcedure(file = '') {
@@ -214,6 +204,10 @@ class ProcedureToJsdoc {
 		// ANCHOR 최종 결과
 		// console.log('🚀 ~ 최종 168 ~', inspect(this.procedureChunkList, false, 5));
 		// console.log('🚀 ~ 종종 .js:206 ~ this.procedureChunkList', this.procedureChunkList);
+		// console.log(
+		// 	'🚀 ~ 종종 .js:206 ~ this.procedureChunkList',
+		// 	this.procedureChunkList[0].rowChunkDesciptions
+		// );
 	}
 
 	static parseProcedureName(rowText = '') {
@@ -229,8 +223,9 @@ class ProcedureToJsdoc {
 					? this.tempStorage.comments.push(comment)
 					: _.set(this.tempStorage, 'comments', []);
 				break;
-			// TODO createComments Row Pattern
+			// createComments Row Pattern
 			case this.LEVEL.ROW:
+				this.tempStorageRowDesciption.push(comment);
 				break;
 			default:
 				comment
@@ -326,11 +321,18 @@ class ProcedureToJsdoc {
 	/** @param {string} rowText 리턴절을 생성해도 되는지 */
 	checkRows(rowText = '') {
 		// 데이터 리턴 index가 변경되었는지 판별
-		// TODO Return index 옆에 코멘트가 왔을 경우 저장 로직 추가
-
-		// TODO [0]이 중복으로 등장했을 경우 tempStorage.rowDuplicationIndex 증가
 		if (rowText.trim().indexOf('[') === 0) {
 			const returnNums = BaseUtil.extractBetweenStrings(rowText, '\\[', '\\]');
+			const rowDataPacketIndex = parseInt(_.head(returnNums), 10);
+			if (rowDataPacketIndex === 0) {
+				// Return index 옆에 코멘트가 왔을 경우 저장 로직 추가
+				this.createComments(`#${rowText.slice(rowText.indexOf(']') + 1)}`);
+				// [0]이 중복으로 등장했을 경우 tempStorage.rowDuplicationIndex 증가
+				this.tempStorage.rowChunkIndex =
+					typeof this.tempStorage.rowChunkIndex === 'number'
+						? this.tempStorage.rowChunkIndex + 1
+						: 0;
+			}
 			this.tempStorage.rowDataPacketIndex = parseInt(_.head(returnNums), 10);
 			this.tempStorage.level = this.LEVEL.ROW;
 			return false;
@@ -339,8 +341,9 @@ class ProcedureToJsdoc {
 		if (this.tempStorage.level === this.LEVEL.ROW) {
 			// Row가 입력되어있는 와중에 의미없는 절이 시작될 경우 종료되었다고 가정
 			const hasDataComment = this.isDataComment(rowText);
+			// FIXME 전후 파악 필요함.. 중간 중간 작업하니 기억이 잘 안나는구만
 			if (!hasDataComment) {
-				this.tempStorage.level = this.LEVEL.ROW_END;
+				// this.tempStorage.level = this.LEVEL.ROW_END;
 				return false;
 			}
 			return true;
@@ -464,24 +467,42 @@ class ProcedureToJsdoc {
 		});
 	}
 
-	// TODO currentTempStorageRow 구현
-	// get currentTempStorageRow() {
-	// 	const index = this.tempStorage.rowDataPacketIndex;
+	get tempStorageRowDesciption() {
+		const index =
+			typeof this.tempStorage.rowChunkIndex === 'number'
+				? this.tempStorage.rowChunkIndex + 1
+				: 0;
 
-	// 	// this.tempStorage.rowDuplicationIndex ?? 0;
-	// 	if (!Array.isArray(this.tempStorage.rows[index])) {
-	// 		this.tempStorage.rows[index] = [];
-	// 	}
+		if (!Array.isArray(this.tempStorage.rowChunkDesciptions[index])) {
+			this.tempStorage.rowChunkDesciptions[index] = [];
+		}
+		return this.tempStorage.rowChunkDesciptions[index];
+	}
 
-	// },
+	get tempStorageRowChunk() {
+		const index = this.tempStorage.rowChunkIndex;
 
-	/** @param {string} [rowText = ''] 리턴 절 생성 */
-	createRows(rowText = '') {
-		const index = this.tempStorage.rowDataPacketIndex;
 		if (!Array.isArray(this.tempStorage.rows[index])) {
 			this.tempStorage.rows[index] = [];
 		}
 
+		return this.tempStorage.rows[index];
+	}
+
+	get tempStorageRowDataPacket() {
+		const index = this.tempStorage.rowDataPacketIndex;
+
+		const rows = this.tempStorageRowChunk;
+
+		if (!Array.isArray(rows[index])) {
+			rows[index] = [];
+		}
+
+		return rows[index];
+	}
+
+	/** @param {string} [rowText = ''] 리턴 절 생성 */
+	createRows(rowText = '') {
 		const splitDelimiter = rowText.indexOf('--') > 0 ? '--' : '#';
 		/** @type {string[]}  */
 		const [dataChunk, ...commentChunk] = rowText
@@ -497,7 +518,7 @@ class ProcedureToJsdoc {
 		}
 
 		const enumTypes = ProcedureToJsdoc.getEnumType(dataType, commentChunk);
-		this.tempStorage.rows[index].push({
+		this.tempStorageRowDataPacket.push({
 			type: enumTypes.length ? enumTypes : 'string',
 			key: keyName,
 			dataType: _.compact(dataType).join(' '),
@@ -510,6 +531,7 @@ class ProcedureToJsdoc {
 		if (this.tempStorage.level === this.LEVEL.WAIT) {
 			this.tempStorage.comments = [];
 			this.tempStorage.nextComments = [];
+			this.tempStorage.rowChunkDesciptions = [];
 			return false;
 		}
 
@@ -519,6 +541,7 @@ class ProcedureToJsdoc {
 
 		// ANCHOR Returns
 		// this.tempStorage.rows.forEach(v => console.table(v));
+		// this.tempStorage.rows.forEach(v => console.log(v));
 
 		// 프로시저 청크 목록중에 일감번호가 더 높은 프로시저가 기존재한다면 일감번호 추가 후 패스
 		const procedureChunk = _.find(this.procedureChunkList, {
@@ -544,6 +567,7 @@ class ProcedureToJsdoc {
 			procedureChunk.workNumbers = realWorkNumbers;
 			if (shouldOverride) {
 				procedureChunk.comments = this.tempStorage.comments;
+				procedureChunk.rowChunkDesciptions = this.tempStorage.rowChunkDesciptions;
 				procedureChunk.params = this.tempStorage.params;
 				procedureChunk.rows = this.tempStorage.rows;
 			}
@@ -555,22 +579,13 @@ class ProcedureToJsdoc {
 				procedure: this.tempStorage.procedure,
 				procedureName: this.tempStorage.procedureName,
 				comments: this.tempStorage.comments,
+				rowChunkDesciptions: this.tempStorage.rowChunkDesciptions,
 				params: this.tempStorage.params,
 				rows: this.tempStorage.rows
 			});
 		}
 
-		this.tempStorage = {
-			level: this.LEVEL.WAIT,
-			db: '',
-			procedure: '',
-			procedureName: '',
-			comments: this.tempStorage.nextComments,
-			nextComments: [],
-			params: [],
-			rowDataPacketIndex: 0,
-			rows: []
-		};
+		this.initTempStorage(this.tempStorage.nextComments);
 	}
 
 	// SECTION GroupBy
@@ -596,8 +611,20 @@ class ProcedureToJsdoc {
 		// Param 절
 		const jsdocParam = ProcedureToJsdoc.createJsdocTypeDef(procedureChunk);
 		// Row 절
+		const chunkLength = procedureChunk.rows.length;
 		const jsdocReturns = procedureChunk.rows
-			.map((option, index) => ProcedureToJsdoc.createJsdocTypeDef(procedureChunk, index))
+			.map((rowDataPacketsChunks, chunkIndex) => {
+				return rowDataPacketsChunks
+					.map((option, index) =>
+						ProcedureToJsdoc.createJsdocTypeDef(
+							procedureChunk,
+							index,
+							chunkIndex,
+							chunkLength
+						)
+					)
+					.join('\n');
+			})
 			.join('\n');
 
 		return `${wrapping.start}\n${jsdocParam}\n${jsdocReturns}\n${wrapping.end}\n`;
@@ -612,7 +639,7 @@ class ProcedureToJsdoc {
 		const description = procedureChunk.procedure || '';
 		const workNumbers = procedureChunk.workNumbers.map(number => `#${number}`).join(', ');
 		const compiled = _.template(
-			'\n/* <%= endTag %>SECTION <%= title %> <%= workNumbers  %> */'
+			'/* <%= endTag %>SECTION <%= title %> <%= workNumbers  %> */'
 		);
 		return {
 			start: compiled({ title: description, endTag: '', workNumbers }),
@@ -625,22 +652,31 @@ class ProcedureToJsdoc {
 	 * @summary Jsdoc
 	 * @param {procedureChunk} procedureChunk
 	 * @param {number} [rowIndex] 없으면 파람. 있으면 Row
+	 * @param {number} [chunkIndex] 있으면 RowDataPacket[] Chunk index
+	 * @param {number} [chunkLength] RowDataPacket[] Chunk length
 	 */
-	static createJsdocTypeDef(procedureChunk, rowIndex) {
+	static createJsdocTypeDef(procedureChunk, rowIndex, chunkIndex, chunkLength = 0) {
 		let procedureOptions = procedureChunk.params;
 
 		let descriptionName = 'Param';
 		if (typeof rowIndex === 'number') {
-			descriptionName = `Row${rowIndex}`;
-			procedureOptions = procedureChunk.rows[rowIndex];
+			const rowChunkDescription = procedureChunk.rowChunkDesciptions[chunkIndex]
+				.join(' ')
+				.trim();
+			descriptionName =
+				chunkLength > 1
+					? `Row${rowIndex}_${chunkIndex} ${rowChunkDescription}`
+					: `Row${rowIndex} ${rowChunkDescription}`;
+			procedureOptions = procedureChunk.rows[chunkIndex][rowIndex];
 		}
 
-		const compiled = _.template(`
-/**
- * LINK <%= descriptionName %> <%= comments %>
+		const compiled = _.template(
+			`/**
+ * LINK <%= comments %> <%= descriptionName %>
  * @typedef {object} <%= procedureName %>.<%= descriptionName %>
  <%= body.join('\\n ') %>
- */`);
+ */`
+		);
 		const compiledProperty = _.template(
 			`* @property {<%= propertyType %>} <%= key %> <%= comment %> <%= dataType %>`
 		);
