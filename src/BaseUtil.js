@@ -166,6 +166,7 @@ class BaseUtil {
 			.split(outerSep)
 			.compact()
 			.invokeMap('split', innerSeq)
+			.map(data => _.takeRight(data, 2))
 			.fromPairs()
 			.value();
 	}

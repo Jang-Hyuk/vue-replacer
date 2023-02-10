@@ -172,7 +172,7 @@ class ProcedureToJsdoc {
 			if (!isValid) {
 				return false;
 			}
-			// ANCHOR rowText
+			// ANCHOR splitChunkProcedure
 			const shouldComments = ProcedureToJsdoc.isComment(rowText);
 			if (shouldComments) {
 				this.createComments(rowText);
@@ -206,7 +206,8 @@ class ProcedureToJsdoc {
 		// console.log('🚀 ~ 종종 .js:206 ~ this.procedureChunkList', this.procedureChunkList);
 		// console.log(
 		// 	'🚀 ~ 종종 .js:206 ~ this.procedureChunkList',
-		// 	this.procedureChunkList[0].rowChunkDesciptions
+		// 	// this.procedureChunkList[0].rowChunkDesciptions
+		// 	_.map(this.procedureChunkList, 'rowChunkDesciptions')
 		// );
 	}
 
@@ -341,9 +342,8 @@ class ProcedureToJsdoc {
 		if (this.tempStorage.level === this.LEVEL.ROW) {
 			// Row가 입력되어있는 와중에 의미없는 절이 시작될 경우 종료되었다고 가정
 			const hasDataComment = this.isDataComment(rowText);
-			// FIXME 전후 파악 필요함.. 중간 중간 작업하니 기억이 잘 안나는구만
 			if (!hasDataComment) {
-				// this.tempStorage.level = this.LEVEL.ROW_END;
+				this.tempStorage.level = this.LEVEL.ROW_END;
 				return false;
 			}
 			return true;
@@ -476,11 +476,12 @@ class ProcedureToJsdoc {
 		if (!Array.isArray(this.tempStorage.rowChunkDesciptions[index])) {
 			this.tempStorage.rowChunkDesciptions[index] = [];
 		}
-		return this.tempStorage.rowChunkDesciptions[index];
+		return _.compact(this.tempStorage.rowChunkDesciptions[index]);
 	}
 
 	get tempStorageRowChunk() {
-		const index = this.tempStorage.rowChunkIndex;
+		const index = this.tempStorage.rowChunkIndex || 0;
+		// const index = this.tempStorage.rowChunkIndex;
 
 		if (!Array.isArray(this.tempStorage.rows[index])) {
 			this.tempStorage.rows[index] = [];
@@ -660,19 +661,22 @@ class ProcedureToJsdoc {
 
 		let descriptionName = 'Param';
 		if (typeof rowIndex === 'number') {
-			const rowChunkDescription = procedureChunk.rowChunkDesciptions[chunkIndex]
-				.join(' ')
-				.trim();
+			const rowChunkDesciptions = procedureChunk.rowChunkDesciptions[chunkIndex] ?? [];
+
+			let rowChunkDescription = rowChunkDesciptions.join(' ').trim();
+			rowChunkDescription = rowChunkDescription
+				? ` ${rowChunkDescription}`
+				: rowChunkDescription;
 			descriptionName =
 				chunkLength > 1
-					? `Row${rowIndex}_${chunkIndex} ${rowChunkDescription}`
-					: `Row${rowIndex} ${rowChunkDescription}`;
+					? `Row${rowIndex}_${chunkIndex}${rowChunkDescription}`
+					: `Row${rowIndex}${rowChunkDescription}`;
 			procedureOptions = procedureChunk.rows[chunkIndex][rowIndex];
 		}
 
 		const compiled = _.template(
 			`/**
- * LINK <%= comments %> <%= descriptionName %>
+ * LINK <%= descriptionName %>-<%= comments %>
  * @typedef {object} <%= procedureName %>.<%= descriptionName %>
  <%= body.join('\\n ') %>
  */`
@@ -682,7 +686,7 @@ class ProcedureToJsdoc {
 		);
 		const body = procedureOptions.map(option => {
 			const propertyType = Array.isArray(option.type)
-				? option.type.map(v => `'${v}'`).join('|')
+				? option.type.map(v => (typeof v === 'number' ? v : `'${v}'`)).join('|')
 				: option.type;
 			return compiledProperty({
 				propertyType,

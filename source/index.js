@@ -21,9 +21,9 @@ function writeFile(chunkList, fileName, isCurrentPath = false) {
 			: path.join(jsdocPath, fileName);
 		const jsdoc = chunkList.map(ProcedureToJsdoc.printJsdocUnit).join('');
 		FileWriter.writeFile(realPath, jsdoc)
-			.then(FileWriter.fixEslint)
+			// .then(FileWriter.fixEslint)
 			.then(res => {
-				console.log(`✅ complete fix ESLint - ${realPath}`);
+				console.log(`✅ complete - ${realPath}`);
 
 				return resolve(res);
 			})

@@ -11,10 +11,11 @@ const jsdocPath = path.join(process.cwd(), process.env.JSDOC_OUT_FOLTER ?? 'out'
 // const argvValue = process.argv.slice(2)[0];
 
 const filePaths = [
-	'#0001 talk.txt',
-	'#0002 talk.txt'
-	// '#9213 20221115_클럽_용_쿠폰_설명.txt',
-	// '#8670 20220714_클럽5678_임_무제한정지자 data삭제 관련_설명.txt',
+	// '#0001 talk.txt',
+	// '#0002 talk.txt'
+	// '#9213 20221115_클럽_용_쿠폰_설명.txt'
+	'#8556 어드민] 빠른만남 무료이용권 내역표기.txt'
+	// '#8670 (어드민) 푸시 변경 및 현황추가.txt'
 	// '#6666 sample3.txt',
 	// 'sample3 copy.txt'
 	// '#6866 20211201_클럽5678_다중채팅_스타샷_설명.txt'
@@ -32,7 +33,7 @@ function writeFile(chunkList, fileName, isCurrentPath = false) {
 		FileWriter.writeFile(realPath, jsdoc)
 			// .then(FileWriter.fixEslint)
 			.then(res => {
-				console.log(`✅ complete fix ESLint - ${realPath}`);
+				console.log(`✅ complete - ${realPath}`);
 
 				return resolve(res);
 			})
