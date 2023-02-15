@@ -6,6 +6,7 @@ import BaseUtil from '../src/BaseUtil.js';
 
 import FileWriter from './FileWriter.js';
 import ProcedureToJsdoc from './ProcedureToJsdoc.js';
+import convertJsdoc from './convertJsdoc.js';
 
 dotenv.config();
 const docPath = path.join(process.cwd(), process.env.JSDOC_DOC_FOLTER ?? 'build');
@@ -19,7 +20,7 @@ function writeFile(chunkList, fileName, isCurrentPath = false) {
 		const realPath = isCurrentPath
 			? path.join(process.cwd(), 'out', fileName)
 			: path.join(jsdocPath, fileName);
-		const jsdoc = chunkList.map(ProcedureToJsdoc.printJsdocUnit).join('');
+		const jsdoc = chunkList.map(convertJsdoc.printJsdocUnit).join('');
 		FileWriter.writeFile(realPath, jsdoc)
 			// .then(FileWriter.fixEslint)
 			.then(res => {

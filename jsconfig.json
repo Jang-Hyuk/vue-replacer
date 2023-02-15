@@ -2,14 +2,24 @@
 	"compilerOptions": {
 		"target": "ESNext",
 		"module": "ESNext",
+		// "noImplicitAny": true,
+		"esModuleInterop": true,
+		// workspace상에서 references 패키지에서 root packges 모듈을 찾지 못하는 문제 해결
 		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		// class static private 변수를 사용하기 위함
+		"useDefineForClassFields": true,
+		"skipLibCheck": true,
+		"checkJs": true,
+		// "moduleResolution": "node",
 		"sourceMap": true,
-		"checkJs": false,
+		// "checkJs": false,
 		"baseUrl": ".",
-		"typeRoots": ["types"],
+		"typeRoots": ["types", "out"],
 		"types": ["jquery", "lodash", "vue", "dayjs", "joi", "lottie"]
 	},
-	"include": [],
+	"include": ["**/*/*.ts", "**/*/*.js"],
 	"exclude": [
 		"**/*/global.js",
 		"**/*/prototype.js",

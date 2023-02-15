@@ -3,42 +3,6 @@ import _ from 'lodash';
 import BaseUtil from '../src/BaseUtil.js';
 import FileReader from './FileReader.js';
 
-/**
- * @typedef {object} tempStorageOption 프로시저 별 파싱 결과를 임시로 저장할 저장소
- * @property {number} level 프로시저를 파싱하는 단계
- * @property {string} db db명. ex) c_payment
- * @property {string} procedure 프로시저명. ex) p_adm_payment_day_stats_list
- * @property {string} procedureName 프로시저명 풀 네임 ex) c_payment.p_adm_payment_day_stats_list
- * @property {string} dataType DB 데이터 타입
- * @property {string[]} comments 프로시저 설명
- * @property {string[]} nextComments 다음 프로시저 설명. 현 프로시저와 다음 프로시저 CALL 이 수행되기 전까지의 설명을 임시로 담고 있음
- * @property {string[][]} rowChunkDesciptions Row Data Packet[] 청크 단위 설명.
- * @property {procedureOption[]} params 프로시저 파라메터 절
- * @property {number} [rowChunkIndex] (default 0)프로시저 결과 row 대분류 index. 한 프로시저로 각기 다른 결과를 주는 프로시저를 담을 인덱스
- * @property {number} rowDataPacketIndex (default 0) 프로시저 결과 row 중분류 index. 기본적인 프로시저 결과를 담을 인덱스
- * @property {procedureOption[][][]} rows 프로시저 결과 Rows
- */
-
-/**
- * @typedef {object} procedureChunk 프로시저 저장 단위
- * @property {number[]} workNumbers 일감 번호 ex) #5687, #8657 -> number
- * @property {string} db db명. ex) c_payment
- * @property {string} procedure 프로시저명. ex) p_adm_payment_day_stats_list
- * @property {string} procedureName 프로시저명 풀 네임 ex) c_payment.p_adm_payment_day_stats_list
- * @property {string[]} comments 프로시저 설명
- * @property {string[][]} rowChunkDesciptions Row Data Packet[] 청크 단위 설명.
- * @property {procedureOption[]} params 프로시저 파라메터 절
- * @property {procedureOption[][][]} rows 프로시저 결과 Rows
- */
-
-/**
- * @typedef {object} procedureOption
- * @property {string} type param 절일 경우 (ENUM, number, string), row 절일 경우 (ENUM, string)
- * @property {string} key column or row key
- * @property {string} comment 설명
- * @property {string} dataType DB 데이터 타입
- */
-
 class ProcedureToJsdoc {
 	/**
 	 * @param {string} filePath
@@ -132,7 +96,7 @@ class ProcedureToJsdoc {
 	 */
 	static checkComment(text = '') {
 		const index = text.search(/[ㄱ-ㅎ|가-힣|a-z|A-Z|0-9|]/);
-		return index !== -1 ? text.slice(index).replaceAll('##', '#') : '';
+		return index !== -1 ? text.slice(index).replace(/#+/, '#').trim() : '';
 	}
 
 	/** 주석 시작인지 체크 */
@@ -204,11 +168,11 @@ class ProcedureToJsdoc {
 		// ANCHOR 최종 결과
 		// console.log('🚀 ~ 최종 168 ~', inspect(this.procedureChunkList, false, 5));
 		// console.log('🚀 ~ 종종 .js:206 ~ this.procedureChunkList', this.procedureChunkList);
-		// console.log(
-		// 	'🚀 ~ 종종 .js:206 ~ this.procedureChunkList',
-		// 	// this.procedureChunkList[0].rowChunkDesciptions
-		// 	_.map(this.procedureChunkList, 'rowChunkDesciptions')
-		// );
+		console.log(
+			'🚀 ~ 종종 .js:206 ~ this.procedureChunkList',
+			// this.procedureChunkList[0].rowChunkDesciptions
+			_.map(this.procedureChunkList, 'rowChunkDesciptions')
+		);
 	}
 
 	static parseProcedureName(rowText = '') {
@@ -226,7 +190,12 @@ class ProcedureToJsdoc {
 				break;
 			// createComments Row Pattern
 			case this.LEVEL.ROW:
+				console.log('🚀 ~ file: ProcedureToJsdoc.js:194 ~ comment', comment);
 				this.tempStorageRowDesciption.push(comment);
+				console.log(
+					'🚀 ~ file: ProcedureToJsdoc.js:195 ~ this.tempStorageRowDesciption',
+					this.tempStorageRowDesciption
+				);
 				break;
 			default:
 				comment
@@ -355,7 +324,7 @@ class ProcedureToJsdoc {
 		let isValid = true;
 
 		// ### 이 연속으로 등장시 무시
-		if (rowText.trim().includes('###')) {
+		if (rowText.trim().includes('#####')) {
 			this.saveChunkProcedure();
 			return false;
 		}
@@ -445,7 +414,6 @@ class ProcedureToJsdoc {
 		if (rowText.charAt(0) === ',') {
 			rowText = rowText.slice(1);
 		}
-		/** @type {string[]}  */
 		const [dataChunk, ...commentChunk] = rowText.trim().split(splitDelimiter);
 
 		const [keyName, ...dataType] = dataChunk.split(' ');
@@ -476,6 +444,8 @@ class ProcedureToJsdoc {
 		if (!Array.isArray(this.tempStorage.rowChunkDesciptions[index])) {
 			this.tempStorage.rowChunkDesciptions[index] = [];
 		}
+
+		return this.tempStorage.rowChunkDesciptions[index];
 		return _.compact(this.tempStorage.rowChunkDesciptions[index]);
 	}
 
@@ -600,105 +570,6 @@ class ProcedureToJsdoc {
 	}
 
 	// !SECTION
-
-	/**
-	 * 프로시저 출력
-	 * @param {procedureChunk} procedureChunk
-	 */
-	static printJsdocUnit(procedureChunk) {
-		// LINK printJsdocUnit
-		// 프로시저 랩핑
-		const wrapping = ProcedureToJsdoc.createJsdocSection(procedureChunk);
-		// Param 절
-		const jsdocParam = ProcedureToJsdoc.createJsdocTypeDef(procedureChunk);
-		// Row 절
-		const chunkLength = procedureChunk.rows.length;
-		const jsdocReturns = procedureChunk.rows
-			.map((rowDataPacketsChunks, chunkIndex) => {
-				return rowDataPacketsChunks
-					.map((option, index) =>
-						ProcedureToJsdoc.createJsdocTypeDef(
-							procedureChunk,
-							index,
-							chunkIndex,
-							chunkLength
-						)
-					)
-					.join('\n');
-			})
-			.join('\n');
-
-		return `${wrapping.start}\n${jsdocParam}\n${jsdocReturns}\n${wrapping.end}\n`;
-	}
-
-	/**
-	 * 프로시저 Section Wrapping
-	 * @summary Jsdoc
-	 * @param {procedureChunk} procedureChunk
-	 */
-	static createJsdocSection(procedureChunk) {
-		const description = procedureChunk.procedure || '';
-		const workNumbers = procedureChunk.workNumbers.map(number => `#${number}`).join(', ');
-		const compiled = _.template(
-			'/* <%= endTag %>SECTION <%= title %> <%= workNumbers  %> */'
-		);
-		return {
-			start: compiled({ title: description, endTag: '', workNumbers }),
-			end: compiled({ title: description, endTag: '!', workNumbers })
-		};
-	}
-
-	/**
-	 * 프로시저 Section Wrapping
-	 * @summary Jsdoc
-	 * @param {procedureChunk} procedureChunk
-	 * @param {number} [rowIndex] 없으면 파람. 있으면 Row
-	 * @param {number} [chunkIndex] 있으면 RowDataPacket[] Chunk index
-	 * @param {number} [chunkLength] RowDataPacket[] Chunk length
-	 */
-	static createJsdocTypeDef(procedureChunk, rowIndex, chunkIndex, chunkLength = 0) {
-		let procedureOptions = procedureChunk.params;
-
-		let descriptionName = 'Param';
-		if (typeof rowIndex === 'number') {
-			const rowChunkDesciptions = procedureChunk.rowChunkDesciptions[chunkIndex] ?? [];
-
-			let rowChunkDescription = rowChunkDesciptions.join(' ').trim();
-			rowChunkDescription = rowChunkDescription
-				? ` ${rowChunkDescription}`
-				: rowChunkDescription;
-			descriptionName =
-				chunkLength > 1
-					? `Row${rowIndex}_${chunkIndex}${rowChunkDescription}`
-					: `Row${rowIndex}${rowChunkDescription}`;
-			procedureOptions = procedureChunk.rows[chunkIndex][rowIndex];
-		}
-
-		const compiled = _.template(
-			`/**
- * LINK <%= descriptionName %>-<%= comments %>
- * @typedef {object} <%= procedureName %>.<%= descriptionName %>
- <%= body.join('\\n ') %>
- */`
-		);
-		const compiledProperty = _.template(
-			`* @property {<%= propertyType %>} <%= key %> <%= comment %> <%= dataType %>`
-		);
-		const body = procedureOptions.map(option => {
-			const propertyType = Array.isArray(option.type)
-				? option.type.map(v => (typeof v === 'number' ? v : `'${v}'`)).join('|')
-				: option.type;
-			return compiledProperty({
-				propertyType,
-				...option
-			});
-		});
-		return compiled({
-			body,
-			descriptionName,
-			...procedureChunk
-		});
-	}
 }
 
 export default ProcedureToJsdoc;
