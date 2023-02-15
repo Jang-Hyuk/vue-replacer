@@ -7,21 +7,34 @@ import BaseUtil from '../src/BaseUtil.js';
 import FileWriter from './FileWriter.js';
 import ProcedureToJsdoc from './ProcedureToJsdoc.js';
 import convertJsdoc from './convertJsdoc.js';
+import convertTs from './convertTs.js';
 
 dotenv.config();
 const docPath = path.join(process.cwd(), process.env.JSDOC_DOC_FOLTER ?? 'build');
 const jsdocPath = path.join(process.cwd(), process.env.JSDOC_OUT_FOLTER ?? 'out');
 
 /**
- *
+ * 실제파일 생성
+ * @param {procedureChunk[]} chunkList
+ * @param {{dbName: string, fileName?: string, isCurrentPath?: boolean}} option
  */
-function writeFile(chunkList, fileName, isCurrentPath = false) {
+function writeFile(chunkList, option) {
+	const { dbName, fileName = dbName, isCurrentPath = false } = option;
+	const fileFullName = `${fileName}.d.ts`;
 	return new Promise((resolve, reject) => {
 		const realPath = isCurrentPath
-			? path.join(process.cwd(), 'out', fileName)
-			: path.join(jsdocPath, fileName);
-		const jsdoc = chunkList.map(convertJsdoc.printJsdocUnit).join('');
-		FileWriter.writeFile(realPath, jsdoc)
+			? path.join(process.cwd(), 'out', fileFullName)
+			: path.join(jsdocPath, fileFullName);
+
+		const dbCompiled = _.template(`namespace <%= dbName %> {
+<%= pBody %>
+}`);
+		const jsdoc = chunkList.map(convertTs.printJsdocUnit).join('');
+		const tsDeclare = dbCompiled({
+			dbName,
+			pBody: jsdoc
+		});
+		FileWriter.writeFile(realPath, tsDeclare)
 			// .then(FileWriter.fixEslint)
 			.then(res => {
 				console.log(`✅ complete - ${realPath}`);
@@ -44,18 +57,25 @@ async function createProcedureChunk() {
 			const procedureToJsdoc = new ProcedureToJsdoc(realFilePath, chunks);
 			await procedureToJsdoc.init();
 
-			const replacedFileName = filePath
+			const replacedFileName = _.chain(filePath)
 				.replace(/ /g, '-')
 				.replace(/&/g, '_')
 				.replace(/\(/g, '[')
-				.replace(/\)/g, ']');
+				.replace(/\)/g, ']')
+				.split('.')
+				.initial()
+				.join('.')
+				.value();
 
 			writeFile(
 				_.filter(procedureToJsdoc.procedureChunkList, chunk =>
 					chunk.workNumbers.includes(procedureToJsdoc.workNumber)
 				),
-				`${replacedFileName}.js`,
-				true
+				{
+					dbName: procedureToJsdoc.workNumber.toString(),
+					fileName: replacedFileName,
+					isCurrentPath: true
+				}
 			);
 
 			return procedureToJsdoc.procedureChunkList;
@@ -72,7 +92,9 @@ function writeJsdocFile() {
 	createProcedureChunk().then(list => {
 		const gChunkStorage = ProcedureToJsdoc.groupByDb(list);
 		_.forEach(gChunkStorage, (nestedList, db) => {
-			writeFile(nestedList, `${db}.d.js`);
+			writeFile(nestedList, {
+				dbName: db
+			});
 		});
 	});
 }

@@ -85,7 +85,6 @@ class ProcedureToJsdoc {
 		// file 정보 읽어들임
 		this.splitChunkProcedure(procedureFile);
 		// 프린트 Jsdoc
-		// this.printJsdoc();
 		return this.procedureChunkList;
 	}
 
@@ -121,6 +120,7 @@ class ProcedureToJsdoc {
 			procedureName: '',
 			comments,
 			nextComments: [],
+			volatilityComments: [],
 			rowChunkDesciptions: [],
 			params: [],
 			rowDataPacketIndex: 0,
@@ -167,12 +167,7 @@ class ProcedureToJsdoc {
 
 		// ANCHOR 최종 결과
 		// console.log('🚀 ~ 최종 168 ~', inspect(this.procedureChunkList, false, 5));
-		// console.log('🚀 ~ 종종 .js:206 ~ this.procedureChunkList', this.procedureChunkList);
-		console.log(
-			'🚀 ~ 종종 .js:206 ~ this.procedureChunkList',
-			// this.procedureChunkList[0].rowChunkDesciptions
-			_.map(this.procedureChunkList, 'rowChunkDesciptions')
-		);
+		// console.log('🚀 ~ file: ProcedureToJsdoc.js:170 ~ this.procedureChunkList', this.procedureChunkList);
 	}
 
 	static parseProcedureName(rowText = '') {
@@ -190,12 +185,7 @@ class ProcedureToJsdoc {
 				break;
 			// createComments Row Pattern
 			case this.LEVEL.ROW:
-				console.log('🚀 ~ file: ProcedureToJsdoc.js:194 ~ comment', comment);
-				this.tempStorageRowDesciption.push(comment);
-				console.log(
-					'🚀 ~ file: ProcedureToJsdoc.js:195 ~ this.tempStorageRowDesciption',
-					this.tempStorageRowDesciption
-				);
+				this.tempStorage.volatilityComments.push(comment);
 				break;
 			default:
 				comment
@@ -226,7 +216,7 @@ class ProcedureToJsdoc {
 				.thru(str => BaseUtil.toDictionary(str, ',', ':'))
 				.omitBy(_.isUndefined)
 				.keys()
-				.map(_.trim)
+				.invokeMap('trim')
 				.reject(str => /[^a-z|A-Z|0-9|\\-]/.test(str))
 				.value();
 		}
@@ -290,21 +280,29 @@ class ProcedureToJsdoc {
 
 	/** @param {string} rowText 리턴절을 생성해도 되는지 */
 	checkRows(rowText = '') {
-		// 데이터 리턴 index가 변경되었는지 판별
+		// 데이터 리턴 index가 변경되었는지 판별. 숫자가 들어있다고 가정함
 		if (rowText.trim().indexOf('[') === 0) {
 			const returnNums = BaseUtil.extractBetweenStrings(rowText, '\\[', '\\]');
 			const rowDataPacketIndex = parseInt(_.head(returnNums), 10);
-			if (rowDataPacketIndex === 0) {
-				// Return index 옆에 코멘트가 왔을 경우 저장 로직 추가
-				this.createComments(`#${rowText.slice(rowText.indexOf(']') + 1)}`);
-				// [0]이 중복으로 등장했을 경우 tempStorage.rowDuplicationIndex 증가
-				this.tempStorage.rowChunkIndex =
-					typeof this.tempStorage.rowChunkIndex === 'number'
-						? this.tempStorage.rowChunkIndex + 1
-						: 0;
-			}
-			this.tempStorage.rowDataPacketIndex = parseInt(_.head(returnNums), 10);
+			const rowComment = `#${rowText.slice(rowText.indexOf(']') + 1)}`;
 			this.tempStorage.level = this.LEVEL.ROW;
+			this.tempStorage.rowDataPacketIndex = rowDataPacketIndex;
+
+			if (rowDataPacketIndex === 0) {
+				// 최초로 세팅되었을 경우
+				// Return index 옆에 코멘트가 왔을 경우 저장 로직 추가
+				this.tempStorage.rowChunkIndex =
+					this.tempStorage.rowChunkIndex === null
+						? 0
+						: this.tempStorage.rowChunkIndex + 1;
+			}
+			this.createComments(rowComment);
+
+			this.tempStorage.volatilityComments.forEach(comment =>
+				this.tempStorageRowDesciption.push(comment)
+			);
+			this.tempStorage.volatilityComments = [];
+
 			return false;
 		}
 
@@ -435,18 +433,21 @@ class ProcedureToJsdoc {
 		});
 	}
 
+	/** @return {string[]} */
 	get tempStorageRowDesciption() {
-		const index =
-			typeof this.tempStorage.rowChunkIndex === 'number'
-				? this.tempStorage.rowChunkIndex + 1
-				: 0;
+		const { rowChunkIndex, rowDataPacketIndex, rowChunkDesciptions } = this.tempStorage;
+		const chunkIndex = typeof rowChunkIndex === 'number' ? rowChunkIndex : 0;
 
-		if (!Array.isArray(this.tempStorage.rowChunkDesciptions[index])) {
-			this.tempStorage.rowChunkDesciptions[index] = [];
+		const chunnkDescriptions = _.get(rowChunkDesciptions, [
+			chunkIndex,
+			rowDataPacketIndex
+		]);
+		if (!Array.isArray(chunnkDescriptions)) {
+			_.set(rowChunkDesciptions, [chunkIndex, rowDataPacketIndex], []);
 		}
 
-		return this.tempStorage.rowChunkDesciptions[index];
-		return _.compact(this.tempStorage.rowChunkDesciptions[index]);
+		// @ts-ignore
+		return _.get(rowChunkDesciptions, [chunkIndex, rowDataPacketIndex]);
 	}
 
 	get tempStorageRowChunk() {
@@ -474,6 +475,8 @@ class ProcedureToJsdoc {
 
 	/** @param {string} [rowText = ''] 리턴 절 생성 */
 	createRows(rowText = '') {
+		// 로우절이 시작하면 휘발성 코멘트 삭제
+		this.tempStorage.volatilityComments = [];
 		const splitDelimiter = rowText.indexOf('--') > 0 ? '--' : '#';
 		/** @type {string[]}  */
 		const [dataChunk, ...commentChunk] = rowText
@@ -483,7 +486,7 @@ class ProcedureToJsdoc {
 			.split(splitDelimiter);
 
 		const [keyName, ...dataType] = dataChunk.split(' ');
-		const type = this.getDataType(dataType, commentChunk);
+		const type = this.getDataType(dataType);
 		if (!keyName || !type) {
 			return false;
 		}

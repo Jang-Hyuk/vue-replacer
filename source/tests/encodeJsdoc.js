@@ -12,11 +12,11 @@ const docPath = path.join(process.cwd(), 'build');
 const jsdocPath = path.join(process.cwd(), 'out');
 // const argvValue = process.argv.slice(2)[0];
 
-/** @type {c_admin.p_adm_real_talk_rpt_ins_v1.Param}  */
+/** @type {c_conts.p_realtalk_proc.Row1_5}  */
 
 const filePaths = [
-	'#0001 talk.txt'
-	// '#0002 talk.txt'
+	'#0001 talk.txt',
+	'#0002 talk.txt'
 	// '#9213 20221115_클럽_용_쿠폰_설명.txt'
 	// '#8556 어드민] 빠른만남 무료이용권 내역표기.txt'
 	// '#8670 (어드민) 푸시 변경 및 현황추가.txt'
@@ -26,15 +26,17 @@ const filePaths = [
 ];
 
 /**
- *
+ * 실제파일 생성
+ * @param {procedureChunk[]} chunkList
+ * @param {{dbName: string, fileName?: string, isCurrentPath?: boolean}} option
  */
-function writeFile(chunkList, dbName, isCurrentPath = false) {
-	const fileName = `${dbName}.d.ts`;
-	// console.log('🚀 ~ file: encodeJsdoc.js:30 ~ chunkList', chunkList);
+function writeFile(chunkList, option) {
+	const { dbName, fileName = dbName, isCurrentPath = false } = option;
+	const fileFullName = `${fileName}.d.ts`;
 	return new Promise((resolve, reject) => {
 		const realPath = isCurrentPath
-			? path.join(process.cwd(), 'out', fileName)
-			: path.join(jsdocPath, fileName);
+			? path.join(process.cwd(), 'out', fileFullName)
+			: path.join(jsdocPath, fileFullName);
 
 		const dbCompiled = _.template(`namespace <%= dbName %> {
 <%= pBody %>
@@ -44,8 +46,6 @@ function writeFile(chunkList, dbName, isCurrentPath = false) {
 			dbName,
 			pBody: jsdoc
 		});
-		// console.log('🚀 ~ file: encodeJsdoc.js:48 ~ tsDeclare', tsDeclare);
-		// console.log('🚀 ~ file: encodeJsdoc.js:42 ~ jsdoc', jsdoc);
 		FileWriter.writeFile(realPath, tsDeclare)
 			// .then(FileWriter.fixEslint)
 			.then(res => {
@@ -69,19 +69,26 @@ async function createProcedureChunk() {
 			const procedureToJsdoc = new ProcedureToJsdoc(realFilePath, chunks);
 			await procedureToJsdoc.init();
 
-			const replacedFileName = filePath
+			const replacedFileName = _.chain(filePath)
 				.replace(/ /g, '-')
 				.replace(/&/g, '_')
 				.replace(/\(/g, '[')
-				.replace(/\)/g, ']');
+				.replace(/\)/g, ']')
+				.split('.')
+				.initial()
+				.join('.')
+				.value();
 
-			// writeFile(
-			// 	_.filter(procedureToJsdoc.procedureChunkList, chunk =>
-			// 		chunk.workNumbers.includes(procedureToJsdoc.workNumber)
-			// 	),
-			// 	`${replacedFileName}.ts`,
-			// 	true
-			// );
+			writeFile(
+				_.filter(procedureToJsdoc.procedureChunkList, chunk =>
+					chunk.workNumbers.includes(procedureToJsdoc.workNumber)
+				),
+				{
+					dbName: procedureToJsdoc.workNumber.toString(),
+					fileName: replacedFileName,
+					isCurrentPath: true
+				}
+			);
 
 			return procedureToJsdoc.procedureChunkList;
 		});
@@ -97,7 +104,9 @@ function writeJsdocFile() {
 	createProcedureChunk().then(list => {
 		const gChunkStorage = ProcedureToJsdoc.groupByDb(list);
 		_.forEach(gChunkStorage, (nestedList, db) => {
-			writeFile(nestedList, db);
+			writeFile(nestedList, {
+				dbName: db
+			});
 		});
 	});
 }

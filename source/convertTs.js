@@ -6,14 +6,6 @@ const convertJsDoc = {
 	 * @param {procedureChunk} procedureChunk
 	 */
 	printJsdocUnit(procedureChunk) {
-		// console.log('🚀 ~ file: convertTs.js:9 ~ procedureChunk', procedureChunk);
-		// LINK printJsdocUnit
-		// 		// 프로시저 랩핑
-		// 		const dbCompiled = _.template(`export namespace <%= db %>> {
-		//       <%= pBody %>
-		// }
-		// `);
-
 		const workNumbers = procedureChunk.workNumbers.map(number => `#${number}`).join(', ');
 		const procedureCompiled = _.template(
 			`  /** 
@@ -25,7 +17,6 @@ const convertJsDoc = {
   }`
 		);
 
-		// const wrapping = convertJsDoc.createJsdocSection(procedureChunk);
 		// Param 절
 		const jsdocParam = convertJsDoc.createJsdocTypeDef(procedureChunk);
 		// Row 절
@@ -51,31 +42,6 @@ const convertJsDoc = {
 			procedure: procedureChunk.procedure,
 			typeBody: `${jsdocParam}\n${jsdocReturns}`
 		});
-
-		return `${wrapping.start}\n${jsdocParam}\n${jsdocReturns}\n${wrapping.end}\n`;
-	},
-
-	/**
-	 * 프로시저 Section Wrapping
-	 * @summary Jsdoc
-	 * @param {procedureChunk} procedureChunk
-	 */
-	createJsdocSection(procedureChunk) {
-		const description = procedureChunk.procedure || '';
-		const workNumbers = procedureChunk.workNumbers.map(number => `#${number}`).join(', ');
-		const compiled = _.template(
-			'/* <%= endTag %>SECTION <%= title %> <%= workNumbers  %> */'
-		);
-		const procedureCompiled = _.template(`
-    <%= comments %> <%= workNumbers  %>
-    export namespace <%= procedure %> {
-      <%= typeBody %>
-  }
-`);
-		return {
-			start: compiled({ title: description, endTag: '', workNumbers }),
-			end: compiled({ title: description, endTag: '!', workNumbers })
-		};
 	},
 
 	/**
@@ -87,17 +53,20 @@ const convertJsDoc = {
 	 * @param {number} [chunkLength] RowDataPacket[] Chunk length
 	 */
 	createJsdocTypeDef(procedureChunk, rowIndex, chunkIndex, chunkLength = 0) {
-		// console.log('🚀 ~ file: convertTs.js:90 ~ chunkLength', chunkLength);
 		let procedureOptions = procedureChunk.params;
 
 		let descriptionName = 'Param';
 		let chunkDescription = '';
 		if (typeof rowIndex === 'number') {
-			const rowChunkDesciptions = procedureChunk.rowChunkDesciptions[chunkIndex] ?? [];
+			const rowChunkDesciptions = _.get(
+				procedureChunk.rowChunkDesciptions,
+				[chunkIndex, rowIndex],
+				[]
+			);
 
 			let rowChunkDescription = _.compact(rowChunkDesciptions).join(' ').trim();
 			if (rowChunkDescription) {
-				chunkDescription = `    /** ${rowChunkDesciptions} */\n`;
+				chunkDescription = `    /** ${rowChunkDesciptions.join(', ')} */\n`;
 			}
 			rowChunkDescription = rowChunkDescription
 				? ` ${rowChunkDescription}`
