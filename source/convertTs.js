@@ -8,7 +8,7 @@ const convertJsDoc = {
 	printJsdocUnit(procedureChunk) {
 		const workNumbers = procedureChunk.workNumbers.map(number => `#${number}`).join(', ');
 		const procedureCompiled = _.template(
-			`  /** 
+			`\n  /** 
    * <%= comments %>
    * @summary <%= workNumbers %>
    */

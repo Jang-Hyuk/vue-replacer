@@ -167,7 +167,10 @@ class ProcedureToJsdoc {
 
 		// ANCHOR 최종 결과
 		// console.log('🚀 ~ 최종 168 ~', inspect(this.procedureChunkList, false, 5));
-		// console.log('🚀 ~ file: ProcedureToJsdoc.js:170 ~ this.procedureChunkList', this.procedureChunkList);
+		// console.log(
+		// 	'🚀 ~ file: ProcedureToJsdoc.js:170 ~ this.procedureChunkList',
+		// 	this.procedureChunkList
+		// );
 	}
 
 	static parseProcedureName(rowText = '') {
@@ -322,7 +325,7 @@ class ProcedureToJsdoc {
 		let isValid = true;
 
 		// ### 이 연속으로 등장시 무시
-		if (rowText.trim().includes('#####')) {
+		if (rowText.trim().includes('########')) {
 			this.saveChunkProcedure();
 			return false;
 		}

@@ -6,6 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "jsdoc": "nodemon  --trace-warnings source/index.js",
+    "docs": "typedoc --searchInComments --name \"Club5678 Procedure API\" --tsconfig ../tsconfig.typedoc.json",
     "dev": "nodemon --trace-warnings src/index.js",
     "dev-d": "nodemon --trace-warnings src/index.js dec",
     "dev-e": "nodemon --trace-warnings src/index.js enc",
@@ -28,6 +29,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/lodash": "^4.14.182",
+    "better-docs": "^2.7.2",
     "eslint": "^7.20.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.3.0",
@@ -37,6 +39,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^8.3.0",
     "prettier": "^2.5.1",
+    "taffydb": "^2.7.3",
     "vue": "^2.3.12"
   },
   "dependencies": {
@@ -44,6 +47,7 @@
     "iconv-lite": "^0.6.3",
     "lodash": "^4.17.21",
     "node-watch": "^0.7.3",
+    "typedoc": "^0.23.25",
     "uuid": "^8.3.2"
   }
 }

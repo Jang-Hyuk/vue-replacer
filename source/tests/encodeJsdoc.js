@@ -15,12 +15,11 @@ const jsdocPath = path.join(process.cwd(), 'out');
 /** @type {c_conts.p_realtalk_proc.Row1_5}  */
 
 const filePaths = [
-	'#0001 talk.txt',
-	'#0002 talk.txt'
-	// '#9213 20221115_클럽_용_쿠폰_설명.txt'
-	// '#8556 어드민] 빠른만남 무료이용권 내역표기.txt'
-	// '#8670 (어드민) 푸시 변경 및 현황추가.txt'
-	// '#6666 sample3.txt',
+	'#0001 talk.txt'
+	// '#0002 talk.txt',
+	// '#8556 어드민] 빠른만남 무료이용권 내역표기.txt',
+	// '#8670 (어드민) 푸시 변경 및 현황추가.txt',
+	// '#6666 sample3.txt'
 	// 'sample3 copy.txt'
 	// '#6866 20211201_클럽5678_다중채팅_스타샷_설명.txt'
 ];

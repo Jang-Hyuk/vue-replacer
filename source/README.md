@@ -5,3 +5,66 @@
 [] Return Rows 절이 특정 param key 값에 따라 달라질 경우 생성 규칙
 [] ts 기반으로 변경
 [] 기존 interface와의 통합 방법 고려
+
+- tsconfig.typedoc.json
+
+``` javascript
+{
+ "compilerOptions": {
+  "target": "ESNext",
+  "module": "ESNext",
+  "esModuleInterop": true,
+  "noImplicitAny": true,
+  // workspace상에서 references 패키지에서 root packges 모듈을 찾지 못하는 문제 해결
+  "moduleResolution": "node",
+  "resolveJsonModule": true,
+  "allowSyntheticDefaultImports": true,
+  // class static private 변수를 사용하기 위함
+  "allowJs": true,
+  "checkJs": true,
+  "useDefineForClassFields": true,
+  "skipLibCheck": true,
+  "sourceMap": true,
+  "baseUrl": "out",
+  "lib": ["dom", "esnext"]
+ },
+ "include": ["**/*.ts"],
+ "exclude": [
+  "**/*/global.js",
+  "**/*/prototype.js",
+  "**/*/pulltorefresh_club.js",
+
+  "club5678_tong_new",
+  "club5678_vc",
+  "club5678_www",
+  "nuxtExercise",
+  "tongtong",
+  "vue-converter",
+  "club5678_admin",
+
+  ".cache",
+  ".git",
+  ".idea",
+  ".output",
+  ".vscode",
+  "build",
+  "cron",
+  "deploy",
+  "dist",
+  "docs",
+  "local_history",
+  "logs",
+  "node_modules",
+  "test"
+ ],
+ "typedocOptions": {
+  "entryPoints": ["./club5678_global/procedure/*.ts"],
+  "out": "docs",
+  "name": "라이브러리 문서",
+  "excludePrivate": true,
+  "readme": "README.md",
+  "gitRevision": "main"
+ }
+}
+
+```

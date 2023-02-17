@@ -1,0 +1,43 @@
+{
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "include": [
+    ],
+    "includePattern": "\\.(jsx|js|ts|tsx)$"
+  },
+  "plugins": [
+    "plugins/markdown",
+    "category",
+    "component",
+    "load",
+    "typescript"
+  ],
+  "markdown": {
+    "tags": [
+      "load"
+    ]
+  },
+  "opts": {
+    "encoding": "utf8",
+    "destination": "docs/",
+    "recurse": true,
+    "verbose": true
+  },
+  "templates": {
+    "better-docs": {
+      "name": "Sample Documentation"
+    }
+  },
+  "typedocOptions": {
+    "entryPoints": [
+      "../club5678_global/procedure/*.ts"
+    ],
+    "out": "docs",
+    "name":"라이브러리 문서",
+    "excludePrivate": true,
+    "readme": "README.md",
+    "gitRevision": "main"
+  }
+}
