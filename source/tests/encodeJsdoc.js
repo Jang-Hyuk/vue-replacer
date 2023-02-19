@@ -67,27 +67,27 @@ async function createProcedureChunk() {
 			const realFilePath = path.join(docPath, filePath.replace(/\//g, sep));
 			const procedureToJsdoc = new ProcedureToJsdoc(realFilePath, chunks);
 			await procedureToJsdoc.init();
+			// 개별 파일 생성은 하지 않음
+			// const replacedFileName = _.chain(filePath)
+			// 	.replace(/ /g, '-')
+			// 	.replace(/&/g, '_')
+			// 	.replace(/\(/g, '[')
+			// 	.replace(/\)/g, ']')
+			// 	.split('.')
+			// 	.initial()
+			// 	.join('.')
+			// 	.value();
 
-			const replacedFileName = _.chain(filePath)
-				.replace(/ /g, '-')
-				.replace(/&/g, '_')
-				.replace(/\(/g, '[')
-				.replace(/\)/g, ']')
-				.split('.')
-				.initial()
-				.join('.')
-				.value();
-
-			writeFile(
-				_.filter(procedureToJsdoc.procedureChunkList, chunk =>
-					chunk.workNumbers.includes(procedureToJsdoc.workNumber)
-				),
-				{
-					dbName: procedureToJsdoc.workNumber.toString(),
-					fileName: replacedFileName,
-					isCurrentPath: true
-				}
-			);
+			// writeFile(
+			// 	_.filter(procedureToJsdoc.procedureChunkList, chunk =>
+			// 		chunk.workNumbers.includes(procedureToJsdoc.workNumber)
+			// 	),
+			// 	{
+			// 		dbName: procedureToJsdoc.workNumber.toString(),
+			// 		fileName: replacedFileName,
+			// 		isCurrentPath: true
+			// 	}
+			// );
 
 			return procedureToJsdoc.procedureChunkList;
 		});

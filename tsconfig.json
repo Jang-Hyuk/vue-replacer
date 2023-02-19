@@ -3,24 +3,20 @@
 		"target": "ESNext",
 		"module": "ESNext",
 		"esModuleInterop": true,
-		"noImplicitAny": true,
-		// workspace상에서 references 패키지에서 root packges 모듈을 찾지 못하는 문제 해결
+		"noImplicitAny": false,
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
 		"allowSyntheticDefaultImports": true,
-		// class static private 변수를 사용하기 위함
+		"allowJs": true,
+		"checkJs": false,
 		"useDefineForClassFields": true,
 		"skipLibCheck": true,
 		"sourceMap": true,
-		"baseUrl": "out",
+		"baseUrl": "./source/",
 		"lib": ["dom", "esnext"]
 	},
 	"include": ["**/*.ts", "**/*.js"],
 	"exclude": [
-		"**/*/global.js",
-		"**/*/prototype.js",
-		"**/*/pulltorefresh_club.js",
-
 		".cache",
 		".git",
 		".idea",
@@ -34,15 +30,8 @@
 		"local_history",
 		"logs",
 		"node_modules",
-		"test"
+		"test",
+		"tests"
 	],
-	"typedocOptions": {
-		// "entryPoints": ["./out/*.ts"],
-		"entryPoints": ["../club5678_global/procedure/*.ts"],
-		"out": "docs",
-		"name": "라이브러리 문서",
-		"excludePrivate": true,
-		"readme": "README.md",
-		"gitRevision": "main"
-	}
+	"typedocOptions": {}
 }

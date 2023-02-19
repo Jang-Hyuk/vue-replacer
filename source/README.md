@@ -1,12 +1,6 @@
----
+# Procedure Replacer
 
-# Task
-
-[] Return Rows 절이 특정 param key 값에 따라 달라질 경우 생성 규칙
-[] ts 기반으로 변경
-[] 기존 interface와의 통합 방법 고려
-
-- tsconfig.typedoc.json
+- typedoc.json
 
 ``` javascript
 {
@@ -28,11 +22,13 @@
   "baseUrl": "out",
   "lib": ["dom", "esnext"]
  },
- "include": ["**/*.ts"],
+ "include": ["**/*.ts", "**/*.js"],
  "exclude": [
   "**/*/global.js",
   "**/*/prototype.js",
   "**/*/pulltorefresh_club.js",
+
+  "**/*/*.min.js",
 
   "club5678_tong_new",
   "club5678_vc",
@@ -58,12 +54,22 @@
   "test"
  ],
  "typedocOptions": {
-  "entryPoints": ["./club5678_global/procedure/*.ts"],
-  "out": "docs",
-  "name": "라이브러리 문서",
-  "excludePrivate": true,
-  "readme": "README.md",
-  "gitRevision": "main"
+    "entryPoints": [
+      "*.ts",
+      "*.js",
+    ],
+    "out": "docs",
+    "sort": ["source-order", "kind", "instance-first", "alphabetical"],
+    "name": "API",
+    "navigationLinks": {
+      "Club5678": "https://m.club5678.com",
+      "영상통통": "https://tong.club5678.com",
+      "VC": "https://vc.club5678.com"
+    },
+    "plugin": ["typedoc-theme-hierarchy"],
+      "theme": "hierarchy",
+    "excludePrivate": true,
+    "readme": "README.md",
  }
 }
 

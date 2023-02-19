@@ -88,7 +88,7 @@ const convertJsDoc = {
 
 		const body = procedureOptions.map(option => {
 			const propertyType = Array.isArray(option.type)
-				? option.type.map(v => (typeof v === 'number' ? v : `'${v}'`)).join('|')
+				? option.type.map(v => (typeof v === 'number' ? v : `'${v}'`)).join(' | ')
 				: option.type;
 
 			const data = {

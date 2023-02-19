@@ -1,0 +1,18 @@
+{
+	"entryPoints": [
+		"out/*.ts"
+	],
+	"out": "docs",
+	"sort": ["source-order", "kind", "instance-first", "alphabetical"],
+	"name": "API",
+	"navigationLinks": {
+		"Club5678": "https://m.club5678.com",
+		"영상통통": "https://tong.club5678.com",
+		"VC": "https://vc.club5678.com"
+	},
+	"plugin": ["typedoc-theme-hierarchy"],
+  "theme": "hierarchy",
+	"excludePrivate": true,
+	"readme": "README.md",
+	"gitRevision": "main"
+}
