@@ -60,6 +60,7 @@
     ],
     "out": "docs",
     "sort": ["source-order", "kind", "instance-first", "alphabetical"],
+    "searchInComments": true,
     "name": "API",
     "navigationLinks": {
       "Club5678": "https://m.club5678.com",

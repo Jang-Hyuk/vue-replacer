@@ -70,7 +70,7 @@ class FileReader {
 		return _.chain(filePath)
 			.split(sep)
 			.last()
-			.split(' ')
+			.split('_')
 			.head()
 			.replace('#', '')
 			.toNumber()
