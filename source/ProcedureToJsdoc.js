@@ -430,7 +430,7 @@ class ProcedureToJsdoc {
 
 		this.tempStorage.params.push({
 			type,
-			key: keyName,
+			key: keyName.replaceAll('`', ''),
 			dataType: _.compact(dataType).join(' '),
 			comment: commentChunk.join(' ').trim()
 		});
@@ -497,7 +497,7 @@ class ProcedureToJsdoc {
 		const enumTypes = ProcedureToJsdoc.getEnumType(dataType, commentChunk);
 		this.tempStorageRowDataPacket.push({
 			type: enumTypes.length ? enumTypes : 'string',
-			key: keyName,
+			key: keyName.replaceAll('`', ''),
 			dataType: _.compact(dataType).join(' '),
 			comment: commentChunk.join(' ').trim()
 		});
