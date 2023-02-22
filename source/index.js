@@ -57,26 +57,26 @@ async function createProcedureChunk() {
 			const procedureToJsdoc = new ProcedureToJsdoc(realFilePath, chunks);
 			await procedureToJsdoc.init();
 
-			const replacedFileName = _.chain(filePath)
-				.replace(/ /g, '-')
-				.replace(/&/g, '_')
-				.replace(/\(/g, '[')
-				.replace(/\)/g, ']')
-				.split('.')
-				.initial()
-				.join('.')
-				.value();
+			// const replacedFileName = _.chain(filePath)
+			// 	.replace(/ /g, '-')
+			// 	.replace(/&/g, '_')
+			// 	.replace(/\(/g, '[')
+			// 	.replace(/\)/g, ']')
+			// 	.split('.')
+			// 	.initial()
+			// 	.join('.')
+			// 	.value();
 
-			writeFile(
-				_.filter(procedureToJsdoc.procedureChunkList, chunk =>
-					chunk.workNumbers.includes(procedureToJsdoc.workNumber)
-				),
-				{
-					dbName: procedureToJsdoc.workNumber.toString(),
-					fileName: replacedFileName,
-					isCurrentPath: true
-				}
-			);
+			// writeFile(
+			// 	_.filter(procedureToJsdoc.procedureChunkList, chunk =>
+			// 		chunk.workNumbers.includes(procedureToJsdoc.workNumber)
+			// 	),
+			// 	{
+			// 		dbName: procedureToJsdoc.workNumber.toString(),
+			// 		fileName: replacedFileName,
+			// 		isCurrentPath: true
+			// 	}
+			// );
 
 			return procedureToJsdoc.procedureChunkList;
 		});

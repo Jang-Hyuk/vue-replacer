@@ -22,7 +22,7 @@
   "baseUrl": "out",
   "lib": ["dom", "esnext"]
  },
- "include": ["**/*.ts", "**/*.js"],
+ "include": ["**/*.ts"],
  "exclude": [
   "**/*/global.js",
   "**/*/prototype.js",
@@ -54,10 +54,7 @@
   "test"
  ],
  "typedocOptions": {
-    "entryPoints": [
-      "*.ts",
-      "*.js",
-    ],
+    "entryPoints": ["./club5678_global/procedure/*.ts"],
     "out": "docs",
     "sort": ["source-order", "kind", "instance-first", "alphabetical"],
     "searchInComments": true,
