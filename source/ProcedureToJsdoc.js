@@ -40,7 +40,9 @@ class ProcedureToJsdoc {
 				'TINYBLOB',
 				'BLOB',
 				'MEDIUMBLOB',
-				'LONGBLOB'
+				'LONGBLOB',
+				// 따로 형 지정안하고 문자열로 리턴할 경우
+				'STRING'
 			],
 			number: [
 				'TINYINT',
