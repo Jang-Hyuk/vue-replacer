@@ -7,6 +7,8 @@
   "scripts": {
     "jsdoc": "nodemon  --trace-warnings source/index.js",
     "docs": "typedoc --tsconfig ../tsconfig.typedoc.json",
+    "typedoc": "typedoc --tsconfig ./tsconfig.typedoc.json",
+    "gen": "yarn docs && yarn typedoc",
     "dev": "nodemon --trace-warnings src/index.js",
     "dev-d": "nodemon --trace-warnings src/index.js dec",
     "dev-e": "nodemon --trace-warnings src/index.js enc",

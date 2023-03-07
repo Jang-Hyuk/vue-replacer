@@ -379,10 +379,12 @@ class ProcedureToJsdoc {
 		// 파람절이 끝나고 Return이 등장하면 Row절이 시작됨을 알림
 		const hasReturn = _.chain(rowText)
 			.toUpper()
-			.split(' ')
-			.intersection(['RETURN', '#RETURN', '>RETURN'])
-			.size()
-			.gt(0)
+			// .split(' ')
+			// .head()
+			.includes('RETURN')
+			// .intersection(['RETURN', '#RETURN', '>RETURN'])
+			// .size()
+			// .gt(0)
 			.value();
 		if (hasReturn) {
 			this.tempStorage.level = this.LEVEL.ROW;

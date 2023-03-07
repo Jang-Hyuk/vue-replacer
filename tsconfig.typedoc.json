@@ -1,0 +1,49 @@
+{
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "ESNext",
+		"esModuleInterop": true,
+		"noImplicitAny": true,
+		// workspace상에서 references 패키지에서 root packges 모듈을 찾지 못하는 문제 해결
+		"moduleResolution": "node",
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		// class static private 변수를 사용하기 위함
+		"allowJs": true,
+		"checkJs": true,
+		"useDefineForClassFields": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"baseUrl": "out",
+		"lib": ["dom", "esnext"]
+	},
+	"include": ["**/*.ts"],
+	"exclude": [
+		".cache",
+		".git",
+		".idea",
+		".output",
+		".vscode",
+		"build",
+		"cron",
+		"deploy",
+		"dist",
+		"docs",
+		"local_history",
+		"logs",
+		"node_modules",
+		"test",
+		"tests"
+	],
+	"typedocOptions": {
+		"entryPoints": ["./out/*.ts"],
+		"out": "docs",
+		"sort": ["source-order", "kind", "instance-first", "alphabetical"],
+		"name": "Work API",
+    "navigationLinks": {
+			"Club API": "../../docs/index.html",
+		},
+		"plugin": ["typedoc-theme-hierarchy"],
+		"theme": "hierarchy",
+	}
+}
