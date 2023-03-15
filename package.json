@@ -16,7 +16,8 @@
     "dev-e": "nodemon --trace-warnings src/index.js enc",
     "dev-de": "nodemon --trace-warnings src/index.js dec-enc",
     "dev:ie": "nodemon --trace-warnings src/index.js ie",
-    "test-jsdoc": "nodemon  --trace-warnings source/tests/encodeJsdoc.js"
+    "test-jsdoc": "nodemon  --trace-warnings source/tests/encodeJsdoc.js",
+    "test-util": "nodemon  --trace-warnings source/tests/convertUtil.js"
   },
   "keywords": [],
   "author": "",

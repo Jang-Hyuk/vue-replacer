@@ -3,7 +3,7 @@
     "allowUnknownTags": false
   },
   "source": {
-    "include": ["./prototype/utils.js", "./prototype/util.qs.js", "./prototype/util.device.js", "./prototype/util.str.js", "./prototype/util.hardware.js"],
+    "include": ["./temp/utils.js", "./temp/util.qs.js", "./temp/util.device.js", "./temp/util.str.js", "./temp/util.hardware.js"],
     "includePattern": "\\.js$",
     "excludePattern": "(node_modules/|docs|doc)"
   },

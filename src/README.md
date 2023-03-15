@@ -8,13 +8,14 @@
 ## .env 파일 생성 (예시)
 
   ```bash
+  GLOBAL_FOLDER = club5678_global
   ADMIN_FOLDER = club5678_admin
   IGNORE_FOLDER = info-workspace, nuxtExercise, test-nuxt, tongtong
 
   ROOT_FOLDER = ..
 
-  # JSDOC_DOC_FOLTER = ../club5678_global/js/jsdoc/work
-  # JSDOC_OUT_FOLTER = ../club5678_global/js/jsdoc
+  # JSDOC_DOC_FOLTER = ../club5678_global/procedure/work
+  # JSDOC_OUT_FOLTER = ../club5678_global/procedure
   ```
   
 ### vsCode Setting
