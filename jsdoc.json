@@ -1,0 +1,24 @@
+{
+  "tags": {
+    "allowUnknownTags": false
+  },
+  "source": {
+    "include": ["./prototype/utils.js", "./prototype/util.qs.js", "./prototype/util.device.js", "./prototype/util.str.js", "./prototype/util.hardware.js"],
+    "includePattern": "\\.js$",
+    "excludePattern": "(node_modules/|docs|doc)"
+  },
+  "plugins": [
+    "plugins/markdown"
+  ],
+  "opts": {
+    "template": "node_modules/docdash",
+    "encoding": "utf8",
+    "destination": "doc/",
+    "recurse": true,
+    "verbose": true
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  }
+}
