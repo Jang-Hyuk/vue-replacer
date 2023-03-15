@@ -314,7 +314,7 @@ class ProcedureToJsdoc {
 		if (this.tempStorage.level === this.LEVEL.ROW) {
 			// Row가 입력되어있는 와중에 의미없는 절이 시작될 경우 종료되었다고 가정
 			const hasDataComment = this.isDataComment(rowText);
-			if (!hasDataComment) {
+			if (!hasDataComment && rowText.trim().length) {
 				this.tempStorage.level = this.LEVEL.ROW_END;
 				return false;
 			}

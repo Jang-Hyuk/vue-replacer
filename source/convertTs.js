@@ -6,11 +6,21 @@ const convertJsDoc = {
 	 * @param {procedureChunk} procedureChunk
 	 */
 	printJsdocUnit(procedureChunk) {
+		const sqlParams = procedureChunk.params
+			.map(param => `   * 	'{$arr['${param.key}']}'`)
+			.join(',\n');
+
 		const workNumbers = procedureChunk.workNumbers.map(number => `#${number}`).join(', ');
 		const procedureCompiled = _.template(
 			`\n  /** 
    * <%= comments %>
    * @summary <%= workNumbers %>
+   * @example
+   * \`\`\` PHP
+   * "CALL ${procedureChunk.procedureName}(
+${sqlParams}
+   * );"
+   * \`\`\`
    */
   export namespace <%= procedure %> {
 <%= typeBody %>
