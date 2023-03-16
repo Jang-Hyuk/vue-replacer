@@ -1,45 +1,46 @@
 import _ from 'lodash';
 import dotenv from 'dotenv';
 import path, { sep } from 'path';
-import fs from 'fs';
 
 import FileReader from '../FileReader.js';
 import FileWriter from '../FileWriter.js';
-import ProcedureToJsdoc from '../ProcedureToJsdoc.js';
+import BaseUtil from '../../src/BaseUtil.js';
 
-// const fileName = '../../prototype/utils.js';
 dotenv.config();
 
-const docPath = path.join(process.cwd(), 'prototype');
-const jsdocPath = path.join(process.cwd(), 'out');
+const { ROOT_FOLDER = '', GLOBAL_FOLDER = 'build', ADMIN_FOLDER = '' } = process.env;
 
-const globalFolderPath = path.join(process.cwd(), process.env.GLOBAL_FOLDER, 'js');
-const globalUtilPaths = [
-	'utils.js',
-	'util.device.js',
-	'util.qs.js',
-	'util.str.js',
-	'util.hardware.js'
-];
-const globalPaths = globalUtilPaths.map(filePath =>
-	path.join(globalFolderPath, filePath)
-);
-
-const adminFolderPath = path.join(process.cwd(), process.env.ADMIN_FOLDER, 'js');
-const adminUtilPaths = ['admin.util.js'];
-const adminPaths = adminUtilPaths.map(filePath => path.join(adminFolderPath, filePath));
 /**
  *
  */
-async function createUtil() {
+async function createUtilDocs() {
+	const utilSavePath = path.join(process.cwd(), 'build');
+
+	const globalFolderPath = path.join(process.cwd(), ROOT_FOLDER, GLOBAL_FOLDER, 'js');
+	const globalUtilPaths = ['utils.js', 'util.device.js', 'util.qs.js', 'util.str.js'];
+	const globalPaths = globalUtilPaths.map(filePath =>
+		path.join(globalFolderPath, filePath)
+	);
+
+	const adminFolderPath = path.join(process.cwd(), ROOT_FOLDER, ADMIN_FOLDER, 'js');
+	const adminUtilPaths = ['admin.utils.js', 'admin.util.str.js'];
+	const adminPaths = adminUtilPaths.map(filePath => path.join(adminFolderPath, filePath));
+
 	const list = globalPaths.concat(adminPaths).map(filePath => {
-		console.log('🚀 ~ file: convertUtil.js:36 ~ filePath:', filePath);
 		return FileReader.readEucKrFile(filePath).then(contents => {
 			return FileWriter.writeFile(
-				path.join(jsdocPath, _.last(filePath.split(sep))),
+				path.join(utilSavePath, _.last(filePath.split(sep))),
 				contents,
 				true
 			);
+		});
+	});
+
+	const globalJsdocPath = path.join(globalFolderPath, 'jsdoc');
+
+	BaseUtil.getFiles(globalJsdocPath, ['js']).forEach(file => {
+		return FileReader.readUtfFile(path.join(globalJsdocPath, file)).then(contents => {
+			return FileWriter.writeFile(path.join(utilSavePath, file), contents, true);
 		});
 	});
 
@@ -49,4 +50,4 @@ async function createUtil() {
 	FileWriter.execute(`${modulePath} -c ${configPath}`);
 }
 
-createUtil();
+createUtilDocs();

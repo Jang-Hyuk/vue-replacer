@@ -8,12 +8,6 @@ class FileWriter {
 	 */
 	static execute(command, callback) {
 		exec(command, (error, stdout, stderr) => {
-			console.log(
-				'🚀 ~ file: FileWriter.js:11 ~ error, stdout, stderr:',
-				error,
-				stdout,
-				stderr
-			);
 			typeof callback === 'function' && callback(error, stdout, stderr);
 		});
 	}

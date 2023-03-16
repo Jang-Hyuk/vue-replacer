@@ -1,10 +1,21 @@
 {
   "tags": {
-    "allowUnknownTags": false
+    "allowUnknownTags": true,
+    "dictionaries": [
+      "jsdoc",
+      "closure"
+    ]
   },
   "source": {
-    "include": ["./temp/utils.js", "./temp/util.qs.js", "./temp/util.device.js", "./temp/util.str.js", "./temp/util.hardware.js"],
-    "includePattern": "\\.js$",
+    // "include": [
+    //   "./prototype/util.device.js"
+    // ],
+    // "include": [
+    //   "./build/global.d.ts"
+    // ],
+    "include": ["./build"],
+    "includePattern": "\\.(jsx|js|ts|tsx)$",
+    // "includePattern": "\\.js$",
     "excludePattern": "(node_modules/|docs|doc)"
   },
   "plugins": [
@@ -20,5 +31,32 @@
   "templates": {
     "cleverLinks": false,
     "monospaceLinks": false
+  },
+  "docdash": {
+    "static": true,
+    "sort": true,
+    "search": true,
+    "commonNav": false,
+    "collapse": false,
+    "wrap": true,
+    "typedefs": true,
+    "navLevel": false,
+    "private": true,
+    "removeQuotes": "none",
+    "ShortenTypes": true,
+    "menu": {
+      "Club5678 API": {
+        "href": "../../docs/index.html",
+        "target": "_blank",
+        "class": "menu-item",
+        "id": "club_api_link"
+      },
+      "Work API": {
+        "href": "../docs/index.html",
+        "target": "_blank",
+        "class": "menu-item",
+        "id": "work_api_link"
+      }
+    }
   }
 }
