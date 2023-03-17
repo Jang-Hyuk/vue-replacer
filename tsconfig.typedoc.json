@@ -41,7 +41,7 @@
 		"sort": ["source-order", "kind", "instance-first", "alphabetical"],
 		"name": "Work API",
     "navigationLinks": {
-			"Club API": "../../docs/index.html",
+			"Club API": "../../../docs/index.html",
 			"Util API": "../../doc/index.html",
 		},
 		"plugin": ["typedoc-theme-hierarchy"],

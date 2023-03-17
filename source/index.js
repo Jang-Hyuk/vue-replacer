@@ -9,6 +9,9 @@ import FileWriter from './FileWriter.js';
 import ProcedureToJsdoc from './ProcedureToJsdoc.js';
 import convertTs from './convertTs.js';
 
+const argValue = process.argv.slice(2)[0] ?? '';
+const shouldCreateDocs = argValue === 'docs';
+
 dotenv.config();
 
 const { ROOT_FOLDER = '', GLOBAL_FOLDER = 'build', ADMIN_FOLDER = '' } = process.env;
@@ -40,7 +43,7 @@ function writeFile(chunkList, option) {
 		FileWriter.writeFile(realPath, tsDeclare)
 			// .then(FileWriter.fixEslint)
 			.then(res => {
-				console.log(`✅ complete - ${realPath}`);
+				console.log(`✅ convert ts - ${realPath}`);
 
 				return resolve(res);
 			})
@@ -91,8 +94,8 @@ async function createProcedureChunk() {
 /**
  * jsdoc 파일 생성
  */
-function writeJsdocFile() {
-	createProcedureChunk().then(list => {
+async function writeJsdocFile() {
+	await createProcedureChunk().then(list => {
 		const gChunkStorage = ProcedureToJsdoc.groupByDb(list);
 		_.forEach(gChunkStorage, (nestedList, db) => {
 			writeFile(nestedList, {
@@ -100,6 +103,20 @@ function writeJsdocFile() {
 			});
 		});
 	});
+
+	if (shouldCreateDocs) {
+		console.log('💢 Create procedure Docs');
+		const configPath = path.join(process.cwd());
+		console.log('🚀 ~ file: index.js:110 ~ configPath:', configPath);
+		FileWriter.execute(`cd ${configPath} && yarn docs`, (error, result, stderr) => {
+			if (stderr) {
+				if (stderr.includes('ERROR')) {
+					// console.error('❗ Failed Util Docs');
+				}
+			}
+			console.log('💫 Complete procedure Docs');
+		});
+	}
 }
 
 /**
@@ -136,11 +153,30 @@ async function createUtilDocs() {
 		});
 	});
 
-	await Promise.all(list);
-	const modulePath = path.join(process.cwd(), 'node_modules/.bin/jsdoc');
-	const configPath = path.join(process.cwd(), 'jsdoc.json');
-	FileWriter.execute(`${modulePath} -c ${configPath}`);
+	const resesults = await Promise.all(list);
+
+	resesults.forEach(filePath => {
+		console.log(`🆗 mv util - ${filePath}`);
+	});
+
+	if (shouldCreateDocs) {
+		console.log('💨 Create Util Docs');
+		const modulePath = path.join(process.cwd(), 'node_modules/.bin/jsdoc');
+		const configPath = path.join(process.cwd(), 'jsdoc.json');
+		FileWriter.execute(`${modulePath} -c ${configPath}`, (error, result, stderr) => {
+			if (stderr) {
+				if (stderr.includes('ERROR')) {
+					// console.error('❗ Failed Util Docs');
+				}
+			}
+			console.log('💥 Complete Util Docs');
+		});
+	}
 }
+
+// function operation() {
+
+// }
 
 writeJsdocFile();
 createUtilDocs();

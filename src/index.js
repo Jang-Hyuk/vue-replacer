@@ -52,7 +52,7 @@ async function operationWatch() {
 			recursive: true,
 			filter(f, skip) {
 				// skip node_modules
-				if (/\/node_modules/.test(f)) return skip;
+				if (/\/node_modules|doc|docs/.test(f)) return skip;
 				// skip .git folder
 				if (/\.git/.test(f)) return skip;
 				// skip temp file

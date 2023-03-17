@@ -50,17 +50,12 @@
 	"typedocOptions": {
 		"entryPoints": ["./club5678_global/procedure/*.ts"],
 		"out": "docs",
-		// "out": "./club5678_global/procedure/api",
 		"searchInComments": true,
 		"sort": ["source-order", "kind", "instance-first", "alphabetical"],
 		"name": "Club5678 API",
 		"navigationLinks": {
 			"Work API": "../../vue-converter/docs/index.html",
-      "Util API": "../../vue-converter/doc/index.html",
-
-			"Club5678": "https://m.club5678.com",
-			"영상통통": "https://tong.club5678.com",
-			"VC": "https://vc.club5678.com"
+			"Util API": "../../vue-converter/doc/index.html"
 		},
 		"plugin": ["typedoc-theme-hierarchy"],
 		"theme": "hierarchy",

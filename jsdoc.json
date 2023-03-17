@@ -7,15 +7,8 @@
     ]
   },
   "source": {
-    // "include": [
-    //   "./prototype/util.device.js"
-    // ],
-    // "include": [
-    //   "./build/global.d.ts"
-    // ],
     "include": ["./build"],
     "includePattern": "\\.(jsx|js|ts|tsx)$",
-    // "includePattern": "\\.js$",
     "excludePattern": "(node_modules/|docs|doc)"
   },
   "plugins": [
@@ -45,7 +38,7 @@
     "removeQuotes": "none",
     "ShortenTypes": true,
     "menu": {
-      "Club5678 API": {
+      "Club API": {
         "href": "../../docs/index.html",
         "target": "_blank",
         "class": "menu-item",
