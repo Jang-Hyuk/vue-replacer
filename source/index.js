@@ -16,8 +16,10 @@ dotenv.config();
 
 const { ROOT_FOLDER = '', GLOBAL_FOLDER = 'build', ADMIN_FOLDER = '' } = process.env;
 
-const docPath = path.join(process.cwd(), ROOT_FOLDER, GLOBAL_FOLDER, 'procedure', 'work');
-const jsdocPath = path.join(process.cwd(), ROOT_FOLDER, GLOBAL_FOLDER, 'procedure');
+const workspacePath = path.join(process.cwd(), ROOT_FOLDER);
+const globalPath = path.join(workspacePath, GLOBAL_FOLDER);
+const docPath = path.join(globalPath, 'procedure', 'work');
+const jsdocPath = path.join(globalPath, 'procedure');
 
 /**
  * 실제파일 생성
@@ -106,16 +108,21 @@ async function writeJsdocFile() {
 
 	if (shouldCreateDocs) {
 		console.log('💢 Create procedure Docs');
-		const configPath = path.join(process.cwd());
-		console.log('🚀 ~ file: index.js:110 ~ configPath:', configPath);
-		FileWriter.execute(`cd ${configPath} && yarn docs`, (error, result, stderr) => {
-			if (stderr) {
-				if (stderr.includes('ERROR')) {
-					// console.error('❗ Failed Util Docs');
+		console.time('procedure');
+		const modulePath = path.join(process.cwd(), 'node_modules/.bin/typedoc');
+		const globalConfigPath = path.join(workspacePath, 'tsconfig.typedoc.json');
+		const workConfigPath = path.join(process.cwd(), 'tsconfig.typedoc.json');
+
+		FileWriter.execute(
+			`${modulePath} --tsconfig ${globalConfigPath} && ${modulePath} --tsconfig ${workConfigPath}`,
+			(error, result, stderr) => {
+				if (stderr) {
+					console.error(stderr);
 				}
+				console.timeEnd('procedure');
+				console.log('💫 Complete procedure Docs');
 			}
-			console.log('💫 Complete procedure Docs');
-		});
+		);
 	}
 }
 
