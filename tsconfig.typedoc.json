@@ -37,12 +37,12 @@
 	],
 	"typedocOptions": {
 		"entryPoints": ["./out/*.ts"],
-		"out": "docs",
+		"out": "../docs-work",
 		"sort": ["source-order", "kind", "instance-first", "alphabetical"],
-		"name": "Work API",
+		"name": "[Work] Club5678 Procedure API",
     "navigationLinks": {
-			"Club API": "../../../docs/index.html",
-			"Util API": "../../doc/index.html",
+			"DB API": "../docs-db/index.html",
+			"Util API": "../docs-util/index.html",
 		},
 		"plugin": ["typedoc-theme-hierarchy"],
 		"theme": "hierarchy",

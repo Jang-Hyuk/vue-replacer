@@ -49,13 +49,13 @@
 	],
 	"typedocOptions": {
 		"entryPoints": ["./club5678_global/procedure/*.ts"],
-		"out": "docs",
+		"out": "docs-db",
 		"searchInComments": true,
 		"sort": ["source-order", "kind", "instance-first", "alphabetical"],
-		"name": "Club5678 API",
+		"name": "[DB] Club5678 Procedure API",
 		"navigationLinks": {
-			"Work API": "../../vue-converter/docs/index.html",
-			"Util API": "../../vue-converter/doc/index.html"
+			"Work API": "../docs-work/index.html",
+			"Util API": "../docs-util/index.html"
 		},
 		"plugin": ["typedoc-theme-hierarchy"],
 		"theme": "hierarchy",

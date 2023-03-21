@@ -17,7 +17,7 @@
   "opts": {
     "template": "node_modules/docdash",
     "encoding": "utf8",
-    "destination": "doc/",
+    "destination": "../docs-util/",
     "recurse": true,
     "verbose": true
   },
@@ -38,15 +38,13 @@
     "removeQuotes": "none",
     "ShortenTypes": true,
     "menu": {
-      "Club API": {
-        "href": "../../docs/index.html",
-        "target": "_blank",
+      "DB API": {
+        "href": "../docs-db/index.html",
         "class": "menu-item",
-        "id": "club_api_link"
+        "id": "db_api_link"
       },
       "Work API": {
-        "href": "../docs/index.html",
-        "target": "_blank",
+        "href": "../docs-work/index.html",
         "class": "menu-item",
         "id": "work_api_link"
       }
