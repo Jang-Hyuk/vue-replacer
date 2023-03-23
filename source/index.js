@@ -133,13 +133,19 @@ async function createUtilDocs() {
 	const utilSavePath = path.join(process.cwd(), 'build');
 
 	const globalFolderPath = path.join(process.cwd(), ROOT_FOLDER, GLOBAL_FOLDER, 'js');
-	const globalUtilPaths = ['utils.js', 'util.device.js', 'util.qs.js', 'util.str.js'];
+	const globalUtilPaths = [
+		'utils.js',
+		'util.device.js',
+		'util.qs.js',
+		'util.str.js',
+		'util.hardware.js'
+	];
 	const globalPaths = globalUtilPaths.map(filePath =>
 		path.join(globalFolderPath, filePath)
 	);
 
 	const adminFolderPath = path.join(process.cwd(), ROOT_FOLDER, ADMIN_FOLDER, 'js');
-	const adminUtilPaths = ['admin.utils.js', 'admin.util.str.js'];
+	const adminUtilPaths = ['admin.utils.js', 'admin.util.str.js', 'admin.mixins.js'];
 	const adminPaths = adminUtilPaths.map(filePath => path.join(adminFolderPath, filePath));
 
 	const list = globalPaths.concat(adminPaths).map(filePath => {
