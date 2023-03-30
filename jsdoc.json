@@ -18,6 +18,7 @@
     "template": "node_modules/docdash",
     "encoding": "utf8",
     "destination": "../docs-util/",
+    "readme": "./build/README.md",
     "recurse": true,
     "verbose": true
   },
