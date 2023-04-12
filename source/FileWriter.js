@@ -1,6 +1,7 @@
+import path from 'path';
 import fs from 'fs';
 import { exec } from 'child_process';
-import iconv from 'iconv-lite';
+import BaseUtil from '../src/BaseUtil.js';
 
 class FileWriter {
 	/**
@@ -42,6 +43,23 @@ class FileWriter {
 		} catch (error) {
 			console.error(error);
 		}
+	}
+
+	/**
+	 * 삭제
+	 * @param {string} dir
+	 * @param {string} [exts=['js','ts']]
+	 */
+	static removeFiles(dir, exts) {
+		// 파일 명 추출 (temp 파일 제외)
+		BaseUtil.getFiles(dir, exts).filter(filePath => {
+			fs.unlink(path.join(dir, filePath), err => {
+				if (err) {
+					console.error(err);
+				}
+			});
+			return '';
+		});
 	}
 }
 

@@ -20,7 +20,9 @@ const workspacePath = path.join(process.cwd(), ROOT_FOLDER);
 const globalPath = path.join(workspacePath, GLOBAL_FOLDER);
 const docPath = path.join(globalPath, 'procedure', 'work');
 const jsdocPath = path.join(globalPath, 'procedure');
+const outPath = path.join(process.cwd(), 'out');
 
+FileWriter.removeFiles(outPath, ['js', 'ts']);
 /**
  * 실제파일 생성
  * @param {procedureChunk[]} chunkList
@@ -31,7 +33,7 @@ function writeFile(chunkList, option) {
 	const fileFullName = `${fileName}.d.ts`;
 	return new Promise((resolve, reject) => {
 		const realPath = isCurrentPath
-			? path.join(process.cwd(), 'out', fileFullName)
+			? path.join(outPath, fileFullName)
 			: path.join(jsdocPath, fileFullName);
 
 		const dbCompiled = _.template(`namespace <%= dbName %> {
