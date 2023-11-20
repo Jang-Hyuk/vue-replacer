@@ -37,12 +37,14 @@
 	],
 	"typedocOptions": {
 		"entryPoints": ["./out/*.ts"],
-		"out": "../docs-work",
+		"out": "../docs/db-work",
 		"sort": ["source-order", "kind", "instance-first", "alphabetical"],
 		"name": "[Work] Club5678 Procedure API",
     "navigationLinks": {
-			"DB API": "../docs-db/index.html",
-			"Util API": "../docs-util/index.html",
+			// "DB API": "http://help.club5678.com:8001",
+			// "Util API": "http://help.club5678.com:8000",
+			"DB API": "../db-all/index.html",
+			"Util API": "../utils/index.html",
 		},
 		"plugin": ["typedoc-theme-hierarchy"],
 		"theme": "hierarchy",

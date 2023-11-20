@@ -33,7 +33,7 @@ ${sqlParams}
 		const chunkLength = procedureChunk.rows.length;
 		const jsdocReturns = procedureChunk.rows
 			.map((rowDataPacketsChunks, chunkIndex) => {
-				return rowDataPacketsChunks
+				let returns = rowDataPacketsChunks
 					.map((option, index) =>
 						convertJsDoc.createJsdocTypeDef(
 							procedureChunk,
@@ -43,6 +43,17 @@ ${sqlParams}
 						)
 					)
 					.join('\n');
+
+				if (chunkLength === 1) {
+					const returnStr = rowDataPacketsChunks
+						.map((v, index) => `Row${index}[]`)
+						.join(', ');
+
+					const compiledType = _.template('\n\texport type Rows = [<%= rows %>]');
+					returns = returns.concat(compiledType({ rows: returnStr }));
+				}
+
+				return returns;
 			})
 			.join('\n');
 
